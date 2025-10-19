@@ -1,0 +1,16 @@
+#Folders
+**/.vscode
+**/build
+**/A-SSH
+**/A-OBJECTFILES
+**/Debug
+**/debug
+
+
+
+
+#Files
+/Xxxx@828
+*.pub
+*.exe
+.pdb
