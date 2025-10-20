@@ -9,11 +9,9 @@
 
 using uint = unsigned int;
 
-const double ratio_d_16_9 = 16.0/9.0;
-const float ratio_f_16_9 = 16.0/9.0;
+const auto ratio_d_16_9 = 16.0/9.0;
 
-const double ratio_d_8_5 = 8.0/5.0;
-const float ratio_f_8_5 = 8.0/5.0;
+const auto ratio_d_8_5 = 8.0/5.0;
 
 
 struct Color_255RGB
@@ -76,8 +74,7 @@ class FX_LINEARFUNCTION_INT{
         float x = 0;
 };
 
-namespace VECTOR
-{
+
     enum class VEC_CHECKER : char
     {
         e_vec = 1,
@@ -158,10 +155,16 @@ namespace VECTOR
 
 
     inline std::ostream& operator<<(std::ostream & out , const vec3& v)
-    {
-        #ifdef _WIN32
-            return out<<(unsigned char)(int)v.x()<<(unsigned char)(int)v.y()<<(unsigned char)(int)v.z();
-        #endif
+    {   
+        //通过将传入的out进行类型转换,如果转换成功则为文件输出流,否则为标准输出流
+        std::ofstream* ofs = dynamic_cast<std::ofstream*>(&out);
+
+        if(ofs != nullptr)
+        {
+            #ifdef _WIN32
+                return out<<(unsigned char)(int)v.x()<<(unsigned char)(int)v.y()<<(unsigned char)(int)v.z();
+            #endif
+        }
         return out<<v.x()<<' '<<v.y()<<' '<<v.z();
     }
 
@@ -226,11 +229,11 @@ namespace VECTOR
     {
         return vec3(v.x() * 255 , v.y() * 255 , v.z() * 255);
     }
-}
-namespace VEC = VECTOR;
+
+// namespace VEC = VECTOR;
 // using POINTS = VEC::vec3;
-using point3 = VEC::vec3;
-using vec3 = VEC::vec3;
+using point3 = vec3;
+// using vec3 = VEC::vec3;
 class ray
 {   private:
         point3 origin;
@@ -238,23 +241,23 @@ class ray
     public:
         ray(){}
         ray(const point3& orig , const vec3& d) : origin(orig) , dir(d){}
-
+        const point3& origination()const{return origin;}
+        const vec3& direction()const{return dir;}
         point3 at(double num)
         {
             if(dir.length() > 1)
             {
-                dir = normalize(dir,VEC::VEC_CHECKER::e_vec);
+                dir = normalize(dir,VEC_CHECKER::e_vec);
             }
             return origin + num * dir;
         }
 
 };
-using color3 = VEC::vec3;
 
-
-inline void DrawImg(const float width ,const float height, std::ofstream& file)
+using color3 = vec3;
+inline void DrawUVImg(const float width ,const float height, std::ofstream& file)
 {
-    VEC::vec3 color= VEC::vec3(0,0,0);
+    vec3 color= vec3(0,0,0);
     for(int v = height ; v>0 ; v--)
     {
         for(int u = 0 ; u < width ; u++)
@@ -267,7 +270,7 @@ inline void DrawImg(const float width ,const float height, std::ofstream& file)
             file<<color;
         }
     }
-}
+} 
 
 
 
