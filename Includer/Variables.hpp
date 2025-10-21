@@ -208,6 +208,18 @@ class FX_LINEARFUNCTION_INT{
         return ((v1.x() * v2.x()) + (v1.y() * v2.y()) + (v1.z() * v2.z()));
     }
 
+    template<typename T>
+    extern T _pow(const T& a, const int b)
+    {   
+        T temp = a;
+        for(int i = 0 ; i<b-1 ; i++)
+        {
+            temp = temp * a;
+        }
+        T result = temp;
+        return result;
+    }
+
     inline vec3 cross(const vec3& v1 , const vec3& v2)
     {
         return vec3(v1.y() * v2.z() - v1.z() * v2.y() , v1.y() * v2.x() - v1.x() * v2.y() , v1.x() * v2.y() - v1.y() * v1.x());
