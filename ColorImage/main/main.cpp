@@ -6,7 +6,7 @@
 
 #define LOG_INFO(msg) std::cerr<<"["<<__FILE__<<" "<<__LINE__<<"]"<<msg<<std::endl;
 
-const double IMG_WIDTH = 516;
+const double IMG_WIDTH = 15;
 const double IMG_HEIGHT = IMG_WIDTH / ratio_d_8_5;
 
 
@@ -32,7 +32,7 @@ int main()
      double viewport_width = viewport_height * (IMG_WIDTH / IMG_HEIGHT);
     
     viewport_width = viewport_width<1? 1: viewport_width;
-    const point3 camera_center = point3(0,0,0)- vec3(0,0,focal_legth);
+    const point3 camera_center = point3(0,0,0);
     vec3 viewport_u = vec3(viewport_width , 0 , 0);//3.2,0,0
     vec3 viewport_v = vec3(0 , -viewport_height , 0);//0,-2,0
 
@@ -41,10 +41,10 @@ int main()
     vec3 pixel_delta_v = viewport_v / IMG_HEIGHT;//2 /657 --> -0.00474074
 
 
-    vec3 viewport_upper_left = camera_center - viewport_u/2 - viewport_v/2;//0,0,0 --> -1.6,1,-1
+    vec3 viewport_upper_left = camera_center - vec3(0,0,focal_legth) - viewport_u/2 - viewport_v/2;//0,0,0 --> -1.6,1,-1
 
 
-    vec3 pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);//-1.6,1,-1 --> -1.59852,0.9985,-1
+    vec3 pixel00_loc = viewport_upper_left +(0.5 * (pixel_delta_u + pixel_delta_v));//-1.6,1,-1 --> -1.59852,0.9985,-1
     // std::cout<<pixel00_loc<<std::endl;
 
     // DrawUVImg(IMG_WIDTH,IMG_HEIGHT,file);
@@ -59,13 +59,14 @@ int main()
             vec3 pixel_center = pixel00_loc + (pixel_delta_u * u) + (pixel_delta_v * v);
             vec3 ray_direction = pixel_center - camera_center; 
             ray r(camera_center,ray_direction);
+            // std::cout<<ray_direction<<std::endl;
 
             // txt<<ray_direction;
-            color3 pixel_color = DrawSphere(r,camera_center,0.5) * 255;
-            if(u==IMG_WIDTH-1 && v == IMG_HEIGHT -1)
-            {
-                std::cout<<pixel_color<<std::endl;
-            }
+            color3 pixel_color = DrawSphere(r,camera_center,2) * 255;
+            // if(u==IMG_WIDTH-1 && v == IMG_HEIGHT -1)
+            // {
+            //     std::cout<<pixel_color<<std::endl;
+            // }
             // txt<<std::endl;
             file<<pixel_color;
         }
@@ -84,20 +85,20 @@ int main()
 //-------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 
-bool hit_sphere(const ray& r ,const vec3& cameraCenter , const double radius)
+bool hit_sphere(const ray& r ,const vec3& center , const double radius)
 {
-    vec3 OC = cameraCenter - r.origination();
+    vec3 OC = center - r.origination();
     double a = dot(r.direction(),r.direction());
     double b = -2.0 *  dot(r.direction(),OC);
-    double c = dot(OC,OC) - _pow(radius,2);
-    double discriminant = pow(b,2) - 4*a*c;
-    // std::cout<<c<<std::endl;
+    double c = dot(OC,OC) - _pow<double>(radius,2);
+    double discriminant = _pow<double>(b,2) - 4*a*c;
+    std::cout<<OC<<std::endl;
 
     return (discriminant >= 0);
 }
+
 color3 ray_color(const ray& r)
 {
-    
     vec3 unit_direction = normalize(r.direction(),VEC_CHECKER::e_vec);
     auto a = 0.5*(unit_direction.y() + 1.0);
     return (1.0-a)*color3(1.0, 1.0, 1.0) + a*color3(0.5, 0.7, 1.0);
@@ -105,7 +106,7 @@ color3 ray_color(const ray& r)
 
 color3 DrawSphere(const ray& r,const vec3& center , const double radius)
 {
-    if(hit_sphere(r,center,radius))
+    if(hit_sphere(r,point3(0,0,-1),radius)==true)
     {
         return color3(1,0,0);
     }

@@ -252,7 +252,7 @@ class ray
         vec3 dir;
     public:
         ray(){}
-        ray(const point3& orig , const vec3& d) : origin(orig) , dir(d){}
+        ray(const point3& orig , const vec3& direction) : origin(orig) , dir(direction){}
         const point3& origination()const{return origin;}
         const vec3& direction()const{return dir;}
         point3 at(double num)
