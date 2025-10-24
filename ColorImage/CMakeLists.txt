@@ -10,6 +10,7 @@ include_directories(../Includer)
 set(
     SOURCES
         ../Includer/Variables.cpp
+        ../Includer/Tools.cpp
         ${PROJECT_SOURCE_DIR}/main/main.cpp
 )
 

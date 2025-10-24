@@ -46,10 +46,11 @@ int main()
                 g = ((static_cast<float>(v) - (PPM_HEIGHT/2)) / (PPM_HEIGHT/2)) * 255;
                 b = 0;
 
-                testFILE<<(char)(r)<<(char)(g)<<(char)(b);
-                // testFILE.write(reinterpret_cast<const char*> (&r) , 1);
-                // testFILE.write(reinterpret_cast<const char*> (&g) , 1);
-                // testFILE.write(reinterpret_cast<const char*> (&b) , 1);
+
+                // testFILE<<(char)(r)<<(char)(g)<<(char)(b);
+                testFILE.write(reinterpret_cast<const char*> (&r) , 1);
+                testFILE.write(reinterpret_cast<const char*> (&g) , 1);
+                testFILE.write(reinterpret_cast<const char*> (&b) , 1);
             }
         }
 

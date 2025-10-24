@@ -288,5 +288,4 @@ inline void DrawUVImg(const float width ,const float height, std::ofstream& file
 
 
 
-
 #endif//Variables
