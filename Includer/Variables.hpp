@@ -7,7 +7,7 @@
 
 #define ratio_ 1.7777777777
 
-using uint = unsigned int;
+// using uint = unsigned int;
 
 const auto ratio_d_16_9 = 16.0/9.0;
 
@@ -39,7 +39,7 @@ struct Color_255RGB_double
         }
 
 };
-using Col_255RGB_D = Color_255RGB_double;
+using Col_255RGB_d = Color_255RGB_double;
 
 struct UV
 {
@@ -227,15 +227,16 @@ class FX_LINEARFUNCTION_INT{
 
     inline vec3 normalize(const vec3& v1 , const VEC_CHECKER vecchacker)
     {
+        vec3 _v1 = v1;
         if(vecchacker == VEC_CHECKER::e_vec)
         {
-            return v1/v1.length();
+            return _v1/_v1.length();
         }
         else if(vecchacker == VEC_CHECKER::e_col)
         {
             return vec3(255,100,155);
         }
-        return v1;
+        return vec3(0,0,0);
     }
     inline vec3 color(const vec3& v )
     {
@@ -255,12 +256,12 @@ class ray
         ray(const point3& orig , const vec3& direction) : origin(orig) , dir(direction){}
         const point3& origination()const{return origin;}
         const vec3& direction()const{return dir;}
-        point3 at(double num)
+        point3 at(double num) const
         {
-            if(dir.length() > 1)
-            {
-                dir = normalize(dir,VEC_CHECKER::e_vec);
-            }
+            // if(dir.length() > 1)
+            // {
+            //     dir = normalize(dir,VEC_CHECKER::e_vec);
+            // }
             return origin + num * dir;
         }
 
