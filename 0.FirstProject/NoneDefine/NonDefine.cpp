@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "..\header\Variables.hpp"
+#include "..\..\Includer\Variables.hpp"
 
 #define CANVASWIDTH 512
 #define CANVASHEIGHT 512
@@ -39,30 +39,30 @@ int main()
 
 
     
-
+    
     //vec3
-    VEC::vec3 *direction = new VEC::vec3(1,2,3);
+    vec3 *direction = new vec3(1,2,3);
     *direction = -(*direction);
     std::cout<<direction->x()<<std::endl;
 
-    VEC::vec3 dir =  VEC::vec3(3,4,5);
+    vec3 dir =  vec3(3,4,5);
     dir = -dir;
     std::cout<<dir.x()<<std::endl;
     std::cout<<dir<<std::endl;
 
-    dir = dir * 8.0D;
+    dir = dir * 8.0;
     std::cout<<dir<<std::endl;
 
-    dir = dir/8.0D;
+    dir = dir/8.0;
     std::cout<<dir<<std::endl;
 
     std::cout<<dir.length()<<std::endl;
 
-    std::cout<<VEC::normalize(dir,VEC::VEC_CHECKER::e_vec)<<std::endl;
+    std::cout<<normalize(dir,VEC_CHECKER::e_vec)<<std::endl;
 
     delete(direction);
 
-    VEC::vec3 col = VEC::vec3(5,2,3);
+    vec3 col = vec3(5,2,3);
 
 
     std::cout<<std::endl;
