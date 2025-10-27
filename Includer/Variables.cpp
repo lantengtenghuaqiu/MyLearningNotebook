@@ -11,7 +11,7 @@ Color_255RGB::Color_255RGB(unsigned char _r , unsigned char _g ,unsigned char _b
 
 UV::UV(){}
 
-UV::UV(int u , int v)
+UV::UV(float u , float v)
 {
     this->u = u;
     this->v = v;
@@ -21,15 +21,15 @@ UV::UV(int u , int v)
 IMAGEPROPERY::IMAGEPROPERY(int width , int height)
 {
     this->uv = UV();
-    this->uv.u = width;
-    this->uv.v = height;
+    this->uv.u = static_cast<float>(width);
+    this->uv.v = static_cast<float>(height);
 
 }
 
 FX_LINEARFUNCTION_INT::FX_LINEARFUNCTION_INT(float k , float a , float b,int width ,int height)
 {
     this->img = new IMAGEPROPERY(width , height);
-    this->fx = img->uv.v; 
+    this->fx = static_cast<int>(img->uv.v); 
     
     this->k = k;
     this->a = a;

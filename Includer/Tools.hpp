@@ -5,10 +5,8 @@
 // #include<iostream>
 #include<fstream>
 
-#define LOGER
 #ifdef LOGER
     #include<initializer_list>
-    // #include<Variables.hpp>
 #endif
 
 #define LOG_INFO(msg) std::cerr<<"["<<__TIME__<<" : "<<__LINE__<<"] : "<<msg<<std::endl;
@@ -145,6 +143,8 @@ namespace xyl
         {
             return a<b?a:b;
         }
+        
+
     }
 
 }

@@ -12,7 +12,7 @@
 //宽:
 constexpr const uint16_t IMG_WIDTH = 216;
 //高:
-constexpr const uint16_t IMG_HEIGHT = (IMG_WIDTH / ratio_d_8_5)<1? 1:(IMG_WIDTH / ratio_d_8_5);
+constexpr const uint16_t IMG_HEIGHT = (static_cast<double>(IMG_WIDTH) / ratio_d_8_5)<1? 1: static_cast<uint16_t>(static_cast<double>(IMG_WIDTH) / ratio_d_8_5);
 
 //绘制圆函数
 color3 DrawSphere(const ray& r,const vec3& center , const double radius);
@@ -106,14 +106,14 @@ double hit_sphere(const ray& r ,const vec3& center , const double radius)
     double discriminant = xyl::math::pow(h,2) - a*c;
 
 
-//    if(discriminant < 0)
-//    {
+   if(discriminant < 0)
+   {
         return -1.0;
-//    }
-//    else
-//    {
-//         return (h - std::sqrt(discriminant)) / a;
-//    }
+   }
+   else
+   {
+        return (h - std::sqrt(discriminant)) / a;
+   }
 }
 
 

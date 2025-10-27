@@ -5,13 +5,16 @@
 #include <cmath>
 #include <fstream>
 
-#include"Tools.hpp"
+#include <vector>
+#include <memory>
+
+#include "Tools.hpp"
 
 // using uint = unsigned int;
 
-const auto ratio_d_16_9 = 16.0 / 9.0;
+const constexpr auto ratio_d_16_9 = 16.0 / 9.0;
 
-const auto ratio_d_8_5 = 8.0 / 5.0;
+const constexpr auto ratio_d_8_5 = 8.0 / 5.0;
 
 struct Color_255RGB
 {
@@ -44,7 +47,7 @@ public:
     float u = 0;
     float v = 0;
     UV();
-    UV(int u, int v);
+    UV(float u, float v);
 };
 
 struct IMAGEPROPERY
@@ -200,7 +203,6 @@ inline vec3 operator/(const vec3 &v1, double num)
     double div = 1 / num;
     return vec3(v1.x() * div, v1.y() * div, v1.z() * div);
 }
-
 inline double dot(const vec3 &v1, const vec3 &v2)
 {
     return ((v1.x() * v2.x()) + (v1.y() * v2.y()) + (v1.z() * v2.z()));
@@ -208,9 +210,10 @@ inline double dot(const vec3 &v1, const vec3 &v2)
 
 inline vec3 cross(const vec3 &v1, const vec3 &v2)
 {
-    return vec3(v1.y() * v2.z() - v1.z() * v2.y(), v1.y() * v2.x() - v1.x() * v2.y(), v1.x() * v2.y() - v1.y() * v1.x());
+    return vec3(v1.y() * v2.z() - v1.z() * v2.y(),
+                v1.y() * v2.x() - v1.x() * v2.y(),
+                v1.x() * v2.y() - v1.y() * v1.x());
 }
-
 inline vec3 normalize(const vec3 &v1, const VEC_CHECKER vecchacker)
 {
     vec3 _v1 = v1;
@@ -235,23 +238,23 @@ using point3 = vec3;
 // using vec3 = VEC::vec3;
 class ray
 {
-    private:
-        point3 origin;
-        vec3 dir;
+private:
+    point3 origin;
+    vec3 dir;
 
-    public:
-        ray() {}
-        ray(const point3 &orig, const vec3 &direction) : origin(orig), dir(direction) {}
-        const point3 &origination() const { return origin; }
-        const vec3 &direction() const { return dir; }
-        point3 at(double num) const
-        {
-            // if(dir.length() > 1)
-            // {
-            //     dir = normalize(dir,VEC_CHECKER::e_vec);
-            // }
-            return origin + num * dir;
-        }
+public:
+    ray() {}
+    ray(const point3 &orig, const vec3 &direction) : origin(orig), dir(direction) {}
+    const point3 &origination() const { return origin; }
+    const vec3 &direction() const { return dir; }
+    point3 at(double num) const
+    {
+        // if(dir.length() > 1)
+        // {
+        //     dir = normalize(dir,VEC_CHECKER::e_vec);
+        // }
+        return origin + num * dir;
+    }
 };
 
 using color3 = vec3;
@@ -272,49 +275,99 @@ inline void DrawUVImg(const float width, const float height, std::ofstream &file
     }
 }
 
+class hit_record
+{
+public:
+    point3 point;
+    vec3 normal;
+    double t;
 
-        class hit_record
+    bool front_face;
+    void set_face_normal(const ray &r, const vec3 &outward_normal)
+    {
+        front_face = dot(r.direction(), outward_normal) < 0;
+
+        normal = front_face ? outward_normal : -outward_normal;
+    }
+};
+
+class hittable
+{
+private:
+public:
+    virtual ~hittable() = default;
+    virtual bool hit(const ray &r, double ray_tmin, double ray_tmax, hit_record &hitInfo) const = 0;
+};
+
+class hittable_list : public hittable
+{
+public:
+    std::vector<std::shared_ptr<hittable>> objects;
+
+    hittable_list() {}
+
+    hittable_list(std::shared_ptr<hittable> objects)
+    {
+    }
+
+    void add(std::shared_ptr<hittable> object)
+    {
+        objects.push_back(object);
+    }
+
+    bool hit(const ray &r, const double ray_tmin, const double ray_max, hit_record &hitInfo) const override
+    {
+        hit_record temp;
+
+        bool hit_anything = false;
+
+        double closeset_so_far = ray_max;
+
+        for (const hittable_list &object : objects)
         {
-            public:
-                point3 point;
-                vec3 normal;
-                double t;
-        };
+        }
+    }
+};
 
-        class hittable
+class Sphere : public hittable
+{
+private:
+    point3 center;
+    double radius;
+
+public:
+    Sphere(const point3 &c, const double &r) : center(c), radius(xyl::math::max(0.0, r)) {}
+    bool hit(const ray &r, const double ray_tmin, const double ray_tmax, hit_record &hitInfo) const override
+    {
+        vec3 oc = center - r.origination();
+        double a = dot(r.direction(), r.direction());
+        double h = dot(r.direction(), oc);
+        double c = dot(oc, oc) - xyl::math::pow(radius, 2);
+
+        double discriminant = xyl::math::pow(h, 2) - a * c;
+
+        if (discriminant < 0)
         {
-            private:
-            public:
-                virtual ~hittable() = default;
-                virtual bool hit(const ray& r,double ray_tmin , double ray_tmax , hit_record& hitInfo)const = 0;
-            
-        };
+            return false;
+        }
 
-        class Sphere : public hittable
+        double sqrtd = std::sqrt(discriminant);
+
+        double root = (h - sqrtd) / a;
+
+        if (root <= ray_tmin || root >= ray_tmax)
         {
-            private:
-                point3 center;
-                double radius;
-            public:
-                Sphere(const point3& c , const double& r):center(c) , radius(xyl::math::max(0.0,r)){}
-                bool hit(const ray& r ,const double ray_tmin ,const double ray_tmax,hit_record& hitInfo) const override 
-                {
-                    vec3 oc = center - r.origination();
-                    double a = dot(r.direction(),r.direction());
-                    double b = dot(r.direction(),oc);
-                    double c = dot(oc,oc) - xyl::math::pow(radius,2);
+            root = (h + discriminant) / a;
 
-                    double discriminant = xyl::math::pow(b,2) - a * c;
+            if (root <= ray_tmin || root >= ray_tmax)
+                return false;
+        }
 
-                    if(discriminant<0)
-                    {
-                        return false;
-                    }
-                }
-                
-        };
-
-
-
+        hitInfo.t = root;
+        hitInfo.point = r.at(root);
+        vec3 outward_normal = (hitInfo.point - center) / radius;
+        hitInfo.set_face_normal(r, outward_normal);
+    }
+};
 
 #endif // Variables
