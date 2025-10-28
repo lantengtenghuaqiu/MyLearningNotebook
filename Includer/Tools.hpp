@@ -4,7 +4,7 @@
 // #include<cstdint>
 // #include<iostream>
 #include<fstream>
-
+#include"Constants.hpp"
 #ifdef LOGER
     #include<initializer_list>
 #endif
@@ -43,7 +43,7 @@ inline void SINGLE_LOGE(T a)
             if(typeCheck.value)
             {
                 // LOG_INFO("v3 log");
-                LOGER_FILE_STREAM<<"["<<__LINE__<<" : "<<__TIME__<<"] : "; 
+                LOGER_FILE_STREAM<<"["<<__DATE__<<" : "<<__LINE__<<" : "<<__TIME__<<"] : "; 
                 #ifdef BINARYREAD
                     for(auto it = args.begin();it != args.end();it++)
                     {   
@@ -61,7 +61,7 @@ inline void SINGLE_LOGE(T a)
             }
             else
             {
-                LOGER_FILE_STREAM<<"["<<__LINE__<<" : "<<__TIME__<<"] : "; 
+                LOGER_FILE_STREAM<<"["<<__DATE__<<" : "<<__LINE__<<" : "<<__TIME__<<"] : "; 
                 for(auto it = args.begin();it != args.end();it++)
                 {
                     LOGER_FILE_STREAM<<it<<"\t";
@@ -109,6 +109,7 @@ inline void SINGLE_LOGE(T a)
 
 #endif
 
+#ifdef XYLMATH
 namespace xyl
 {
     namespace math
@@ -144,9 +145,14 @@ namespace xyl
             return a<b?a:b;
         }
         
+        inline double DegToRad(double deg)
+        {
+            return deg * pi / 180.0;
+        }
 
     }
 
 }
+#endif
 
 #endif

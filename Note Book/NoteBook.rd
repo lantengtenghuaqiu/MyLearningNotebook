@@ -209,15 +209,14 @@ C++笔记:
 		_sleep(time) 这个函数需要包含#include<thread>,但是使用MinGW时在编译时会提示不推荐使用
 				|--------------------------------------------------------------------------------------------|
 				|E:/Environments/mingw64/x86_64-w64-mingw32/include/stdlib.h:689:24: note: declared here 689 |
-				|   _CRTIMP void __cdecl _sleep(unsigned long _Duration) __MINGW_ATTRIB_DEPRECATED;		       |
+				|   _CRTIMP void __cdecl _sleep(unsigned long _Duration) __MINGW_ATTRIB_DEPRECATED;		     |
 				|--------------------------------------------------------------------------------------------|
- 	//是因为这不是c++标准,是微软平台下的线程休眠的旧方法,已废弃,所以在不同平台下应使用相应平台的休眠:
+ 		是因为这不是c++标准,是微软平台下的线程休眠的旧方法,已废弃,所以在不同平台下应使用相应平台的休眠:
 		Windows 下: 包含#include<window.h> 使用Sleep(time)
 
 
 	//类似C#中的变长参数:
 		需要包含头文件#include<initializer_list>
-
 
 		对于流文件的变长参数不可以使用上方,因为initializer_list<std::fstream>中的std::fstream默认为const形式,无法修改:
 			所以使用变长参数,关闭流文件
@@ -336,6 +335,7 @@ C++笔记:
 		在使用函数func的时候传入para,参数列表中的形参会直接关联实参,也就是说para改变时,实参也会跟着改变,同样,参数对应的实参改变,para也会随之改变;
 		引用的作用之一就是,避免传入参数时拷贝占用内存空间.此外对于非引用的重要一点就是不会改变实参,所以对于引用可以添加const修饰符进行修饰,避免para改变实参;
 
+	//强枚举 enum class
 
 	//头文件前向声明:
 		当头文件A.hpp中定义了B.hpp文件,并且在B.hpp文件中又包含了A.hpp文件,当main.cpp文件包含了这两个其中一个文件,都会导致循环定义,最后冲突无法正确构建:

@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 
+#define XYLMATH
 #include "Tools.hpp"
 
 // using uint = unsigned int;
@@ -75,7 +76,7 @@ public:
     float x = 0;
 };
 
-enum class VEC_CHECKER : char
+constexpr enum class VEC_CHECKER : char
 {
     e_vec = 1,
     e_col = 2
@@ -283,7 +284,8 @@ public:
     double t;
 
     bool front_face;
-    void set_face_normal(const ray &r, const vec3 &outward_normal)
+
+    void set_face_normal(const ray &r, const vec3& outward_normal)
     {
         front_face = dot(r.direction(), outward_normal) < 0;
 
@@ -301,32 +303,43 @@ public:
 
 class hittable_list : public hittable
 {
-public:
-    std::vector<std::shared_ptr<hittable>> objects;
+    public:
+        std::vector<std::shared_ptr<hittable>> objects;
 
-    hittable_list() {}
-
-    hittable_list(std::shared_ptr<hittable> objects)
-    {
-    }
-
-    void add(std::shared_ptr<hittable> object)
-    {
-        objects.push_back(object);
-    }
-
-    bool hit(const ray &r, const double ray_tmin, const double ray_max, hit_record &hitInfo) const override
-    {
-        hit_record temp;
-
-        bool hit_anything = false;
-
-        double closeset_so_far = ray_max;
-
-        for (const hittable_list &object : objects)
+        hittable_list() {}
+        hittable_list(std::shared_ptr<hittable> object)
         {
+            add(object);
         }
-    }
+
+        void add(std::shared_ptr<hittable> object)
+        {
+            objects.push_back(object);
+        }
+
+        void clear(){objects.clear();}
+
+        bool hit(const ray &r, const double ray_tmin, const double ray_tmax, hit_record &hitInfo) const override
+        {
+            hit_record temp_hitInfo;
+
+            bool hit_anything = false;
+
+            double closeset_so_far = ray_tmax;
+
+            for (const std::shared_ptr<hittable>& object : objects)
+            {
+                if(object->hit(r,ray_tmin,closeset_so_far,temp_hitInfo))
+                {
+                    hit_anything = true;
+                    closeset_so_far = temp_hitInfo.t;
+
+                    hitInfo = temp_hitInfo;
+                }
+                
+            }
+            return hit_anything;
+        }
 };
 
 class Sphere : public hittable
@@ -336,7 +349,7 @@ private:
     double radius;
 
 public:
-    Sphere(const point3 &c, const double &r) : center(c), radius(xyl::math::max(0.0, r)) {}
+    Sphere(const point3 &c, const double &r) : center(c), radius(std::fmax(0.0, r)) {}
     bool hit(const ray &r, const double ray_tmin, const double ray_tmax, hit_record &hitInfo) const override
     {
         vec3 oc = center - r.origination();
@@ -357,17 +370,26 @@ public:
 
         if (root <= ray_tmin || root >= ray_tmax)
         {
-            root = (h + discriminant) / a;
+            root = (h + sqrtd) / a;
 
             if (root <= ray_tmin || root >= ray_tmax)
                 return false;
         }
 
         hitInfo.t = root;
-        hitInfo.point = r.at(root);
+        hitInfo.point = r.at(hitInfo.t);
         vec3 outward_normal = (hitInfo.point - center) / radius;
         hitInfo.set_face_normal(r, outward_normal);
     }
 };
+
+#ifndef RTONEWEEK
+    #include <limits>
+    const static double infinity = std::numeric_limits<double>::infinity();
+
+
+
+
+#endif
 
 #endif // Variables
