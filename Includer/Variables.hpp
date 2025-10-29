@@ -17,49 +17,9 @@ const constexpr auto ratio_d_16_9 = 16.0 / 9.0;
 
 const constexpr auto ratio_d_8_5 = 8.0 / 5.0;
 
-struct Color_255RGB
-{
-public:
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    Color_255RGB() {};
-    Color_255RGB(unsigned char _r, unsigned char _g, unsigned char _b);
-};
-struct Color_255RGB_double
-{
-public:
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    Color_255RGB_double() {};
-    Color_255RGB_double(double _r, double _g, double _b)
-    {
-        r = (unsigned char)_r;
-        g = (unsigned char)_g;
-        b = (unsigned char)_b;
-    }
-};
-using Col_255RGB_d = Color_255RGB_double;
 
-struct UV
-{
-public:
-    float u = 0;
-    float v = 0;
-    UV();
-    UV(float u, float v);
-};
 
-struct IMAGEPROPERY
-{
-public:
-    UV uv;
 
-    IMAGEPROPERY() {};
-    IMAGEPROPERY(int width, int height);
-};
-using Img = IMAGEPROPERY;
 
 class FX_LINEARFUNCTION_INT
 {
@@ -67,7 +27,7 @@ class FX_LINEARFUNCTION_INT
 
 public:
     FX_LINEARFUNCTION_INT(float k, float a, float b, int width, int height);
-    IMAGEPROPERY *img;
+
     int fx = 0;
     int f = 0;
     float k = 0;

@@ -17,8 +17,8 @@ constexpr const uint16_t IMG_HEIGHT = (static_cast<double>(IMG_WIDTH) / ratio_d_
 
 //绘制
 color3 ray_color(const ray& r , const hittable& world);
-
-
+//渲染
+void Render(std::ofstream& stream ,const uint16_t& height,const uint16_t& width,const vec3& pixel00_loc,const vec3& pixel_delta_u,const vec3& pixel_delta_v,const vec3& camera_center ,const hittable_list& world);
 
 //主程序入口:
 int main()
@@ -38,8 +38,8 @@ int main()
     //World:
      hittable_list world;
 
-     world.add(std::make_shared<Sphere>(point3(0,0,-1),0.5));
-     world.add(std::make_shared<Sphere>(point3(0,-100.5,-1),100));
+    world.add(std::make_shared<Sphere>(point3(0,0,-1),0.5));
+    world.add(std::make_shared<Sphere>(point3(0,-100.5,-1),100));
 
     //Camera:
     //相机位置
@@ -63,24 +63,9 @@ int main()
 
     vec3 pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);//-1.6,1,-1 --> -1.59852,0.9985,-1
 
-    for(int v = 0 ; v < IMG_HEIGHT ; v++)
-    {
-        for(int u = 0 ; u <IMG_WIDTH ; u++)
-        {
-                                //u = 0 : v = 0;        pixel_center = (-1.59852,0.9985,-1);
-                                //u = 1080 : v = 657;   pixel_center = (-1.59852,0.9985,-1) + (3.2,0,0) + (0,-2,0);
-            vec3 pixel_center = pixel00_loc + (pixel_delta_u * u) + (pixel_delta_v * v);
-            vec3 ray_direction = pixel_center - camera_center; 
-            ray r(camera_center,ray_direction);
-            // std::cout<<ray_direction<<std::endl;
-            // txt<<ray_direction;
-            color3 pixel_color = ray_color(r,world) * 255;
 
-            file<<pixel_color;
-        }
-    }
-    // LOG_INFO(camera_center);
-    
+    //开始渲染,写入文件
+    Render(file,IMG_HEIGHT,IMG_WIDTH,pixel00_loc,pixel_delta_u,pixel_delta_v,camera_center,world);
 
 
     CloseStreamings(LOGER_FILE_STREAM,file);
@@ -105,4 +90,24 @@ color3 ray_color(const ray& r , const hittable& world)
 
     return (1.0 - a) * color3(1.0,1.0,1.0) + a * color3(0.5, 0.7, 1.0);
 
+}
+
+void Render(std::ofstream& stream ,const uint16_t& height,const uint16_t& width,const vec3& pixel00_loc,const vec3& pixel_delta_u,const vec3& pixel_delta_v,const vec3& camera_center ,const hittable_list& world)
+{
+        for(int v = 0 ; v < IMG_HEIGHT ; v++)
+    {
+        for(int u = 0 ; u <IMG_WIDTH ; u++)
+        {
+                                //u = 0 : v = 0;        pixel_center = (-1.59852,0.9985,-1);
+                                //u = 1080 : v = 657;   pixel_center = (-1.59852,0.9985,-1) + (3.2,0,0) + (0,-2,0);
+            vec3 pixel_center = pixel00_loc + (pixel_delta_u * u) + (pixel_delta_v * v);
+            vec3 ray_direction = pixel_center - camera_center; 
+            ray r(camera_center,ray_direction);
+            // std::cout<<ray_direction<<std::endl;
+            
+            color3 pixel_color = ray_color(r,world) * 255;
+
+            stream<<pixel_color;
+        }
+    }
 }

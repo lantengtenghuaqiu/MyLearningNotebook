@@ -9,7 +9,7 @@
     #include<initializer_list>
 #endif
 
-#define LOG_INFO(msg) std::cerr<<"["<<__TIME__<<" : "<<__LINE__<<"] : "<<msg<<std::endl;
+#define LOG_INFO(msg) std::cerr<<"["<<__FILE__<<" : "<<__TIME__<<" : "<<__LINE__<<"] : "<<msg<<std::endl;
 
 template<typename T>
 inline void V3_LOGE( T a , T b , T c)
@@ -64,7 +64,7 @@ inline void SINGLE_LOGE(T a)
                 LOGER_FILE_STREAM<<"["<<__DATE__<<" : "<<__LINE__<<" : "<<__TIME__<<"] : "; 
                 for(auto it = args.begin();it != args.end();it++)
                 {
-                    LOGER_FILE_STREAM<<it<<"\t";
+                    LOGER_FILE_STREAM<<it<<"\t"<<std::endl;
                 }
                 LOGER_FILE_STREAM<<"\n"; 
             }
