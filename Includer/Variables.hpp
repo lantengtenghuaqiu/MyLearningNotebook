@@ -9,7 +9,10 @@
 #include <memory>
 
 #define XYLMATH
+#define RTONEWEEK
+
 #include "Tools.hpp"
+#include "Constants.hpp"
 
 // using uint = unsigned int;
 
@@ -17,16 +20,12 @@ const constexpr auto ratio_d_16_9 = 16.0 / 9.0;
 
 const constexpr auto ratio_d_8_5 = 8.0 / 5.0;
 
-
-
-
-
 class FX_LINEARFUNCTION_INT
 {
     FX_LINEARFUNCTION_INT();
 
 public:
-    FX_LINEARFUNCTION_INT(float k, float a, float b, int width, int height);
+    FX_LINEARFUNCTION_INT(float k, float a, float b, int width, int height){};
 
     int fx = 0;
     int f = 0;
@@ -62,6 +61,7 @@ public:
     {
         return vec3(-e[0], -e[1], -e[2]);
     }
+    // vec3 operator+(double i)const;
 
     double operator[](int i) const
     {
@@ -193,10 +193,8 @@ inline vec3 color(const vec3 &v)
     return vec3(v.x() * 255, v.y() * 255, v.z() * 255);
 }
 
-// namespace VEC = VECTOR;
-// using POINTS = VEC::vec3;
 using point3 = vec3;
-// using vec3 = VEC::vec3;
+
 class ray
 {
 private:
@@ -210,31 +208,12 @@ public:
     const vec3 &direction() const { return dir; }
     point3 at(double num) const
     {
-        // if(dir.length() > 1)
-        // {
-        //     dir = normalize(dir,VEC_CHECKER::e_vec);
-        // }
         return origin + num * dir;
     }
 };
 
 using color3 = vec3;
-inline void DrawUVImg(const float width, const float height, std::ofstream &file)
-{
-    vec3 color = vec3(0, 0, 0);
-    for (int v = height; v > 0; v--)
-    {
-        for (int u = 0; u < width; u++)
-        {
-            double r = ((double)u / width * 255);
-            double g = ((double)v / height * 255);
-            double b = 0;
 
-            color = color3(r, g, b);
-            file << color;
-        }
-    }
-}
 
 class hit_record
 {
@@ -304,52 +283,79 @@ class hittable_list : public hittable
 
 class Sphere : public hittable
 {
-private:
-    point3 center;
-    double radius;
+    private:
+        point3 center;
+        double radius;
 
-public:
-    Sphere(const point3 &c, const double &r) : center(c), radius(std::fmax(0.0, r)) {}
-    bool hit(const ray &r, const double ray_tmin, const double ray_tmax, hit_record &hitInfo) const override
-    {
-        vec3 oc = center - r.origination();
-        double a = dot(r.direction(), r.direction());
-        double h = dot(r.direction(), oc);
-        double c = dot(oc, oc) - xyl::math::pow(radius, 2);
-
-        double discriminant = xyl::math::pow(h, 2) - a * c;
-
-        if (discriminant < 0)
+    public:
+        Sphere(const point3 &c, const double &r) : center(c), radius(std::fmax(0.0, r)) {}
+        bool hit(const ray &r, const double ray_tmin, const double ray_tmax, hit_record &hitInfo) const override
         {
-            return false;
-        }
+            vec3 oc = center - r.origination();
+            double a = dot(r.direction(), r.direction());
+            double h = dot(r.direction(), oc);
+            double c = dot(oc, oc) - xyl::math::pow(radius, 2);
 
-        double sqrtd = std::sqrt(discriminant);
+            double discriminant = xyl::math::pow(h, 2) - a * c;
 
-        double root = (h - sqrtd) / a;
+            if (discriminant < 0)
+            {
+                return false;
+            }
 
-        if (root <= ray_tmin || root >= ray_tmax)
-        {
-            root = (h + sqrtd) / a;
+            double sqrtd = std::sqrt(discriminant);
+
+            double root = (h - sqrtd) / a;
 
             if (root <= ray_tmin || root >= ray_tmax)
-                return false;
-        }
+            {
+                root = (h + sqrtd) / a;
 
-        hitInfo.t = root;
-        hitInfo.point = r.at(hitInfo.t);
-        vec3 outward_normal = (hitInfo.point - center) / radius;
-        hitInfo.set_face_normal(r, outward_normal);
-    }
+                if (root <= ray_tmin || root >= ray_tmax)
+                    return false;
+            }
+
+            hitInfo.t = root;
+            hitInfo.point = r.at(hitInfo.t);
+            vec3 outward_normal = (hitInfo.point - center) / radius;
+            hitInfo.set_face_normal(r, outward_normal);
+        }
 };
 
-#ifndef RTONEWEEK
-    #include <limits>
-    const static double infinity = std::numeric_limits<double>::infinity();
+namespace xyl
+{   
+    class Interval
+    {
+        private:
+            double min,max; 
+        public:
+            Interval():min(-xyl::consts::infinity),max(+xyl::consts::infinity){}
 
+    };
+}
 
+//UV color example
+namespace xyl
+{   
+    namespace example
+    {
+        inline void DrawUVImg(const float width, const float height, std::ofstream &file)
+        {
+            vec3 color = vec3(0, 0, 0);
+            for (int v = height; v > 0; v--)
+            {
+                for (int u = 0; u < width; u++)
+                {
+                    double r = ((double)u / width * 255);
+                    double g = ((double)v / height * 255);
+                    double b = 0;
 
-
-#endif
+                    color = color3(r, g, b);
+                    file << color;
+                }
+            }
+        }
+    }
+} // namespace xyl
 
 #endif // Variables

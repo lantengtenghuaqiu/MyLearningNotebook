@@ -9,6 +9,7 @@ include_directories(../Includer)
 
 set(
     SOURCES
+        ../Includer/Camera.cpp
         ../Includer/Constants.cpp
         ../Includer/Tools.cpp
         ../Includer/Variables.cpp
