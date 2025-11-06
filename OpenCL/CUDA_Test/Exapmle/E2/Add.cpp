@@ -29,7 +29,7 @@ const char* add = R"(
         }
     )";
 
-unsigned int strlen(const char* str,unsigned int max);
+unsigned int strlen2(const char* str,unsigned int max);
 
 unsigned int const LENGTH = 1000;
 float* number1 = new float[LENGTH];
@@ -122,7 +122,7 @@ int main()
     return 0;
 }
 
-unsigned int strlen(const char* str,unsigned int max)
+unsigned int strlen2(const char* str,unsigned int max)
 {
     unsigned int index = 0;
     if(max>0)

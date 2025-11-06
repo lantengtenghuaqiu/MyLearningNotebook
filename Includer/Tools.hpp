@@ -7,26 +7,6 @@
 #include "Constants.hpp"
 
 
-
-namespace xyl
-{
-    namespace types
-    {
-        template <typename T, typename U>
-        struct is_same
-        {
-            static constexpr bool value = false;
-        };
-
-        template <typename T>
-        struct is_same<T, T>
-        {
-            static constexpr bool value = true;
-        };
-    }
-
-} // namespace xyl
-
 #ifdef LOGER
 #include <initializer_list>
 #endif
@@ -104,9 +84,25 @@ namespace xyl
     }
 #endif
 
-#ifdef XYLMATH
 namespace xyl
 {
+
+    namespace types
+    {
+        template <typename T, typename U>
+        struct is_same
+        {
+            static constexpr bool value = false;
+        };
+
+        template <typename T>
+        struct is_same<T, T>
+        {
+            static constexpr bool value = true;
+        };
+    }
+
+    #ifdef XYLMATH
     namespace math
     {
         template <typename T>
@@ -140,16 +136,13 @@ namespace xyl
             return a < b ? a : b;
         }
 
-        inline double DegToRad(const double &deg)
-        {
-            return deg * xyl::consts::pi / 180.0;
-        }
+        
         template <typename T>
         inline bool surrounds(const T &x, const T &min, const T &max)
         {
             return min < x && x < max;
         }
-
+        
         class vec3;
         template <typename K, typename T>
         inline K clamp(const K &val, const T &min, const T &max)
@@ -162,65 +155,32 @@ namespace xyl
                 val_temp.z() = val_temp.z()<min ? min : val_temp.z > max ? max:val_temp.z();
                 return val_temp;
             }
-
+            
             if constexpr (xyl::types::is_same<K,T>::value)
             {
                 if (val < min)
-                    return min;
+                return min;
                 if (val > max)
-                    return max;
+                return max;
             }
-
+            
             return val;
         }
-
-        inline double random_double_normalized(void)
-        {
-            // 这是一个归一化随机值从[0,1]的方法
-            // rand会获得从0到RAND_MAX+1.0的随机数,所以rand = RAND_MAX+1.0的时候等于1,所以rand = 0则等于0;
-            return std::rand() / (RAND_MAX + 1.0);
-        }
-
+        
         template <typename T>
         inline T random_range(const T &min, const T &max)
         {
             // 这是通过随机值归一化[0,1]来获得最小为min,最大为(max-min) * [0,1]的值
             return min + ((max - min) * random_double_normalized());
         }
-
+        
+        inline double DegToRad(const double &deg);
+        inline double random_double_normalized(void);
     }
+    #endif
 
-}
-#endif
+    inline unsigned int strlen(const char* str,unsigned int max);
 
-namespace xyl
-{
-    unsigned int strlen(const char* str,unsigned int max)
-    {
-        unsigned int index = 0;
-        if(max>0)
-        {
-            while(str[index]!='\0' && index<max)
-            {
-                index+=1;
-            }
-            return index;
-        }
-        else
-        {
-            while(str[index]!='\0')
-            {
-                index+=1;
-            }
-            return index;
-        }
-
-
-    }
-}
-
-namespace xyl
-{
     namespace error_checker
     {
         enum class XTYPES
@@ -229,5 +189,12 @@ namespace xyl
         };
     }
 }
+
+namespace xyl
+{
+
+}
+
+
 
 #endif

@@ -6,20 +6,16 @@
 #define RTONEWEEK
 #define LOGER
 
+#include "Camera.hpp"
 #include "Variables.hpp"
 #include "Tools.hpp"
-#include "Camera.hpp"
 
-// //绘制
-// color3 ray_color(const ray& r , const hittable& world);
-
-// void Render(std::ofstream& stream ,const Camera& camera,const hittable_list& world);
 
 //主程序入口:
 int main()
 {
     //创建文件流:
-    std::ofstream file("ColorImageAntialiasing.ppm" , std::ios::binary|std::ios::out);
+    std::ofstream file("ColorImageAntialiasing2.ppm" , std::ios::binary|std::ios::out);
     
     if(!file.is_open())
     {
@@ -33,7 +29,7 @@ int main()
     //Camera:
     Camera camera;
     
-
+    xyl::strlen("xxx",3);
     //World:
     hittable_list world;
 
