@@ -7,7 +7,7 @@
 
 #include "Variables.hpp"
 #include"Tools.hpp"
-
+#include"Loger.hpp"
 //Image:
 //确定图像像素大小:
 //宽:
@@ -46,8 +46,8 @@ class Camera{
 
         //颜色计算
         color3 ray_color(const ray& _ray , const hittable& world)const;
-        ray get_ray(int a, int b)const;
-        vec3 sample_square()const;
+        ray get_ray(const int& a,const int& b)const;
+        vec3 sample_square(void)const;
         
     public:
         //渲染

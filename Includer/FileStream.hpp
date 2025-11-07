@@ -2,12 +2,11 @@
 
 #define FILESTREAM_H
 #include <fstream>
+#include<iostream>
 
-#ifndef PPM_STREAM
-static void PPMStream(std::ofstream& ppmstream,auto width,auto height);
+void PPMStream(std::ofstream& ppmstream,unsigned int width,unsigned int height);
 
 
 
-#endif
 
 #endif

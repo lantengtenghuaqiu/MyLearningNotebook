@@ -9,7 +9,7 @@
 #include "Camera.hpp"
 #include "Variables.hpp"
 #include "Tools.hpp"
-
+#include "Loger.hpp"
 
 //主程序入口:
 int main()
@@ -40,7 +40,7 @@ int main()
     camera.Render(file,world);
 
     //关闭所有文件流:
-    CloseStreamings(LOGER_FILE_STREAM,file);
+    xyl::log::CloseStreamings(xyl::log::LOGER_FILE_STREAM,file);
 
     return 0;
 } 

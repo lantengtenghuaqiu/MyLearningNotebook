@@ -1,5 +1,5 @@
 #define XYLMATH
-#include "Tools.hpp"
+#include"Tools.hpp"
 
 double xyl::math::DegToRad(const double &deg)
 {
@@ -14,12 +14,12 @@ double xyl::math::random_double_normalized(void)
 }
 
 
-int xyl::math::floor(int value)
+int xyl::math::floor(const int& value)
 {
     return value - (value % 1);
 }
 
-int xyl::math::ceil(int value)
+int xyl::math::ceil(const int& value)
 {
     return value + (1 - (value % 1));
 }
