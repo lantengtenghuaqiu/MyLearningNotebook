@@ -43,16 +43,17 @@ void Camera::RenderOld(std::ofstream &stream, const hittable_list &world) const
 }
 
 
-inline ray Camera::get_ray(int v, int u) const
+ray Camera::get_ray(int v, int u) const
 {
     vec3 offset = sample_square();
+    DOLOGE({offset});
     vec3 pixel_sample = pixel00_loc + ((u + offset.x()) * this->pixel_delta_u) + ((offset.y() + v) * this->pixel_delta_v);
     vec3 ray_origin = this->camera_center;
     vec3 ray_direction = pixel_sample - ray_origin;
     return ray(ray_origin , ray_direction);
 }
 
-inline vec3 Camera::sample_square() const
+vec3 Camera::sample_square() const
 {
     return vec3(xyl::math::random_double_normalized() - 0.5, xyl::math::random_double_normalized() - 0.5 ,0.0);
 }

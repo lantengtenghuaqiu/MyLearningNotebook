@@ -174,12 +174,14 @@ namespace xyl
             return min + ((max - min) * random_double_normalized());
         }
         
-        inline double DegToRad(const double &deg);
-        inline double random_double_normalized(void);
+        double DegToRad(const double &deg);
+        double random_double_normalized(void);
+        int floor (int value);
+        int ceil(int value);
     }
     #endif
 
-    inline unsigned int strlen(const char* str,unsigned int max);
+    unsigned int strlen(const char* str,unsigned int max);
 
     namespace error_checker
     {

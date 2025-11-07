@@ -11,13 +11,13 @@
 //Image:
 //确定图像像素大小:
 //宽:
-constexpr const int IMG_WIDTH = 1024;
+constexpr unsigned int IMG_WIDTH = 1024;
 //高:
-constexpr const int IMG_HEIGHT = IMG_WIDTH < ratio_d_8_5? 1: (IMG_WIDTH / ratio_d_8_5);
+constexpr unsigned int IMG_HEIGHT = IMG_WIDTH / ratio_d_8_5;
 
-constexpr const int sample_per_pixel = 10;
+constexpr int sample_per_pixel = 10;
 
-constexpr const double pixel_sample_scale = 1.0/sample_per_pixel;
+constexpr double pixel_sample_scale = 1.0/sample_per_pixel;
 
 // #if defined(_GLIBCXX_FSTREAM) && defined(_GLIBCXX_CSTDINT)
 class Camera{

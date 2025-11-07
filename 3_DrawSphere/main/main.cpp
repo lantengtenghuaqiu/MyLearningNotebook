@@ -11,10 +11,10 @@
 #include "Tools.hpp"
 
 
-//ä¸»ç¨‹åºå…¥å£:
+//Ö÷³ÌĞòÈë¿Ú:
 int main()
 {
-    //åˆ›å»ºæ–‡ä»¶æµ:
+    //´´½¨ÎÄ¼şÁ÷:
     std::ofstream file("ColorImageAntialiasing2.ppm" , std::ios::binary|std::ios::out);
     
     if(!file.is_open())
@@ -24,7 +24,7 @@ int main()
     }
 
     file<<"P6\n"<<IMG_WIDTH<<" "<<(int)IMG_HEIGHT<<"\n255\n";
-    
+
 
     //Camera:
     Camera camera;
@@ -36,10 +36,10 @@ int main()
     world.add(std::make_shared<Sphere>(point3(0,0,-1),0.5));
     world.add(std::make_shared<Sphere>(point3(0,-100.5,-1),100));
 
-    //å¼€å§‹æ¸²æŸ“,å†™å…¥æ–‡ä»¶:
+    //¿ªÊ¼äÖÈ¾,Ğ´ÈëÎÄ¼ş:
     camera.Render(file,world);
 
-    //å…³é—­æ‰€æœ‰æ–‡ä»¶æµ:
+    //¹Ø±ÕËùÓĞÎÄ¼şÁ÷:
     CloseStreamings(LOGER_FILE_STREAM,file);
 
     return 0;

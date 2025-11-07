@@ -399,9 +399,10 @@
 
 				// 原始字符串：直接写 "，无需转义
 					const char* str2 = R"(He said "Hello World")"; 
-
-
-
+		-inline 内联关键字:
+			首先有一个重点,一般来说,inline的函数的声明和实现必须在一起,即在hpp中使用inline必须在hpp中声明而不能在cpp中声明.
+			对于有一些类中函数声明在hpp但是实现在cpp,且main.cpp包含的是hpp文件,不报错是因为编译器原则,原有的版本或者不同系统下,会忽视inline
+			即:编译器对 inline 的 “建议性” 处理 或 函数未被实际调用
 
 					
 	->#指针专栏#:

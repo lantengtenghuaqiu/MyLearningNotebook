@@ -319,6 +319,8 @@ class Sphere : public hittable
             hitInfo.point = r.at(hitInfo.t);
             vec3 outward_normal = (hitInfo.point - center) / radius;
             hitInfo.set_face_normal(r, outward_normal);
+
+            return true;
         }
 };
 
@@ -339,12 +341,12 @@ namespace xyl
 {   
     namespace example
     {
-        inline void DrawUVImg(const float width, const float height, std::ofstream &file)
+        inline void DrawUVImg(const unsigned int width, const unsigned int height, std::ofstream &file)
         {
             vec3 color = vec3(0, 0, 0);
-            for (int v = height; v > 0; v--)
+            for (unsigned int v = height; v > 0; v--)
             {
-                for (int u = 0; u < width; u++)
+                for (unsigned int u = 0; u < width; u++)
                 {
                     double r = ((double)u / width * 255);
                     double g = ((double)v / height * 255);
