@@ -24,6 +24,9 @@ int xyl::math::ceil(const int& value)
     return value + (1 - (value % 1));
 }
 
+// void xyl::WileProtector(long max)
+
+
 unsigned int xyl::strlen(const char *str, unsigned int max)
 {
     unsigned int index = 0;

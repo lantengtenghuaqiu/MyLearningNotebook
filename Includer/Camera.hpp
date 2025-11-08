@@ -46,6 +46,7 @@ class Camera{
 
         //颜色计算
         color3 ray_color(const ray& _ray , const hittable& world)const;
+
         ray get_ray(const int& a,const int& b)const;
         vec3 sample_square(void)const;
         

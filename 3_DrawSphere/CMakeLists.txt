@@ -9,10 +9,11 @@ include_directories(../Includer)
 
 set(
     SOURCES
-        ${PROJECT_SOURCE_DIR}/../Includer/Camera.cpp
         ${PROJECT_SOURCE_DIR}/../Includer/Constants.cpp
         ${PROJECT_SOURCE_DIR}/../Includer/Tools.cpp
         ${PROJECT_SOURCE_DIR}/../Includer/Variables.cpp
+        ${PROJECT_SOURCE_DIR}/../Includer/Camera.cpp
+        ${PROJECT_SOURCE_DIR}/../Includer/Loger.cpp
         ${PROJECT_SOURCE_DIR}/main/main.cpp
 )
 

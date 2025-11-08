@@ -5,11 +5,14 @@
 #include "Variables.hpp"
 #include <initializer_list>
 #include <fstream>
+
 namespace xyl
 {
     namespace log
     {
-#define LOG_INFO(msg) std::cerr << "[" << __FILE__ << " : " << __TIME__ << " : " << __LINE__ << "] : " << msg << std::endl;
+        #define LOG_INFO(msg) std::cerr << "[" << __FILE__ << " : " << __TIME__ << " : " << __LINE__ << "] : " << msg << std::endl;
+        
+        static std::ofstream LOGER_FILE_STREAM("loger.log");//, std::ios::app
 
         template <typename T>
         inline void V3_LOGE(T a, T b, T c)
@@ -29,7 +32,6 @@ namespace xyl
             loger.close();
         }
 
-        static std::ofstream LOGER_FILE_STREAM("loger.log", std::ios::app);
 
         template <typename T>
         inline static void DOLOGE(const std::initializer_list<T> args)
@@ -70,7 +72,7 @@ namespace xyl
             if (first.is_open())
             {
                 LOG_INFO("file is closed");
-                LOGER_FILE_STREAM << "---[" << __DATE__ << " : " << __TIME__ << "file is closed" << "]---\n";
+                // LOGER_FILE_STREAM << "---[" << __DATE__ << " : " << __TIME__ << "file is closed" << "]---\n";
                 first.close();
             }
 

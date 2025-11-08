@@ -20,84 +20,72 @@ constexpr float ratio_d_8_5 = 8.0 / 5.0;
 
 enum class VEC_CHECKER : char
 {
-    e_vec = 1,
-    e_col = 2
+    e_vec,
+    e_col,
+    e_ppm,
+    e_file
 };
+
+class vec3;
+double dot(const vec3 &v1, const vec3 &v2);
+
 
 class vec3
 {
 private:
     double e[3];
-
+    VEC_CHECKER checker = VEC_CHECKER::e_vec;
 public:
-    const double *v = e;
-    vec3() : e{0, 0, 0} {}
+    const double* v = e;
+    vec3();
 
-    vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
+    vec3(const double& e0, const double& e1,const double& e2);
+    vec3(const double& e0, const double& e1,const double& e2 ,const VEC_CHECKER& check);
 
-    double x() const; //Return value can not be returned
+    double x() const; // Return value can not be returned
     double y() const;
     double z() const;
-
+    VEC_CHECKER GetChecker()const;
     // 使用-号时,如果现在有vec3 direction变量,-direction可以使其返回相反数,但因为是const不会改变e所以只能接收.
-    vec3 operator-() const
-    {
-        return vec3(-e[0], -e[1], -e[2]);
-    }
+    vec3 operator-();
     // vec3 operator+(double i)const;
 
-    double operator[](int i) const
+    double operator[](int i) const;
+
+    double &operator[](int i);
+
+    vec3 &operator+=(const vec3 &v);
+
+    vec3 &operator()(const double& e0 , const double& e1 , const double& e2);
+
+
+    vec3 &operator*=(double num);
+
+    vec3 &operator/=(double num);
+
+
+    double DotVec3() const;
+
+
+    double length() const;
+
+    static vec3 random();
+
+    template<typename T>
+    static vec3 random(const T& min , const T& max)
     {
-        if (i < 0 || i > 3)
-        {
-            throw std::out_of_range("vec3 : the index out of the range");
-        }
-        return e[i];
+        return vec3(xyl::math::random_range<double>(min , max),xyl::math::random_range<double>(min , max),xyl::math::random_range<double>(min , max));
     }
 
-    double &operator[](int i)
-    {
-        if (i < 0 || i > 3)
-        {
-            throw std::out_of_range("vec3 : the index out of the range");
-        }
-        return e[i];
-    }
 
-    vec3 &operator+=(const vec3 &v)
-    {
-        e[0] += v.x();
-        e[1] += v.y();
-        e[2] += v.z();
-        return *this;
-    }
+    
 
-    vec3 &operator*=(double num)
-    {
-        e[0] *= num;
-        e[1] *= num;
-        e[1] *= num;
-        return *this;
-    }
-
-    vec3 &operator/=(double num)
-    {
-        e[0] /= num;
-        e[1] /= num;
-        e[2] /= num;
-        return *this;
-    }
-
-    double length_squared() const
-    {
-        return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
-    }
-
-    double length() const
-    {
-        return std::sqrt(length_squared());
-    }
 };
+
+vec3 RandomUnitVector();
+
+vec3 RandomOnHemisphere(const vec3& normal);
+
 namespace xyl
 {
     namespace vec
@@ -120,82 +108,33 @@ namespace xyl
     }
 }
 
-inline static std::ostream &operator<<(std::ostream &out, const vec3 &v)
-{
-    // 通过将传入的out进行类型转换,如果转换成功则为文件输出流,否则为标准输出流
-    std::ofstream *ofs = dynamic_cast<std::ofstream *>(&out);
+std::ostream &operator<<(std::ostream &out, const vec3 &v);
 
-    if (ofs != nullptr)
-    {
-#ifdef _WIN32
-        return out << (unsigned char)(int)v.x() << (unsigned char)(int)v.y() << (unsigned char)(int)v.z();
-#endif
-    }
-    return out << v.x() << ' ' << v.y() << ' ' << v.z();
-}
+vec3 operator+(const vec3 &v1, const vec3 &v2);
 
-inline vec3 operator+(const vec3 &v1, const vec3 &v2)
-{
-    return vec3(v1.x() + v2.x(), v1.y() + v2.y(), v1.z() + v2.z());
-}
 
-inline vec3 operator-(const vec3 &v1, const vec3 &v2)
-{
-    return vec3(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z());
-}
+vec3 operator-(const vec3 &v1, const vec3 &v2);
 
-inline vec3 operator*(const vec3 &v1, const vec3 &v2)
-{
-    return vec3(v1.x() * v2.x(), v1.y() * v2.y(), v1.z() * v2.z());
-}
+vec3 operator*(const vec3 &v1, const vec3 &v2);
 
-inline vec3 operator*(const vec3 &v1, double num)
-{
-    return vec3(v1.x() * num, v1.y() * num, v1.z() * num);
-}
+vec3 operator*(const vec3 &v1, double num);
 
-inline vec3 operator*(const double num, const vec3 &v)
-{
-    return vec3(v.x() * num, v.y() * num, v.z() * num);
-}
+vec3 operator*(const double num, const vec3 &v);
 
-inline vec3 operator/(const vec3 &v1, double num)
-{
-    if (num == 0)
-    {
-        num = 0.000001;
-    }
-    double div = 1 / num;
-    return vec3(v1.x() * div, v1.y() * div, v1.z() * div);
-}
-inline double dot(const vec3 &v1, const vec3 &v2)
-{
-    return ((v1.x() * v2.x()) + (v1.y() * v2.y()) + (v1.z() * v2.z()));
-}
 
-inline vec3 cross(const vec3 &v1, const vec3 &v2)
-{
-    return vec3(v1.y() * v2.z() - v1.z() * v2.y(),
-                v1.y() * v2.x() - v1.x() * v2.y(),
-                v1.x() * v2.y() - v1.y() * v1.x());
-}
-inline vec3 normalize(const vec3 &v1, const VEC_CHECKER vecchacker)
-{
-    vec3 _v1 = v1;
-    if (vecchacker == VEC_CHECKER::e_vec)
-    {
-        return _v1 / _v1.length();
-    }
-    else if (vecchacker == VEC_CHECKER::e_col)
-    {
-        return vec3(255, 100, 155);
-    }
-    return vec3(0, 0, 0);
-}
-inline vec3 color(const vec3 &v)
-{
-    return vec3(v.x() * 255, v.y() * 255, v.z() * 255);
-}
+vec3 operator/(const vec3 &v1, double num);
+
+
+
+
+vec3 cross(const vec3 &v1, const vec3 &v2);
+
+
+vec3 normalize(const vec3 &v1, const VEC_CHECKER vecchacker);
+
+
+vec3 color(const vec3 &v);
+
 
 using point3 = vec3;
 
@@ -227,7 +166,7 @@ public:
 
     bool front_face;
 
-    void set_face_normal(const ray &r, const vec3 &outward_normal)
+    void set_face_normal(const ray &r, vec3 outward_normal)
     {
         front_face = dot(r.direction(), outward_normal) < 0;
 
@@ -339,27 +278,27 @@ namespace xyl
 }
 
 // UV color example
-namespace xyl
-{
-    namespace example
-    {
-        inline void DrawUVImg(const unsigned int width, const unsigned int height, std::ofstream &file)
-        {
-            vec3 color = vec3(0, 0, 0);
-            for (unsigned int v = height; v > 0; v--)
-            {
-                for (unsigned int u = 0; u < width; u++)
-                {
-                    double r = ((double)u / width * 255);
-                    double g = ((double)v / height * 255);
-                    double b = 0;
+// namespace xyl
+// {
+//     namespace example
+//     {
+//         inline void DrawUVImg(const unsigned int width, const unsigned int height, std::ofstream &file)
+//         {
+//             vec3 color = vec3(0, 0, 0);
+//             for (unsigned int v = height; v > 0; v--)
+//             {
+//                 for (unsigned int u = 0; u < width; u++)
+//                 {
+//                     double r = ((double)u / width * 255);
+//                     double g = ((double)v / height * 255);
+//                     double b = 0;
 
-                    color = color3(r, g, b);
-                    file << color;
-                }
-            }
-        }
-    }
-} // namespace xyl
+//                     color = color3(r, g, b);
+//                     file << color;
+//                 }
+//             }
+//         }
+//     }
+// } // namespace xyl
 
 #endif // Variables

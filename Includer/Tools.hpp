@@ -11,6 +11,13 @@
 
 namespace xyl
 {
+    static long WHILE_PROPECTOR = 0;
+
+
+    inline void USE_STATIC_VARIABLES()
+    {
+        printf("Using : " + WHILE_PROPECTOR);
+    }
 
 
     namespace types

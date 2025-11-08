@@ -2,10 +2,12 @@
 #include <fstream>
 #include <cstdint>
 
+
 #define XYLMATH
 #define RTONEWEEK
 #define LOGER
-#define Chapter3
+
+#define Chapter4
 
 #include "Camera.hpp"
 #include "Variables.hpp"
@@ -29,7 +31,6 @@ int main()
     //Camera:
     Camera camera;
 
-    xyl::strlen("xxx",3);
     //World:
     hittable_list world;
 
