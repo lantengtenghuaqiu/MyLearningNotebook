@@ -1,5 +1,10 @@
 #include "Variables.hpp"
 
+
+
+using point3 = vec3;
+using color3 = vec3;
+
 vec3::vec3() : e{0, 0, 0} 
 {
     this->checker=VEC_CHECKER::e_vec;
@@ -30,7 +35,7 @@ VEC_CHECKER vec3::GetChecker() const
     return this->checker;
 }
 
-vec3 vec3::operator-()
+vec3 vec3::operator-() const
 {
     return vec3(-this->e[0], -this->e[1], -this->e[2]);
 }
@@ -100,6 +105,12 @@ vec3 vec3::random()
     return vec3(xyl::math::random_double_normalized(), xyl::math::random_double_normalized(), xyl::math::random_double_normalized());
 }
 
+bool vec3::NearZero() const
+{
+    double num = 1e-8;
+    return (xyl::math::abs(this->e[0])<num) && (xyl::math::abs(this->e[1])<num) && (xyl::math::abs(this->e[2])<num);
+}
+
 vec3 RandomUnitVector()
 {
     vec3 point(0,0,0);
@@ -111,14 +122,14 @@ vec3 RandomUnitVector()
          point = vec3::random<double>(-1.0,1.0);
          lensq = point.DotVec3();
 
-         if( 1e-160 < lensq && lensq <= 1.0)
+         if( 1e-100 < lensq && lensq <= 1.0)
          {
             return point / sqrt(lensq);
          }
 
     }
     xyl::WHILE_PROPECTOR = 0;
-    return vec3();
+    return point;
 }
 
 vec3 RandomOnHemisphere(const vec3 &normal)

@@ -1,19 +1,13 @@
 #ifndef Variables
 #define Variables
 
-#include <iostream>
-#include <cmath>
-#include <fstream>
+// #include <iostream>
 
-#include <vector>
 #include <memory>
 
 #define XYLMATH
 
 #include "Tools.hpp"
-#include "Constants.hpp"
-
-// using uint = unsigned int;
 
 constexpr float ratio_d_16_9 = 16.0 / 9.0;
 constexpr float ratio_d_8_5 = 8.0 / 5.0;
@@ -47,7 +41,7 @@ public:
     double z() const;
     VEC_CHECKER GetChecker()const;
     // 使用-号时,如果现在有vec3 direction变量,-direction可以使其返回相反数,但因为是const不会改变e所以只能接收.
-    vec3 operator-();
+    vec3 operator-()const;
     // vec3 operator+(double i)const;
 
     double operator[](int i) const;
@@ -77,14 +71,45 @@ public:
         return vec3(xyl::math::random_range<double>(min , max),xyl::math::random_range<double>(min , max),xyl::math::random_range<double>(min , max));
     }
 
-
+    bool NearZero()const;
     
 
 };
 
+using point3 = vec3;
+using color3 = vec3;
+
 vec3 RandomUnitVector();
 
 vec3 RandomOnHemisphere(const vec3& normal);
+
+
+
+std::ostream &operator<<(std::ostream &out, const vec3 &v);
+
+vec3 operator+(const vec3 &v1, const vec3 &v2);
+
+
+vec3 operator-(const vec3 &v1, const vec3 &v2);
+
+vec3 operator*(const vec3 &v1, const vec3 &v2);
+
+vec3 operator*(const vec3 &v1, double num);
+
+vec3 operator*(const double num, const vec3 &v);
+
+
+vec3 operator/(const vec3 &v1, double num);
+
+
+vec3 cross(const vec3 &v1, const vec3 &v2);
+
+
+vec3 normalize(const vec3 &v1, const VEC_CHECKER vecchacker);
+
+
+vec3 color(const vec3 &v);
+
 
 namespace xyl
 {
@@ -105,177 +130,28 @@ namespace xyl
             }
             return val;
         }
+
+        template<typename K >
+        inline K Reflect(const K& v , const K& n)
+        {
+            return v - 2*dot(v,n)*n;
+        }
+
+
+        inline vec3 Refract(const vec3& uv , const vec3& n , const double& etai_over_etat)
+        {
+            double cos_theta = xyl::math::min(dot(-uv,n),1.0);
+
+            vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
+
+            vec3 r_out_parallel = -std::sqrt(xyl::math::abs(1.0 - r_out_perp.length())) * n;
+
+            return r_out_perp + r_out_parallel;
+        }
     }
 }
 
-std::ostream &operator<<(std::ostream &out, const vec3 &v);
 
-vec3 operator+(const vec3 &v1, const vec3 &v2);
-
-
-vec3 operator-(const vec3 &v1, const vec3 &v2);
-
-vec3 operator*(const vec3 &v1, const vec3 &v2);
-
-vec3 operator*(const vec3 &v1, double num);
-
-vec3 operator*(const double num, const vec3 &v);
-
-
-vec3 operator/(const vec3 &v1, double num);
-
-
-
-
-vec3 cross(const vec3 &v1, const vec3 &v2);
-
-
-vec3 normalize(const vec3 &v1, const VEC_CHECKER vecchacker);
-
-
-vec3 color(const vec3 &v);
-
-
-using point3 = vec3;
-
-class ray
-{
-private:
-    point3 origin;
-    vec3 dir;
-
-public:
-    ray() {}
-    ray(const point3 &orig, const vec3 &direction) : origin(orig), dir(direction) {}
-    const point3 &origination() const { return origin; }
-    const vec3 &direction() const { return dir; }
-    point3 at(double num) const
-    {
-        return origin + num * dir;
-    }
-};
-
-using color3 = vec3;
-
-class hit_record
-{
-public:
-    point3 point;
-    vec3 normal;
-    double t;
-
-    bool front_face;
-
-    void set_face_normal(const ray &r, vec3 outward_normal)
-    {
-        front_face = dot(r.direction(), outward_normal) < 0;
-
-        normal = front_face ? outward_normal : -outward_normal;
-    }
-};
-
-class hittable
-{
-private:
-public:
-    virtual ~hittable() = default;
-    virtual bool hit(const ray &r, double ray_tmin, double ray_tmax, hit_record &hitInfo) const = 0;
-};
-
-class hittable_list : public hittable
-{
-public:
-    std::vector<std::shared_ptr<hittable>> objects;
-
-    hittable_list() {}
-    hittable_list(std::shared_ptr<hittable> object)
-    {
-        add(object);
-    }
-
-    void add(std::shared_ptr<hittable> object)
-    {
-        objects.push_back(object);
-    }
-
-    void clear() { objects.clear(); }
-
-    bool hit(const ray &r, const double ray_tmin, const double ray_tmax, hit_record &hitInfo) const override
-    {
-        hit_record temp_hitInfo;
-
-        bool hit_anything = false;
-
-        double closeset_so_far = ray_tmax;
-
-        for (const std::shared_ptr<hittable> &object : objects)
-        {
-            if (object->hit(r, ray_tmin, closeset_so_far, temp_hitInfo))
-            {
-                hit_anything = true;
-                closeset_so_far = temp_hitInfo.t;
-
-                hitInfo = temp_hitInfo;
-            }
-        }
-        return hit_anything;
-    }
-};
-
-class Sphere : public hittable
-{
-private:
-    point3 center;
-    double radius;
-
-public:
-    Sphere(const point3 &c, const double &r) : center(c), radius(std::fmax(0.0, r)) {}
-    bool hit(const ray &r, const double ray_tmin, const double ray_tmax, hit_record &hitInfo) const override
-    {
-        vec3 oc = center - r.origination();
-        double a = dot(r.direction(), r.direction());
-        double h = dot(r.direction(), oc);
-        double c = dot(oc, oc) - xyl::math::pow(radius, 2);
-
-        double discriminant = xyl::math::pow(h, 2) - a * c;
-
-        if (discriminant < 0)
-        {
-            return false;
-        }
-
-        double sqrtd = std::sqrt(discriminant);
-
-        double root = (h - sqrtd) / a;
-
-        if (root <= ray_tmin || root >= ray_tmax)
-        {
-            root = (h + sqrtd) / a;
-
-            if (root <= ray_tmin || root >= ray_tmax)
-                return false;
-        }
-
-        hitInfo.t = root;
-        hitInfo.point = r.at(hitInfo.t);
-        vec3 outward_normal = (hitInfo.point - center) / radius;
-        hitInfo.set_face_normal(r, outward_normal);
-
-        return true;
-    }
-};
-
-namespace xyl
-{
-    class Interval
-    {
-    private:
-        double min, max;
-
-    public:
-        Interval() : min(-xyl::consts::infinity), max(+xyl::consts::infinity) {}
-    };
-}
 
 // UV color example
 // namespace xyl

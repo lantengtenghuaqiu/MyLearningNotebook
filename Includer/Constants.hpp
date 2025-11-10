@@ -18,7 +18,14 @@ namespace xyl
         
     } // namespace consts
     
+    class Interval
+    {
+    private:
+        double min, max;
 
+    public:
+        Interval();
+    };
 
 
 }

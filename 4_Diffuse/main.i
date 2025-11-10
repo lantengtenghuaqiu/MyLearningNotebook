@@ -2760,19 +2760,6 @@ namespace std
   template<>
     struct __is_integral_helper<unsigned long long>
     : public true_type { };
-
-
-
-
-  __extension__
-  template<>
-    struct __is_integral_helper<__int128>
-    : public true_type { };
-
-  __extension__
-  template<>
-    struct __is_integral_helper<unsigned __int128>
-    : public true_type { };
 # 440 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/type_traits" 3
   template<typename _Tp>
     struct is_integral
@@ -2795,14 +2782,7 @@ namespace std
   template<>
     struct __is_floating_point_helper<long double>
     : public true_type { };
-# 493 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/type_traits" 3
-  template<>
-    struct __is_floating_point_helper<__float128>
-    : public true_type { };
-
-
-
-
+# 500 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/type_traits" 3
   template<typename _Tp>
     struct is_floating_point
     : public __is_floating_point_helper<__remove_cv_t<_Tp>>::type
@@ -3024,8 +3004,6 @@ namespace std
     using __is_signed_integer = __is_one_of<__remove_cv_t<_Tp>,
    signed char, signed short, signed int, signed long,
    signed long long
-
-   , signed __int128
 # 733 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/type_traits" 3
    >;
 
@@ -3035,8 +3013,6 @@ namespace std
     using __is_unsigned_integer = __is_one_of<__remove_cv_t<_Tp>,
    unsigned char, unsigned short, unsigned int, unsigned long,
    unsigned long long
-
-   , unsigned __int128
 # 753 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/type_traits" 3
    >;
 
@@ -3854,12 +3830,6 @@ namespace std
   template<>
     struct __make_unsigned<long long>
     { typedef unsigned long long __type; };
-
-
-  __extension__
-  template<>
-    struct __make_unsigned<__int128>
-    { typedef unsigned __int128 __type; };
 # 1741 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/type_traits" 3
   template<typename _Tp,
     bool _IsInt = is_integral<_Tp>::value,
@@ -3985,12 +3955,6 @@ namespace std
   template<>
     struct __make_signed<unsigned long long>
     { typedef signed long long __type; };
-
-
-  __extension__
-  template<>
-    struct __make_signed<unsigned __int128>
-    { typedef __int128 __type; };
 # 1901 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/type_traits" 3
   template<typename _Tp,
     bool _IsInt = is_integral<_Tp>::value,
@@ -9105,8 +9069,6 @@ namespace std
       enum { __value = 1 };
       typedef __true_type __type;
     };
-# 272 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/cpp_type_traits.h" 3
-__extension__ template<> struct __is_integer<__int128> { enum { __value = 1 }; typedef __true_type __type; }; __extension__ template<> struct __is_integer<unsigned __int128> { enum { __value = 1 }; typedef __true_type __type; };
 # 289 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/cpp_type_traits.h" 3
   template<typename _Tp>
     struct __is_floating
@@ -12722,7 +12684,14 @@ namespace __gnu_cxx
 
   template<typename _Value>
     const int __numeric_traits_integer<_Value>::__digits;
-# 137 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/ext/numeric_traits.h" 3
+# 130 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/ext/numeric_traits.h" 3
+  __extension__ template<> struct __is_integer_nonstrict<__int128> { enum { __value = 1 }; typedef std::__true_type __type; enum { __width = 128 }; }; __extension__ template<> struct __is_integer_nonstrict<unsigned __int128> { enum { __value = 1 }; typedef std::__true_type __type; enum { __width = 128 }; };
+
+
+
+
+
+
   template<typename _Tp>
     using __int_traits = __numeric_traits_integer<_Tp>;
 # 157 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/ext/numeric_traits.h" 3
@@ -14974,12 +14943,6 @@ namespace std
   __size_to_integer(long long __n) { return __n; }
   inline constexpr unsigned long long
   __size_to_integer(unsigned long long __n) { return __n; }
-
-
-  __extension__ inline constexpr __int128
-  __size_to_integer(__int128 __n) { return __n; }
-  __extension__ inline constexpr unsigned __int128
-  __size_to_integer(unsigned __int128 __n) { return __n; }
 # 1049 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/stl_algobase.h" 3
   inline constexpr long long
   __size_to_integer(float __n) { return (long long)__n; }
@@ -14988,8 +14951,8 @@ namespace std
   inline constexpr long long
   __size_to_integer(long double __n) { return (long long)__n; }
 
-  __extension__ inline constexpr long long
-  __size_to_integer(__float128 __n) { return (long long)__n; }
+
+
 
 
   template<typename _OutputIterator, typename _Size, typename _Tp>
@@ -17797,12 +17760,6 @@ namespace std
 
 
   template<> struct hash<unsigned long long> : public __hash_base<size_t, unsigned long long> { size_t operator()(unsigned long long __val) const noexcept { return static_cast<size_t>(__val); } };
-
-
-  __extension__
-  template<> struct hash<__int128> : public __hash_base<size_t, __int128> { size_t operator()(__int128 __val) const noexcept { return static_cast<size_t>(__val); } };
-  __extension__
-  template<> struct hash<__int128 unsigned> : public __hash_base<size_t, __int128 unsigned> { size_t operator()(__int128 unsigned __val) const noexcept { return static_cast<size_t>(__val); } };
 # 201 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/functional_hash.h" 3
   struct _Hash_impl
   {
@@ -21655,13 +21612,6 @@ unsigned long __attribute__((__cdecl__)) _lrotr(unsigned long,int);
 
 
   __extension__ long long __attribute__((__cdecl__)) atoll (const char *);
-
-
-  __extension__ long long __attribute__((__cdecl__)) wtoll (const wchar_t *);
-  __extension__ char *__attribute__((__cdecl__)) lltoa (long long, char *, int);
-  __extension__ char *__attribute__((__cdecl__)) ulltoa (unsigned long long , char *, int);
-  __extension__ wchar_t *__attribute__((__cdecl__)) lltow (long long, wchar_t *, int);
-  __extension__ wchar_t *__attribute__((__cdecl__)) ulltow (unsigned long long, wchar_t *, int);
 # 764 "E:/Environments/mingw64/x86_64-w64-mingw32/include/stdlib.h" 3
 }
 
@@ -21894,27 +21844,7 @@ namespace std
   inline constexpr long double
   abs(long double __x)
   { return __builtin_fabsl(__x); }
-
-
-
-  __extension__ inline constexpr __int128
-  abs(__int128 __x) { return __x >= 0 ? __x : -__x; }
-# 135 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/std_abs.h" 3
-  __extension__ inline constexpr
-  __float128
-  abs(__float128 __x)
-  {
-
-
-
-
-
-
-    return __builtin_signbit(__x) ? -__x : __x;
-
-  }
-
-
+# 150 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/std_abs.h" 3
 
 }
 }
@@ -23644,11 +23574,6 @@ namespace std
   template<> struct __byte_operand<unsigned long> { using __type = byte; };
   template<> struct __byte_operand<long long> { using __type = byte; };
   template<> struct __byte_operand<unsigned long long> { using __type = byte; };
-
-  template<> struct __byte_operand<__int128>
-  { using __type = byte; };
-  template<> struct __byte_operand<unsigned __int128>
-  { using __type = byte; };
 # 108 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/cstddef" 3
   template<typename _IntegerType>
     struct __byte_operand<const _IntegerType>
@@ -37446,13 +37371,7 @@ namespace std
 # 142 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/cstdint" 3
 }
 # 4 "main.cpp" 2
-
-
-
-
-
-
-
+# 12 "main.cpp"
 # 1 "../Includer/Camera.hpp" 1
 
 
@@ -37587,50 +37506,6 @@ extern "C" {
   void __attribute__((__cdecl__)) sincos (double __x, double *p_sin, double *p_cos);
   void __attribute__((__cdecl__)) sincosl (long double __x, long double *p_sin, long double *p_cos);
   void __attribute__((__cdecl__)) sincosf (float __x, float *p_sin, float *p_cos);
-# 265 "E:/Environments/mingw64/x86_64-w64-mingw32/include/math.h" 3
-  struct _complex {
-    double x;
-    double y;
-  };
-
-
-  double __attribute__((__cdecl__)) _cabs(struct _complex _ComplexA);
-  double __attribute__((__cdecl__)) _hypot(double _X,double _Y);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _j0(double _X);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _j1(double _X);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _jn(int _X,double _Y);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _y0(double _X);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _y1(double _X);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _yn(int _X,double _Y);
-
-
-  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _matherr (struct _exception *);
-# 292 "E:/Environments/mingw64/x86_64-w64-mingw32/include/math.h" 3
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _chgsign (double _X);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _copysign (double _Number,double _Sign);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _logb (double);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _nextafter (double, double);
-  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _scalb (double, long);
-  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _finite (double);
-  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _fpclass (double);
-  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _isnan (double);
-
-
-
-
-
-
-__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) j0 (double) ;
-__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) j1 (double) ;
-__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) jn (int, double) ;
-__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) y0 (double) ;
-__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) y1 (double) ;
-__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) yn (int, double) ;
-
-__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) chgsign (double);
-# 322 "E:/Environments/mingw64/x86_64-w64-mingw32/include/math.h" 3
-  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) finite (double);
-  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) fpclass (double);
 # 367 "E:/Environments/mingw64/x86_64-w64-mingw32/include/math.h" 3
 typedef float float_t;
 typedef double double_t;
@@ -37936,10 +37811,6 @@ __extension__ long long __attribute__((__cdecl__)) llrintl (long double);
    __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _finitef(float _X);
    __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _isnanf(float _X);
    __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _fpclassf(float _X);
-
-
-
-   extern long double __attribute__((__cdecl__)) _chgsignl (long double);
 # 1575 "E:/Environments/mingw64/x86_64-w64-mingw32/include/math.h" 3
 }
 
@@ -40698,7 +40569,7 @@ namespace std
       static constexpr float_round_style round_style
        = round_toward_zero;
     };
-# 1637 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/limits" 3
+# 1658 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/limits" 3
   __extension__ template<> struct numeric_limits<__int128> { static constexpr bool is_specialized = true; static constexpr __int128 min() noexcept { return (((__int128)(-1) < 0) ? -(((__int128)(-1) < 0) ? (((((__int128)1 << ((128 - ((__int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(__int128)0) - 1 : (__int128)0); } static constexpr __int128 max() noexcept { return (((__int128)(-1) < 0) ? (((((__int128)1 << ((128 - ((__int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(__int128)0); } static constexpr int digits = 128 - 1; static constexpr int digits10 = (128 - 1) * 643L / 2136; static constexpr bool is_signed = true; static constexpr bool is_integer = true; static constexpr bool is_exact = true; static constexpr int radix = 2; static constexpr __int128 epsilon() noexcept { return 0; } static constexpr __int128 round_error() noexcept { return 0; } static constexpr __int128 lowest() noexcept { return min(); } static constexpr int max_digits10 = 0; static constexpr int min_exponent = 0; static constexpr int min_exponent10 = 0; static constexpr int max_exponent = 0; static constexpr int max_exponent10 = 0; static constexpr bool has_infinity = false; static constexpr bool has_quiet_NaN = false; static constexpr bool has_signaling_NaN = false; static constexpr float_denorm_style has_denorm = denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr __int128 infinity() noexcept { return static_cast<__int128>(0); } static constexpr __int128 quiet_NaN() noexcept { return static_cast<__int128>(0); } static constexpr __int128 signaling_NaN() noexcept { return static_cast<__int128>(0); } static constexpr __int128 denorm_min() noexcept { return static_cast<__int128>(0); } static constexpr bool is_iec559 = false; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = true; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_toward_zero; }; __extension__ template<> struct numeric_limits<unsigned __int128> { static constexpr bool is_specialized = true; static constexpr unsigned __int128 min() noexcept { return 0; } static constexpr unsigned __int128 max() noexcept { return (((unsigned __int128)(-1) < 0) ? (((((unsigned __int128)1 << ((128 - ((unsigned __int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(unsigned __int128)0); } static constexpr unsigned __int128 lowest() noexcept { return min(); } static constexpr int max_digits10 = 0; static constexpr int digits = 128; static constexpr int digits10 = 128 * 643L / 2136; static constexpr bool is_signed = false; static constexpr bool is_integer = true; static constexpr bool is_exact = true; static constexpr int radix = 2; static constexpr unsigned __int128 epsilon() noexcept { return 0; } static constexpr unsigned __int128 round_error() noexcept { return 0; } static constexpr int min_exponent = 0; static constexpr int min_exponent10 = 0; static constexpr int max_exponent = 0; static constexpr int max_exponent10 = 0; static constexpr bool has_infinity = false; static constexpr bool has_quiet_NaN = false; static constexpr bool has_signaling_NaN = false; static constexpr float_denorm_style has_denorm = denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr unsigned __int128 infinity() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 quiet_NaN() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 signaling_NaN() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 denorm_min() noexcept { return static_cast<unsigned __int128>(0); } static constexpr bool is_iec559 = false; static constexpr bool is_bounded = true; static constexpr bool is_modulo = true; static constexpr bool traps = true; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_toward_zero; };
 # 1669 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/limits" 3
   template<>
@@ -44656,115 +44527,6 @@ namespace std
 
 
 }
-
-
-namespace __gnu_cxx
-{
-
-# 1216 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/specfun.h" 3
-  inline float
-  airy_aif(float __x)
-  {
-    float __Ai, __Bi, __Aip, __Bip;
-    std::__detail::__airy<float>(__x, __Ai, __Bi, __Aip, __Bip);
-    return __Ai;
-  }
-
-
-
-
-  inline long double
-  airy_ail(long double __x)
-  {
-    long double __Ai, __Bi, __Aip, __Bip;
-    std::__detail::__airy<long double>(__x, __Ai, __Bi, __Aip, __Bip);
-    return __Ai;
-  }
-
-
-
-
-  template<typename _Tp>
-    inline typename __gnu_cxx::__promote<_Tp>::__type
-    airy_ai(_Tp __x)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      __type __Ai, __Bi, __Aip, __Bip;
-      std::__detail::__airy<__type>(__x, __Ai, __Bi, __Aip, __Bip);
-      return __Ai;
-    }
-
-
-
-
-  inline float
-  airy_bif(float __x)
-  {
-    float __Ai, __Bi, __Aip, __Bip;
-    std::__detail::__airy<float>(__x, __Ai, __Bi, __Aip, __Bip);
-    return __Bi;
-  }
-
-
-
-
-  inline long double
-  airy_bil(long double __x)
-  {
-    long double __Ai, __Bi, __Aip, __Bip;
-    std::__detail::__airy<long double>(__x, __Ai, __Bi, __Aip, __Bip);
-    return __Bi;
-  }
-
-
-
-
-  template<typename _Tp>
-    inline typename __gnu_cxx::__promote<_Tp>::__type
-    airy_bi(_Tp __x)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      __type __Ai, __Bi, __Aip, __Bip;
-      std::__detail::__airy<__type>(__x, __Ai, __Bi, __Aip, __Bip);
-      return __Bi;
-    }
-# 1292 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/specfun.h" 3
-  inline float
-  conf_hypergf(float __a, float __c, float __x)
-  { return std::__detail::__conf_hyperg<float>(__a, __c, __x); }
-# 1303 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/specfun.h" 3
-  inline long double
-  conf_hypergl(long double __a, long double __c, long double __x)
-  { return std::__detail::__conf_hyperg<long double>(__a, __c, __x); }
-# 1323 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/specfun.h" 3
-  template<typename _Tpa, typename _Tpc, typename _Tp>
-    inline typename __gnu_cxx::__promote_3<_Tpa, _Tpc, _Tp>::__type
-    conf_hyperg(_Tpa __a, _Tpc __c, _Tp __x)
-    {
-      typedef typename __gnu_cxx::__promote_3<_Tpa, _Tpc, _Tp>::__type __type;
-      return std::__detail::__conf_hyperg<__type>(__a, __c, __x);
-    }
-# 1340 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/specfun.h" 3
-  inline float
-  hypergf(float __a, float __b, float __c, float __x)
-  { return std::__detail::__hyperg<float>(__a, __b, __c, __x); }
-# 1351 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/specfun.h" 3
-  inline long double
-  hypergl(long double __a, long double __b, long double __c, long double __x)
-  { return std::__detail::__hyperg<long double>(__a, __b, __c, __x); }
-# 1372 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/bits/specfun.h" 3
-  template<typename _Tpa, typename _Tpb, typename _Tpc, typename _Tp>
-    inline typename __gnu_cxx::__promote_4<_Tpa, _Tpb, _Tpc, _Tp>::__type
-    hyperg(_Tpa __a, _Tpb __b, _Tpc __c, _Tp __x)
-    {
-      typedef typename __gnu_cxx::__promote_4<_Tpa, _Tpb, _Tpc, _Tp>
-  ::__type __type;
-      return std::__detail::__hyperg<__type>(__a, __b, __c, __x);
-    }
-
-
-
-}
 # 3700 "E:/Environments/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/c++/cmath" 2 3
 
 
@@ -45935,8 +45697,8 @@ namespace std
       static_assert(is_same<typename remove_cv<_Tp>::type, _Tp>::value,
    "std::vector must have a non-const, non-volatile value_type");
 
-
-
+      static_assert(is_same<typename _Alloc::value_type, _Tp>::value,
+   "std::vector must have the same value_type as its allocator");
 
 
 
@@ -55246,7 +55008,7 @@ public:
     template<typename T>
     static vec3 random(const T& min , const T& max)
     {
-        return vec3(xyl::math::random_range(min , max),xyl::math::random_range(min , max),xyl::math::random_range(min , max));
+        return vec3(xyl::math::random_range<double>(min , max),xyl::math::random_range<double>(min , max),xyl::math::random_range<double>(min , max));
     }
 
 
@@ -55464,7 +55226,7 @@ namespace xyl
         inline void V3_LOGE(T a, T b, T c)
         {
             std::ofstream loger("log.log");
-            loger << " : [" << "../Includer/Loger.hpp" << " : " << 21 << " : " << "21:28:43" << "] : " << a << "\t" << b << "\t" << c << "\n";
+            loger << " : [" << "../Includer/Loger.hpp" << " : " << 21 << " : " << "07:20:24" << "] : " << a << "\t" << b << "\t" << c << "\n";
 
             loger.close();
         }
@@ -55473,7 +55235,7 @@ namespace xyl
         inline void SINGLE_LOGE(T a)
         {
             std::ofstream loger("log.log");
-            loger << " : [" << "../Includer/Loger.hpp" << " : " << 30 << " : " << "21:28:43" << "] : " << a << "\n";
+            loger << " : [" << "../Includer/Loger.hpp" << " : " << 30 << " : " << "07:20:24" << "] : " << a << "\n";
 
             loger.close();
         }
@@ -55487,7 +55249,7 @@ namespace xyl
                 xyl::types::is_same<T, vec3> typeCheck;
                 if constexpr (typeCheck.value)
                 {
-                    LOGER_FILE_STREAM << "[" << "Nov  8 2025" << " : " << "21:28:43" << "] : ";
+                    LOGER_FILE_STREAM << "[" << "Nov  9 2025" << " : " << "07:20:24" << "] : ";
 
 
 
@@ -55505,7 +55267,7 @@ namespace xyl
                 {
                     for (const T &it : args)
                     {
-                        LOGER_FILE_STREAM << "[" << "Nov  8 2025" << " : " << "21:28:43" << "] : " << it << "\t" << std::endl;
+                        LOGER_FILE_STREAM << "[" << "Nov  9 2025" << " : " << "07:20:24" << "] : " << it << "\t" << std::endl;
                     }
                 }
             }
@@ -55517,8 +55279,8 @@ namespace xyl
         {
             if (first.is_open())
             {
-                std::cerr << "[" << "../Includer/Loger.hpp" << " : " << "21:28:43" << " : " << 74 << "] : " << "file is closed" << std::endl;;
-                LOGER_FILE_STREAM << "---[" << "Nov  8 2025" << " : " << "21:28:43" << "file is closed" << "]---\n";
+                std::cerr << "[" << "../Includer/Loger.hpp" << " : " << "07:20:24" << " : " << 74 << "] : " << "file is closed" << std::endl;;
+
                 first.close();
             }
 
@@ -55531,7 +55293,7 @@ namespace xyl
 
 
 
-constexpr unsigned int IMG_WIDTH = 56;
+constexpr unsigned int IMG_WIDTH = 1024;
 
 constexpr unsigned int IMG_HEIGHT = IMG_WIDTH / ratio_d_8_5;
 
@@ -55577,23 +55339,23 @@ class Camera{
 
 
     };
-# 12 "main.cpp" 2
-# 1 "../Includer/Variables.hpp" 1
 # 13 "main.cpp" 2
-# 1 "../Includer/Tools.hpp" 1
+# 1 "../Includer/Variables.hpp" 1
 # 14 "main.cpp" 2
-# 1 "../Includer/Loger.hpp" 1
+# 1 "../Includer/Tools.hpp" 1
 # 15 "main.cpp" 2
+# 1 "../Includer/Loger.hpp" 1
+# 16 "main.cpp" 2
 
 
 int main()
 {
 
-    std::ofstream file("ColorImageAntialiasing2.ppm" , std::ios::binary|std::ios::out);
+    std::ofstream file("ColorImageAntialiasing.ppm" , std::ios::binary|std::ios::out);
 
     if(!file.is_open())
     {
-        std::cerr << "[" << "main.cpp" << " : " << "21:28:43" << " : " << 24 << "] : " << "" << std::endl;;
+        std::cerr << "[" << "main.cpp" << " : " << "07:20:24" << " : " << 25 << "] : " << "" << std::endl;;
         return -1;
     }
 
@@ -55602,7 +55364,6 @@ int main()
 
     Camera camera;
 
-    xyl::strlen("xxx",3);
 
     hittable_list world;
 

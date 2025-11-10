@@ -16,7 +16,7 @@ constexpr const uint16_t IMG_WIDTH = 216;
 constexpr const uint16_t IMG_HEIGHT = (static_cast<double>(IMG_WIDTH) / ratio_d_8_5)<1? 1: static_cast<uint16_t>(static_cast<double>(IMG_WIDTH) / ratio_d_8_5);
 
 //绘制圆函数
-color3 DrawSphere(const ray& r,const vec3& center , const double radius);
+color3 DrawSphere(const Ray& r,const vec3& center , const double radius);
 
 
 
@@ -60,7 +60,7 @@ int main()
                                 //u = 1080 : v = 657;   pixel_center = (-1.59852,0.9985,-1) + (3.2,0,0) + (0,-2,0);
             vec3 pixel_center = pixel00_loc + (pixel_delta_u * u) + (pixel_delta_v * v);
             vec3 ray_direction = pixel_center - camera_center; 
-            ray r(camera_center,ray_direction);
+            Ray r(camera_center,ray_direction);
             // std::cout<<ray_direction<<std::endl;
             // txt<<ray_direction;
             color3 pixel_color = DrawSphere(r,camera_center,0.5) * 255;
@@ -80,7 +80,7 @@ int main()
 //-------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 //通过delta x求射线与圆的交集,射线穿过sphere的公式,delta > 0会返回两个值,delta x = 0相交返回一个,delta x < 0不相交
-double ray_color(const ray& r ,const vec3& center , const double radius)
+double ray_color(const Ray& r ,const vec3& center , const double radius)
 {
     //算法优化前
     {
@@ -118,7 +118,7 @@ double ray_color(const ray& r ,const vec3& center , const double radius)
 }
 
 
-color3 DrawSphere(const ray& r,const vec3& center , const double radius)
+color3 DrawSphere(const Ray& r,const vec3& center , const double radius)
 {
     //绘制Sphere的
     double t = ray_color(r,point3(0,0,-1),radius);

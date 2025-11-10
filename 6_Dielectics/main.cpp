@@ -7,18 +7,19 @@
 #define RTONEWEEK
 #define LOGER
 
-#define DIFFUSE
+#define MATERIAL
 
 #include "Camera.hpp"
 #include "Variables.hpp"
 #include "Tools.hpp"
 #include "Loger.hpp"
+#include "Material.hpp"
 
 //���������:
 int main()
 {
     //�����ļ���:
-    std::ofstream file("_9.5_GammaCorrection2.ppm" , std::ios::binary|std::ios::out);
+    std::ofstream file("_11_2SnellLaw.ppm" , std::ios::binary|std::ios::out);
 
     if(!file.is_open())
     {
@@ -31,11 +32,17 @@ int main()
     //Camera:
     Camera camera;
 
+    auto ground         =   std::make_shared<Lambertain>(color3(0.5,0.5,0.7));
+    auto centerSphere   =   std::make_shared<Lambertain>(color3(0.7,0.7,0.6));
+    auto leftSphere     =   std::make_shared<Dielectic>(1.50);
+    auto rightSphere    =   std::make_shared<Metal>(color3(0.8,0.8,0.8),0.3);
+
     //World:
     hittable_list world;
-
-    world.add(std::make_shared<Sphere>(point3(0,0,-1),0.5));
-    world.add(std::make_shared<Sphere>(point3(0,-100.5,-1),100));
+    world.add(std::make_shared<Sphere>(point3( 0.0,   -100.5,    -1.0),    100.0,    ground));
+    world.add(std::make_shared<Sphere>(point3( 0.0,      0.0,    -1.2),      0.5,    centerSphere));
+    world.add(std::make_shared<Sphere>(point3(-1.0,      0.0,    -1.0),      0.5,    leftSphere));
+    world.add(std::make_shared<Sphere>(point3( 1.0,      0.0,    -1.0),      0.5,    rightSphere));
 
     //��ʼ��Ⱦ,д���ļ�:
     camera.Render(file,world);

@@ -8,10 +8,12 @@
 #include "Variables.hpp"
 #include"Tools.hpp"
 #include"Loger.hpp"
+#include "Ray.hpp"
+#include "Material.hpp"
 //Image:
 //确定图像像素大小:
 //宽:
-constexpr unsigned int IMG_WIDTH = 1024;
+constexpr unsigned int IMG_WIDTH = 1028;
 //高:
 constexpr unsigned int IMG_HEIGHT = IMG_WIDTH / ratio_d_8_5;
 
@@ -44,10 +46,13 @@ class Camera{
 
         vec3 pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);//-1.6,1,-1 --> -1.59852,0.9985,-1
 
-        //颜色计算
-        color3 ray_color(const ray& _ray , const hittable& world)const;
+        //Depth
+        int maxDepth = 10;
 
-        ray get_ray(const int& a,const int& b)const;
+        //颜色计算
+        color3 ray_color(const Ray& _ray , const hittable& world , int depth)const;
+
+        Ray get_ray(const int& a,const int& b)const;
         vec3 sample_square(void)const;
         
     public:
@@ -57,7 +62,6 @@ class Camera{
 
 
     };
-
 
 
 

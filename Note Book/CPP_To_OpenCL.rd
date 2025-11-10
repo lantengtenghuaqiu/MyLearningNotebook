@@ -353,6 +353,18 @@
 				此时constexpr UDERWIN int num = 10;
 				等价于constexpr int num = 10;即原来的代码
 
+			3.通过宏进行静态函数或者普通函数的定义:
+				当使用#define时如果内容为空则视为无内容,否则可以作为一种判断标准
+				#define F_NONE 
+				#define F_STATIC static
+				class Myclass
+				{
+					public:
+						int F_NONE func(){}		//define 没有赋值,则当作普通函数
+						int F_STATIC func2(){} 	//define 被赋值,则会改为静态函数
+				};
+
+				
 	->#头文件专栏#:
 		//头文件前向声明:
 			当头文件A.hpp中定义了B.hpp文件,并且在B.hpp文件中又包含了A.hpp文件,当main.cpp文件包含了这两个其中一个文件,都会导致循环定义,最后冲突无法正确构建:

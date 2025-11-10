@@ -1,10 +1,11 @@
 #ifndef LOGER_H
 #define LOGER_H
 
+#include <iostream>
+#include <fstream>
+#include <initializer_list>
 #include "Tools.hpp"
 #include "Variables.hpp"
-#include <initializer_list>
-#include <fstream>
 
 namespace xyl
 {

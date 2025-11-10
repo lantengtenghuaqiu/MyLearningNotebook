@@ -1,12 +1,11 @@
 #ifndef Tools
 #define Tools
 
-// #include<cstdint>
-// #include<iostream>
+
 #include <fstream>
 #include<cstdlib>
+#include <cmath>
 #include "Constants.hpp"
-
 
 
 namespace xyl
@@ -97,8 +96,31 @@ namespace xyl
             return min + ((max - min) * random_double_normalized());
         }
         
+        template<typename T>
+        inline T abs(const T& val)
+        {
+            T temp = val;
+            if(temp<0.0)
+                temp *= -1;
+            return temp;
+        }
 
     }
+
+
+        namespace Render
+        {
+            template<typename T>
+            inline T linear_to_gamma(T linear_component)
+            {
+                if(linear_component > 0.0)
+                {
+                    return std::sqrt(linear_component);
+                }
+                return 0;
+            }
+
+        }
 
     unsigned int strlen(const char* str,unsigned int max);
 
