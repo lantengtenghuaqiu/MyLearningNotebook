@@ -16,7 +16,7 @@
 int main()
 {
     //�����ļ���:
-    std::ofstream file("ColorImageAntialiasing.ppm" , std::ios::binary|std::ios::out);
+    std::ofstream file("xxx.ppm" , std::ios::binary|std::ios::out);
 
     if(!file.is_open())
     {

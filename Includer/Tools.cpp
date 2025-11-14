@@ -3,7 +3,7 @@
 
 double xyl::math::DegToRad(const double &deg)
 {
-    return deg * xyl::consts::pi / 180.0;
+    return deg * (xyl::consts::pi / 180.0);
 }
 
 double xyl::math::random_double_normalized(void)

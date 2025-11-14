@@ -18,7 +18,7 @@
 int main()
 {
     //�����ļ���:
-    std::ofstream file("_9.5_GammaCorrection2.ppm" , std::ios::binary|std::ios::out);
+    std::ofstream file("xxx.ppm" , std::ios::binary|std::ios::out);
 
     if(!file.is_open())
     {

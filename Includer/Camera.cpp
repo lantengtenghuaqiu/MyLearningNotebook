@@ -129,11 +129,59 @@ void Camera::Render(std::ofstream &stream, const hittable_list &world) const
             g = xyl::Render::linear_to_gamma(result.v[1])* 255;
             b = xyl::Render::linear_to_gamma(result.v[2])* 255;
             
-            // xyl::log::DOLOGE({r,g,b});
+            // xyl::log::DOLOGE({this->lookat});
             // stream<<result;
             stream.write((const char *)(&r), 1);
             stream.write((const char *)(&g), 1);
             stream.write((const char *)(&b), 1);
         }
     }
+}
+
+
+
+Camera::Camera()
+{
+    this->lookfrom  = point3(0,0,0);
+    this->lookup    = point3(0,1,0);
+    this->lookat    = point3(0,0,-1);
+
+    this->fov = 90;
+
+}
+
+Camera::Camera(vec3 lookfrom, vec3 lookup, vec3 lookat, double fov)
+{
+    this->lookfrom = lookfrom;
+    this->lookup = lookup;
+    this->lookat = lookat;
+
+    this->fov = fov;
+
+}
+
+void Camera::Initialize()
+{
+
+
+    this->camera_center = lookfrom;
+    this->focal_length = (lookfrom - lookat).length();
+    this->theta = xyl::math::DegToRad(fov);
+    this->h = std::tan(theta/2.0);
+
+    this->viewport_height = 2.0 * h * focal_length;
+    this->viewport_width = viewport_height * (static_cast<double>(IMG_WIDTH) / IMG_HEIGHT);
+
+    this->w = normalize(lookfrom - lookat,VEC_CHECKER::e_vec);
+    this->u = normalize(cross(lookup , w),VEC_CHECKER::e_vec);
+    this->v = cross(w,u);
+
+    this->viewport_u = viewport_width * u;  
+    this->viewport_v = viewport_height * -v;
+
+    this->pixel_delta_u  = viewport_u / IMG_WIDTH;   
+    this->pixel_delta_v= viewport_v / IMG_HEIGHT;  
+
+    this->viewport_upper_left = camera_center - (focal_length * w) - viewport_u/2 - viewport_v/2;
+    this->pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 }

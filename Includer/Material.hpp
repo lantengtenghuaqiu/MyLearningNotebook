@@ -47,6 +47,6 @@ class Dielectic : public Material
     public:
         Dielectic(double refraction_index);
         bool scatter(const Ray& ray_in ,  const hit_record& hitInfo , color3& attenuation , Ray& scattered)const override;
-
+    static double reflectance(const double& cosine , const double& refraction_index);
 };
 #endif

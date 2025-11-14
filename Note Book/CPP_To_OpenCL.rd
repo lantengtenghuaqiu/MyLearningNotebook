@@ -197,13 +197,13 @@
 						struct is_same
 						{
 							static constexpr bool value = false;
-						}
+						};
 					偏特化:
 						template<typename T>
 						struc is_same<T,T>
 						{
 							static constexpr bool value = true;
-						}
+						};
 					当使用is_same<type1,type2> check;的时候,传入type1和type2如果相同会返回偏特化,则value为true,反之返回主模板false
 					实例:
 						class vec3;
@@ -301,8 +301,24 @@
 					}
 				};
 	
-		强枚举 enum class:
+		4.强枚举 enum class:
 
+		5.模板类继承:
+			对于基类,如果是一个模板类,则他的继承类需要在继承的时候声明类型:
+				template<typename T>
+				class point
+				{
+					T origin[3];
+				};
+				
+				template<typename T>
+				class vec3 : public point<T>
+				{
+					private:
+						T magnitude;
+						T direction[3];
+				};
+        
 
 
 	->#函数专栏#:
@@ -323,6 +339,15 @@
 				inline double random_double_normalized(void){}
 				其中函数参数中的void表示无参函数,是c++标准写法,与inline double random_double_normalized()等价
 
+		3.函数指针--请看指针栏
+			函数也有地址
+
+		4.C风格输出流:
+			输出指针地址占位符:
+				printf("%p" , &point);
+				printf("%d" , (int)val);
+				printf("%f" , (float)val);
+				printf("%s" , "abc");
 
 
 
@@ -414,7 +439,7 @@
 
 
 
-	->#修饰符(关键字)类专栏#:
+	->#修饰符(关键字)专栏#:
 		-const:
 			//const是一个常量修饰符,总的来说是承诺不能修改修饰的变量;
 			1.成员函数const:
@@ -497,7 +522,17 @@
 
 					
 	->#指针专栏#:
-		所谓指针,就是主动创建的一份内存空间,将地址传递给指针,让该指针操作该空间的内容.
+		-所谓指针,就是主动创建的一份内存空间,将地址传递给指针,让该指针操作该空间的内容.
+			指针的理解(地址理解):
+				int val=10; 
+				int * point = new int; 
+				point = &val; 
+				首先,指针初始化本身也占用一块内存地址,因此,指针本身也有地址一说 printf("%p\n",point); 
+				这里表示point指向的那块值的地址 printf("%p\n",&point); 
+				这里表示point指针自己的地址. printf("%d\n",*point); 
+				这里表示对指针指的那块地址的解引用,即获取该地址的值 printf("%p\n",*&num); 
+				这里表示先获取指针自身的地址,再对自身指针地址解引用,获得指针指向的那个地址,并不是解引用为值,最终表示的是val的地址
+
 		1.创建array需要用引用形式:
 			int *num = new int[3];
 
@@ -518,6 +553,7 @@
 				//如果要获取地址中的数据(需要进行类型转换):
 				int* result = (int*)num1;
 			void* 用于处理类型不确定性.一般用在函数传参的时候,保持通用属性,以及作为c和c++的接口
+
 		5.通过C语言跨过const,修改const char*的内容:
 			extern "C" void func(void* val , size_t len , char* afterVal)
 			{
@@ -538,7 +574,34 @@
 			float* number = (float*) calloc(uint length , sizof(float));
 				创建length长度,每份都为float大小的内存空间,因为calloc返回为void*所以需要用(float*)转换,才能将开辟的空间传递给number
 
-
+		7.函数指针:
+			首先,函数也有地址,可以使用输出流查看如:printf("%p" , func);或printf("%p" , &func);
+			其次,当想让函数成为参数可以使用函数指针或使用include<funcitional>库;
+				1.创建函数指针:
+					声明一个函数:
+						int function(int a, int b,...){return a+b;}
+					声明对应的函数指针:
+						int(*p_func)(int,int) = function;
+						这里需要注意,第一部分为返回值类型,第二部分为指针名称,第三部分为函数参数类型;
+						其返回类型,和参数类型需要一一对应;
+					使用:
+						printf("%d",p_func(1,2));即可输出函数中的逻辑,即1+2=3;
+			通过函数指针,使用函数作为参数:
+				方法1:
+					template<typename T>
+					T Sum_er(unsigned int index_variable , T val ,int(*func)(unsigned int,int))
+					{
+						return func(index_variable, val);
+					}
+					其中:int(*func)(unsigned int,int)就是函数指针,func是函数名,各部分与上相同,传入的函数需要与之对应
+					此外如果不加*:int(func)(unsigned int,int);也可以,这是c++的语法糖,会隐式转换.
+				方法2:
+					template<typename T>
+					T Sum_er(unsigned int index_variable , T val ,std::function<T(unsigned int,T)> func)
+					{
+						return func(index_variable, val);
+					}
+					该方法需要引入头文件include<funcitional>,std::function<T(unsigned int,T)> func的各部分也需要与上相同
 <<OpenCL>>:
     ->#简介#:
         ....
