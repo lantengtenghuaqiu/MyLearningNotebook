@@ -13,7 +13,7 @@ namespace xyl
             /* data */
             VEC_TYPE point3[3];
             Point3();
-            Point3(unsigned short x, unsigned short y , unsigned short z);
+            Point3(float x, float y , float z);
 
         };
         

@@ -159,6 +159,25 @@ CMake合集:
 
 		cmake -bulid <文件名> 构建cmake配置好的<文件名>(一般是build)文件,进行源文件和main文件以及链接头文件,生成可执行.exe文件
 		CMakeLists.txt Code:
+
+	-各参数代表含义:
+		${PROJECT_SOURCE_DIR} 包含project(...)的CmakeLists.txt文件所在位置;
+			${PROJECT_SOURCE_DIR}/../../X_Includer
+				可以表示${PROJECT_SOURCE_DIR}上层的上层中的X_Includer文件夹
+
+
+	-全局设置头文件include_directorie:
+		include_directorie(${PROJECT_SOURCE_DIR}/../../X_Includer)设置所有头文件都在该地址
+	-局部设置头文件target_include_directories:
+		target_include_directories(head1 PRIVATE ${PROJECT_SOURCE_DIR}/../../X_Includer )
+			这样在之后对于cpp文件或者库文件的引用的时候,可以在前声明对应的head
+				add_executable(myapp src/main.cpp) 
+
+		//指定编译版本
+		set(CMAKE_CXX_STANDARD 17)
+		//强制执行该编译版本
+		set(CMAKE_CXX_STANDARD_REQUIRE ON)
+
 		#配置生成位置
 		#${CMAKE_BINARY_DIR}是build文件夹,但build并不是固定名称,和一开始build cmake文件有关
 		set_target_properties(nodefine PROPERTIES

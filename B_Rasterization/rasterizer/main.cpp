@@ -1,10 +1,10 @@
 #include "Constants.hpp"
 #include "xyl_vector.hpp"
-// #define do_print
+#define do_print
 
 #ifdef do_print
 #include<stdio.h> 
-#define xprint_d(msg) printf("%d",msg);
+#define xprint_d(msg) printf("%f",msg);
 #else
 #define xprint_d(msg);
 #endif
@@ -29,8 +29,8 @@ int main()
     Canvas rasterizerCanvas;
     rasterizerCanvas.width = canvas_width;
     rasterizerCanvas.height = canvas_height;
-    // xprint_d(rasterizerCanvas.height)
-    xyl::coordinate::Point3 p0(3,5,0);
-
+    xyl::coordinate::Point3 p0(3.0f,5.0f,0.0f);
+    // xprint_d(p0.point3[0]);
+    
     return 0;
 }
