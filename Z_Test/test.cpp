@@ -3,6 +3,8 @@
 
 #include<cstdint>
 
+#include <vector>
+
 #ifdef _WIN32
     #include <conio.h>
     // #define WHILELOOPING
@@ -89,6 +91,13 @@ int main()
 
     #endif
 
+    int num = (5) * 30 + (10 * 30) + 2480 + 66.57 + 100 ;
+    printf("%d\n",num);
+
+
+    std::vector<int> i98(10);
+    // printf("%d\n" , i98.data());
+    printf("%d\n" , i98.size());
 
     std::cout<<"END!!!";
     return 0;
