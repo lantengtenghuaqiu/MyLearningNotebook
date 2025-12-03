@@ -1,5 +1,7 @@
 <<Vulkan>>
 	--#简介#:
+
+        Vulkan默认没有farme buffer,而是需要显示的创建一个"Swap chain"的infrastructure,
 	
 	--#目录#:
 
@@ -67,6 +69,73 @@
 
                 queueFamilyIndex是指定的队列簇中的某一个Queue,像是银行不同部门,比如VIP部门,前台业务部门,个人业务部门等等.
                 queueCount是队列簇中某一个Queue中类似窗口一样的东西,像是银行中有VIP1室,VIP2室,queueCount为1,则使用1个VIP室处理业务1,如果为2,则有两个VIP室处理业务,一个处理业务1一个处理业务2.
+
+
+
+        队列和队列族:
+            首先,是先有队列族再有队列.
+            队列族:
+                在Vulkan初始化队列的时候,会根据当前设备再初始化队列族,队列族是Vulkan对于GPU硬件的抽象.
+                在GPU中,被划分了很多功能单元,对于数据处理有专门的分工,比如,图形渲染单元,通用计算单元,DMA传输单元和呈现单元等...
+                队列族,不是GPU天生就有,而是Vulkan对GPU单元的重新映射,不是改变物理硬件的能力.
+                此外队列族是具有独立功能的,比如有图形队列族,计算队列族,传输队列族,呈现队列族等等.
+
+                代码体现:
+                    首先需要通过vkEnumeratePhysicalDevices()获得有多少个设备,和具体的设备都有那些,并保存到一个容器中vector<VkPhysicalDevice_T *> devices(device_cout);
+                    队列族是使用句柄获取一个特定的设备的句柄值,然后通过内核系统调用硬件的:
+                        VkPhysicalDevice vk_physical_device;    硬件句柄
+                        通过:
+                            for (const auto &device : devices)
+                            {
+                                VkPhysicalDeviceProperties physical_device_properties;
+                                vkGetPhysicalDeviceProperties(device, &physical_device_properties);
+                                
+                                VkPhysicalDeviceFeatures physical_device_feature;
+                                vkGetPhysicalDeviceFeatures(device, &physical_device_feature);
+
+                                if (physical_device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && physical_device_feature.geometryShader)
+                                {
+                                    vk_physical_devices = device;
+                                    break;
+                                }
+                            }
+                            通过在设备容器中遍历,然后比对具有相同功能的设备并获取它的句柄值.
+
+                        然后通过设备句柄获得有多少队列族:
+                            vkGetPhysicalDeviceQueueFamilyProperties(this->vk_physical_devices, &queue_family_count, nullptr);
+                        再通过一个容器保存这些具体的队列族:
+                            std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
+                            vkGetPhysicalDeviceQueueFamilyProperties(this->vk_physical_devices, &queue_family_count, queue_families.data());
+
+                        番外:
+                            在已经存储好所有队列族中的容器中查找,哪些可以进行渲染
+                                for (const auto &queue_family : queue_families)
+                                {
+                                    if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                                    {
+                                        graphic_family_index = i;
+                                    }
+                                    render_support = false;
+                                    vkGetPhysicalDeviceSurfaceSupportKHR(this->vk_physical_devices, i, this->vk_surfaceHKR, &render_support);
+                                    if (render_support)
+                                    {
+                                        render_family_index = i;
+                                    }
+
+                                    if (graphic_family_index > 0 && render_family_index > 0)
+                                    {
+                                        break;
+                                    }
+                                    i++;
+                                }
+
+                            graphic_family_index就是用来记录那队列族中的哪个可以进行VK_QUEUE_GRAPHICS_BIT功能的索引值.
+                            vkGetPhysicalDeviceSurfaceSupportKHR(...)是用来检测当前设备中的当前队列族能传递到窗口中
+
+
+            队列:
+                队列是程序员,将使用一些队列族,使用队列族的功能.
+                假如我创建 2 个队列,通过绑定,可以将这两个队列绑定图形队列族,这样这两个队列都可以执行图形队列族的功能.
 
 
 
