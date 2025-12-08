@@ -710,6 +710,7 @@
 				当初始化std::optional<int> number;之后它为空,调用number.has_value();返回false
 				当number = 1;赋予一个值之后,这个模板就为非空状态
 				此时调用number.has_value();返回true.
+			
 
 		->#数据结构专栏#
 			1.内存对齐:
