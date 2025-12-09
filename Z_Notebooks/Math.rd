@@ -105,3 +105,25 @@
         =|a x b| * (Π_(a x b)^0(c))
         =|a x b| * (((a x b)/|a x b|) · c)
         = (a x b) · c      //化简后得到
+
+    平面的确定:
+        两向量过一点但不共线,就可以确定一个平面
+
+    平面方程:
+        当有两个不共线向量OA和OB本身可以通过正六面体体积为0时组成一个平面.因此可以通过向量OM(x-x0,y-y0,z-z0)共面共面确定一个平面.   
+            平面的参数方程:
+                |x = x0 + λOAx + μOBx;
+                |y = y0 + λOAy + μOBy;
+                |z = z0 + λOAz + μOBz;
+            平面普通方程:
+                OM · (OA x OB) = 0 其中OM(x-x0),M是点.
+                展开:
+                    (Ax + By + Cz) - (Ax0 + By0 + Cz0) = 0;
+                    Ax + By + Cz + D = 0 其中D = -(Ax0 + By0 + Cz0)
+        
+    点到平面的距离:
+        Point(p0):M(x , y , z) ; O(x0 , y0 , z0)
+        Plane(Pl0):Ax + By + Cz - (Ax0 + By0 + Cz0) = 0
+
+
+        Distance
