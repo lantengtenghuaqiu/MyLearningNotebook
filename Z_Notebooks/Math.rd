@@ -727,5 +727,12 @@
                 (x,y) * (|a12 a22 a2|   |y|)
                          |a1  a2  a0|   |1|
 
+
+    ->#两点距离方程:
+                            |bx - ax|   |bx - ax|
+        distance(a,b) = sqrt(|by - ay| · |by - ay|)
+                            |bz - az|   |bz - az|
                 
+
+
 
