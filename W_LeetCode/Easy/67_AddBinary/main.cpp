@@ -26,7 +26,7 @@ int main()
     // 1 - 2 = 0;
 
     // 4 - 2 = 2
-    // 2 - 2 = 1
+    // 2 - 2 = 1    
     // 1 - 2 = 0
     //}
 
@@ -40,6 +40,10 @@ int main()
     size_t i = length;
     char * c = new char[length];
 
+    for(size_t i = 0 ; i < length ; i++)
+    {
+        
+    }
     // while(i<length)
     // {
     //     if(a[i] == '0' && b[i]==)

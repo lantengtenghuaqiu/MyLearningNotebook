@@ -15,15 +15,17 @@ GPU的大致组成.一般的,中心为GPU芯片,以NAVIDA的GPU举例,
                 特殊处理核心:计算三角函数,根号,除法
         除了GPC外GPU还包含控制器(NVLink,PCIe..),显卡缓存器,以太网接口等组成
 
-我讨厌自以为是自不量力的人,他们太容易自大和自恋,太容易忽视自己的问题.同样的他们不会考虑别人,没有站在其他角度看问题的能力.
-他们做事情轻浮,浅显,容易浮夸.对于自己本身并没有的条件会装瞎降低所谓的底线,还会夸夸其次的说自己有这些优点.
-让人看到就极其火大.
-我欣赏自敛的人,他们文静如雪花,洁白让人安神.只是感受到他们的存在就让我安心.
-我欣赏开朗的人,他们向外辐射能量,能带动人积极向上的情感,但是我喜欢的这样的人是有信仰的人,有明确目标的人,而不是简单的火,虽然带来热量,一阵风就让它的光摇摆不定,这种人太懦弱.
-我没办法压制住自己的怒火,我的精神洁癖越来越严重,我十分讨厌那群自利不在乎别人眼光的人,我十分讨厌那群明明不确定但是还要很确定的和你抬杠的人,我讨厌明明都不小了但是还做优质的事的人.
-我讨厌农名工,因为他们总是拿着为了家人说事,虽然没错但是他们大部分人都喜欢抽烟,喝酒并不会想办法提升自己,最后还会说自己还有什么办法,已经这样了;我不喜欢学习学不进去;从小就怎么学习现在哪会这些;
-我讨厌那群学习本身就不好的人还喜欢信誓旦旦的说,如果从新来一遍一定能好好学习;我讨厌那群说上学轻松的"大人",明明自己学习差的要死;
-我讨厌酗酒成性的人,讨厌在大街上抽烟的人.
-大多数时间我都是在努力压制自己,努力让自己喜欢周围的人,但是他们总是说出一些自以为是的话,真是恨不得抽他们两个大嘴巴子.
-我喜欢像是谢尔顿,虽然很怪,虽然是电视剧中的,但我喜欢这样的人,他有原则即便有一些形而上学,不懂得变通,但是他直白的性格和明确的目标让我十分仰慕他.
-我不喜欢那些讲历史的,明明从来没真实见过,通过自己的判断就能传播自己的观点.吵起来的时候跟菜集的那群吝啬鬼一样,让人恶心.
+(-(Ch / 2) x(CameraLeft'), -(Ch / 2) y(CameraLeft'), -(Ch / 2) z(CameraLeft')) + (-(Ch / 2) x(CameraUp'), -(Ch / 2) y(CameraUp'), -(Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
+(-(Ch / 2) x(CameraLeft'), -(Ch / 2) y(CameraLeft'), -(Ch / 2) z(CameraLeft')) + ((Ch / 2) x(CameraUp'), (Ch / 2) y(CameraUp'), (Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
+((Ch / 2) x(CameraLeft'), (Ch / 2) y(CameraLeft'), (Ch / 2) z(CameraLeft')) + (-(Ch / 2) x(CameraUp'), -(Ch / 2) y(CameraUp'), -(Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
+((Ch / 2) x(CameraLeft'), (Ch / 2) y(CameraLeft'), (Ch / 2) z(CameraLeft')) + ((Ch / 2) x(CameraUp'), (Ch / 2) y(CameraUp'), (Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
+
+((NearPlane/(z(OCenter) - OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) - OHeight / 2), (z(OCenter) - OLength))
+((NearPlane/(z(OCenter) - OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) + OHeight / 2), (z(OCenter) - OLength))
+((NearPlane/(z(OCenter) - OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) - OHeight / 2), (z(OCenter) - OLength))
+((NearPlane/(z(OCenter) - OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) + OHeight / 2), (z(OCenter) - OLength))
+
+((NearPlane/(z(OCenter) + OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) - OHeight / 2), (z(OCenter) + OLength))
+((NearPlane/(z(OCenter) + OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) + OHeight / 2), (z(OCenter) + OLength))
+((NearPlane/(z(OCenter) + OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) - OHeight / 2), (z(OCenter) + OLength))
+((NearPlane/(z(OCenter) + OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) + OHeight / 2), (z(OCenter) + OLength))
