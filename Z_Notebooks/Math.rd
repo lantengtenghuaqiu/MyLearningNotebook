@@ -589,20 +589,6 @@
         其中二次曲面中,部分二次柱面以及二次锥面等等,都是直纹面.
         此外椭球面因为有界,所以有界二次曲面没有直纹面.
 
-(-(Ch / 2) x(CameraLeft'), -(Ch / 2) y(CameraLeft'), -(Ch / 2) z(CameraLeft')) + (-(Ch / 2) x(CameraUp'), -(Ch / 2) y(CameraUp'), -(Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
-(-(Ch / 2) x(CameraLeft'), -(Ch / 2) y(CameraLeft'), -(Ch / 2) z(CameraLeft')) + ((Ch / 2) x(CameraUp'), (Ch / 2) y(CameraUp'), (Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
-((Ch / 2) x(CameraLeft'), (Ch / 2) y(CameraLeft'), (Ch / 2) z(CameraLeft')) + (-(Ch / 2) x(CameraUp'), -(Ch / 2) y(CameraUp'), -(Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
-((Ch / 2) x(CameraLeft'), (Ch / 2) y(CameraLeft'), (Ch / 2) z(CameraLeft')) + ((Ch / 2) x(CameraUp'), (Ch / 2) y(CameraUp'), (Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
-
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) - OHeight / 2), (z(OCenter) - OLength))
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) + OHeight / 2), (z(OCenter) - OLength))
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) - OHeight / 2), (z(OCenter) - OLength))
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) + OHeight / 2), (z(OCenter) - OLength))
-
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) - OHeight / 2), (z(OCenter) + OLength))
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) + OHeight / 2), (z(OCenter) + OLength))
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) - OHeight / 2), (z(OCenter) + OLength))
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) + OHeight / 2), (z(OCenter) + OLength))
 
     ->#坐标变换
         ->#平面仿射坐标变换:
