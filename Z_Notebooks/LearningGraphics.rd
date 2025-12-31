@@ -15,7 +15,12 @@
                 latency time 潜在的时间,延迟时间;
                 strategy 战略,策划行动 stragies(复述形式);
                 strategic 战略的策略的;
-                
+                instruction set architecture(ISA)
+                rigidly 严格地,坚硬地;
+                as outlined above 前文所说;
+                aggregate 集合的,合计的;合计,集合;
+                underlying 潜在的,在下面的;
+
         ->#管线架构:
             渲染管线并不是指物理层面上的一根管线,而是一种渲染数据的一种流程.
             而这样的流程分为很多种类型,并且可以通过指定好的规则(阶段),让硬件即"CPU"和"GPU",进行具体的生成和渲染.
@@ -193,122 +198,13 @@
         SIMD的全称为"Single Instruction Multiple Data",即单指令多数据,是一种并行处理的处理单元.
         核心逻辑为,控制单元发送一条指令,会有多个算术逻辑单元(ALU)同时执行该指令.
 
-        SIMT:
+        SIMT全称为"Single Instruction Multiple Thread"即单指令多线程,是NVIDIA用于处理并行运算对于SIMD的一种升级架构.
 
+    现代Shader程序使用统一Shader设计,即Vertex shader , Geometry shader和Tessellation shader都共享一个相同的Shader模型.
+    其中对于基本的类型32float 和 vector,vector只存在于shader code中,并不被硬件所支持.此外,除了32float,GPU硬件一般还支持32int和64float类型.
+    32float一般用于存储position,normal,matrix rows,colors以及texture coordinates
+    32int一般用于表示数量,索引,bitmask.
 
-
-    ->#变换
-        --简介:
-            光栅化渲染的步骤,是将一个模型的顶点通过矩阵变换一步步映射到屏幕上,即MVP(ModelToWorld - WorldToView - ViewToProjection).
-            首先对于光栅化的第一步,将需要的模型的顶点信息,从模型空间通过矩阵变换,转换到世界空间下.
-                ModelToWorld:
-                    在模型的移动中,其移动记录是由世界空间坐标进行记录,
-                    想象有一个在模型空间下的一个"世界空间领航员",他的位置信息和当前模型的世界空间下的位置相同,他位于模型空间下的(0,0,0)位置,
-                    注意一点,在模型刚进入这个世界空间下的时候,它们都是具有初始点的,而"世界空间领航员"的初始位置即(0,0,0),其他各顶点的位置保持原位置,
-                    所以在刚进入这个世界空间的时候,"世界空间领航员"的世界空间坐标和模型空间坐标都是(0,0,0),其他各顶点的位置依旧保持原位置.
-                    假如模型在(2,3,8)这个位置,则"世界空间领航员"的位置坐标也在(2,3,8),意义表示他领导所有模型顶点移动了(2,3,8)个单位位置
-                    当模型向z轴正方向移动10单位(0,0,10),则想象这个领航员带着所有的点都往前移动,更类似于,这个模型的所有模型空间下的坐标都跟着移动10单位,
-                    而这些模型顶点信息同样有世界空间坐标,记录员就是"世界空间领航员",顶点模型在模型空间永远都是原来的位置,
-                    站在世界空间下去看的时候,他的值会根据"世界空间领航员"的位置相加,从而变换位置
-                
-                    如果模型没有变动(发生旋转或平移)的情况下,映射到世界空间下的矩阵变换
-                        | 1 0 0 0 | * | p0_x p1_x p2_x p3_x | = | 1 -1 -1  1 |
-                        | 0 1 0 0 |   | p0_y p1_y p2_y p3_y |   | 1  1 -1 -1 |
-                        | 0 0 1 0 |   | p0_z p1_z p3_z p3_z |   | 1  1  1  1 |
-                        | 0 0 0 1 |   |   1    1    1    1  |   | 1  1  1  1 |
-
-                    如果模型发生了旋转或者偏移,假如扩大2倍,旋转了30度,之后进行移动3单位
-                    则计算相应的矩阵
-                    Scale Matrix:
-                        各轴均匀放大2倍
-                        | 1 0 0 0 | *  2  =  | 2 0 0 0 | 
-                        | 0 1 0 0 |          | 0 2 0 0 | 
-                        | 0 0 1 0 |          | 0 0 2 0 | 
-                        | 0 0 0 1 |          | 0 0 0 1 |          
-
-                    Rotate Matrix:
-                        按y轴旋转30度
-                        | 1 0 0 0 | * | cos(30) 0 -sin(30) 0 | = | cos(30) 0 -sin(30) 0 |
-                        | 0 1 0 0 |   |    0    1     0    0 |   |    0    1     0    0 |
-                        | 0 0 1 0 |   | sin(30) 0  cos(30) 0 |   | sin(30) 0  cos(30) 0 |
-                        | 0 0 0 1 |   |    0    0     0    1 |   |    0    0     0    1 |
-
-
-                    !!!注意!!!
-                        如:
-                            1:
-                                缩放
-                                | 2 0 0 0 | * | 1 | = | 2 |
-                                | 0 2 0 0 |   | 1 |   | 2 |
-                                | 0 0 2 0 |   | 1 |   | 2 |
-                                | 0 0 0 1 |   | 1 |   | 1 |
-                                平移
-                                | 1 0 0 5 | * | 2 | = | 7 |  
-                                | 0 1 0 3 |   | 2 |   | 5 |
-                                | 0 0 1 1 |   | 2 |   | 3 |
-                                | 0 0 0 1 |   | 1 |   | 1 |
-
-                            2:
-                                平移
-                                | 1 0 0 5 | * | 1 | = | 6 |  
-                                | 0 1 0 3 |   | 1 |   | 4 |
-                                | 0 0 1 1 |   | 1 |   | 2 |
-                                | 0 0 0 1 |   | 1 |   | 1 |
-                                缩放
-                                | 2 0 0 0 | * | 6 | = | 12 |
-                                | 0 2 0 0 |   | 4 |   |  8 |
-                                | 0 0 2 0 |   | 2 |   |  4 |
-                                | 0 0 0 1 |   | 1 |   |  1 |
-
-                            经计算,旋转和平移两种互换后的结果,不相同.
-
-                    现有点: p0(1,1,1,1);
-                    ModelToWorld:
-                        如果模型旋转90度,缩放2倍,平移(3,5,1)
-
-                WorldToCamera(WorldToView)
-                    
-                    获得Camera的位置点Pos(6,4,15),朝向点At(6,4,0),上方向轴(0,1,0)
-
-                    CameraAxis: CameraDir       normalize(Pos - At) =       (0,0,1)
-                                CameraUp                                    (0,1,0)
-                                CameraRight     (CameraUp x CameraDir) =    (1,0,0)
-
-                    Camera Rotation Matrix:  |   Dir.x    Dir.y    Dir.z  0 |
-                                            |    Up.x     Up.y     Up.z  0 |
-                                            | Right.x  Right.y  Right.z  0 |
-                                            |       0        0        0  1 |
-
-                    Camera Translate Matrix: | 1  0  0  -Pos.x |
-                                            | 0  1  0  -Pos.y |
-                                            | 0  1  0  -Pos.z |
-                                            | 0  0  0       1 |
-
-                    进行转换:
-                                相机平移矩阵 * 相机旋转矩阵 * 世界空间坐标
-            
-                CameraToProject(ViewToProjection):
-                    相机空间的投影变换,第一步需要确定好相机裁切盒:
-                        相机的X轴方向3D空间下的裁切范围 [Left , Right]
-                        相机的Y轴方向3D空间下的裁切范围 [Bottom , Top]
-                        相机的Z轴方向3D空间下的裁切范围 [Near , Far]
-                    如果超过这个范围的位置就需要被裁切掉.
-                    
-                    相机的缩放和平移:
-                        因为NDC所以需要将各轴的最大位置信息缩放到[-1,1]之间
-                            -1 = Kx * Left + Bx;
-                            1 = Kx * Right + Bx;
-                        通过线性组合解方程可以得到
-                            Kx = 2 / (Left-Right)   Bx = - (Left + Right) / (Left - Right) 
-                            Ky = 2 / (Top-Bottom)   By = - (Top+Bottom) / (Top-Bottom) 
-                            Kz = 2 / (Far-Near)     Bz = - (Far+Near) / (Far-Near) 
-                        组成正交投影矩阵:
-                            | 2/(Left-Right)    0               0               - (Left + Right) / (Left - Right)  |
-                            | 0                 2/(Top-Bottom)  0               - (Top+Bottom) / (Top-Bottom)      |
-                            | 0                 0               2 / (Far-Near)  - (Far+Near) / (Far-Near)          |
-                            | 0                 0               0                   1                              |
-
-
-
-            games101变换:
-                
+    underlying virtual machine(底层虚拟机),是GPU用于执行着色器程序而构建的抽象执行环境.如VMware这类系统级虚拟机，而是专门服务于着色器代码的轻量级虚拟执行层。
+    因为不同的硬件厂商(AMD,NVIDIA,Intel...)的硬件架构都存在差异,所以满足HLSL或GLSL这样的着色器语言可以跨硬件使用,则抽象了一层翻译成硬件可适配的虚拟环境.
+    每一个可编程的Shader都包含uniform 和 varying两种输入的数据类型,他们被分为这样的硬件层原因是因为硬件上有constant register用给uniform,和varying register用给varying的两种寄存器.
