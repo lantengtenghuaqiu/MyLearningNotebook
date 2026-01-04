@@ -24,7 +24,7 @@ int main()
 
     GLFWwindow * window = glfwCreateWindow(1280,720,"Learning GLFW",nullptr ,nullptr);
 
-    if(!window)
+    if(window == NULL)
     {
         printf("%s" , "wrong");
         glfwTerminate();

@@ -176,3 +176,166 @@ games101变换
     |       cos(β)cos(γ)                    -cos(β)sin(γ)                       sin(β)  |
     |cos(α)sin(γ)+sin(α)sin(β)cos(γ)     cos(α)cos(γ)-sin(α)sin(β)cos(γ)   -sin(α)cos(β)|
     |sin(α)sin(γ)-cos(α)sin(β)cos(γ)     sin(α)cos(γ)+cos(α)sin(β)sin(γ)    cos(α)cos(β)|
+
+
+26/1/1
+    microcode 微码;微指令码;
+    emulate 仿真;效仿;
+    vendor 商贩;
+    IHVs Independent Hardware Vendors;
+    Low-overhead 低开销;
+    well-defined 明确定义的
+    prepend 预谋;预先考虑;
+    pretend 假装;
+    morphing 变形;
+    morph 形态;(使)图形变换;改变,变化;
+    deform 改变外形;损坏外形;
+    terminology 术语;专用术语
+    quadrilateral 四边形的;四边形;
+    elaborate 复杂的;详尽的;详细说明
+    practitioner 从业者;实践者;
+    preserve 保持;维护;保护;
+    notation 符号;用于表示的一种符号/标记;
+    denote A denote somthing,用于表示,A表示/代表着一种东西/符号/标记;
+    A dnoting points and directions : A代表着点和方向;
+    throughout 副词,表示某一个东西/事物,对于另一个东西/事物,从始至终,贯穿着一个整体
+    concatenation 名词,表示连接;
+    noncommutativity 表示没有交换属性;
+
+    早期shader不支持流控制(条件控制),并且shader程序是由驱动供应商在云端(供应商端)编译成微指令代码.并且缺少一些运算函数,对vertex shader和pixel shader的控制并不完全.
+    直到2002年DirectX9.0的发布,ShaderModel的2.0大大提高了对shader的控制能力,以及功能函数的包含.
+    但是该时期只有Static Flow Control,缺少Dynamic Flow Contorl,直到高级着色器语言的出现(微软和NVIDIA开发的HLSL和OpenGL开发的GLSL),在2004年随着Shader Model 3.0的问世才开始出现动态流控制. 
+
+        Shader Model:
+            Shader Model是微软为DirectX图形API制定的图形API着色器编程规范.
+            Shader Model 3.0和Shader Model 4.0是两个关键的迭代版本:
+            Shader Model 3.0:
+                支持了顶点着色器(Vertex Shader)和像素着色器(Pixel Shader),
+                最大支持512条VertexShader指令 和 512条PixelShader指令.
+                仅支持基础标量计算/向量运算
+            Shader Model 4.0:
+                除了Vertex Shaer和Pixel Shader,新增支持Geometry Shader;
+                解除指令数量限制,几乎没有硬件限制.
+                并且支持Integer,位于等运算运算
+                (SM 4.0 对应OpenGL 3.30)
+            Shader Model 5.0(对应Direct 11):
+                新增支持Tessellation ShaderShader(OpenGL 4.0)和Compute Shader(OpenGL 4.3).
+
+    之后为应对CPU性能瓶颈,DirectX开发了Dirext 12;Appel开发了Metal;而AMD和Khronos Group开发了Vulkan在2016;
+    Vulkan使用了一种新的高级中间语言(SPIR-V),同时可以被Shader Representation和General GPU Compute使用.
+        SPIR-V:
+            标准化二进制中间表示格式,用于处理图形着色器和计算内核的跨平台跨API的表达.
+            应用程序必须将着色器程序编译成SPIR-V二进制块才可以被GPU处理.
+            SPIR-V再被Vulkan驱动编译成GPU硬件指令.
+            它的核心定位是"连接高级着色器语言(GLSL/HLSL)与GPU硬件指令集的翻译桥梁,避免直接暴露硬件细节.
+
+    3.5 The Vertex Shader Stage:
+        (在Application Satge,会将数据读取,之后在Gemetry Stage阶段的会有Input Assembler对上一阶段获取数据进行进一步读取和加工,将数据(position/color)转换成vertexs和primitives并创建成三角形组,发送给管线中)
+        (Input Assembler三角形分组原理:
+            1.对于顶点数据e0,e1,e2,e3,e4,e5
+            2.Inpute会将顶点数据中的Position和Color等创建为Vertex(v1,v2,v3,v4,v5)
+            3.再将这些Vertex组再加工为三角形:
+                1.将顶点分组为[v0,v1,v2] [v3,v4,v5]形成两个三角形结构.
+        
+        )
+        这是Functional Pipeline(可编程)的第一个阶段,也是第一个可以由Programmer直接控制的阶段,处于Geometry阶段.值得注意的是,一些数据的加工是在该阶段之前.在DirectX中被称为input assembler,一些数据流可以被汇集在一起,组成一组vertexs和primitives并传入管线中.
+        Input Assembler会把顶点转换成三角形组,该阶段不会进行三角形插值计算,只分组.
+        之后这组被加工好的模型可以被Instancing成实例.进行多次使用.
+
+    3.6 The Tessellation Stage:
+        是一种曲面细分技术,可以根据模型实时生成新顶点,生成更多的三角形,用于高效实现传统LOD的方法,改变了LOD通过改变低中高模的方法,通过距离可以改变模型的三角形面数,增加曲面细节.
+        Tessellation技术和UE中的Nanite的区别是,Tessellation是可控制的,适合各种静态或动态的物体.对模型数据可以是中低高模,存储量灵活.过渡效果较Nanite差.
+        而Nanite只适合静态物体,对已有的顶点进行缩减,不生成新顶点.因此一般对于高模会使用,数据存储量大,过渡效果无缝衔接.
+        Tessellation Shader被DirectX分为:
+            1.Hull Shader
+            2.Tessellator
+            3.Domain Shader
+    3.7 Geometry Shader Stage:
+
+
+
+    3.8 Pixel Shader Stage:
+        在Pixel Shder中做Phong光照模型或者其他效果的时候,
+        其实是在对光栅化后的一张2维平面,
+        通过buffer中存储的数据进行计算的.
+
+    4.Transform
+        4.1.1 Translation:
+            从一个位置到另一个位置的变化(改变原点位置).
+            //GeoGebra:
+                CUBE:
+                    LDF=(x(C) - width / 2, y(C) - height / 2, z(C) - depth / 2)
+                    LUF=(x(C) - width / 2, y(C) + height / 2, z(C) - depth / 2)
+                    LDN=(x(C) - width / 2, y(C) - height / 2, z(C) + depth / 2)
+                    LUN=(x(C) - width / 2, y(C) + height / 2, z(C) + depth / 2)
+
+                    RDF=(x(C) + width / 2, y(C) - height / 2, z(C) - depth / 2)
+                    RUF=(x(C) + width / 2, y(C) + height / 2, z(C) - depth / 2)
+                    RDN=(x(C) + width / 2, y(C) - height / 2, z(C) + depth / 2)
+                    RUN=(x(C) + width / 2, y(C) + height / 2, z(C) + depth / 2)
+            对于平移矩阵,它的逆矩阵T^-1 (t)= T(-t); 
+            对于变换顺序:
+                TRS;
+                Scale Transform(尤其是非均匀缩放)在Rotation Transform之后会导致斜切形变;
+
+            对于逆变换需要:
+                (TRS)^-1 = S^-1 * (R^T)^-1 * T^-1
+        4.1.6 Rigid-Body Transform
+            表示无形变(No scaling or shearing,only rotating and translating)的变换.
+
+        Camera
+            Camera Coordinates:
+                [Up,x1',y1',z1'] 
+                [Left,x2',y2',z2'] 
+                [Dir,x3',y3',z3']
+            将M1的坐标转换到Camera坐标系下:
+                M1'= (M1_x*x1' , M1_x*y1' , M1_z1') + (M_y*x2' , M_y*y2' , M1_z*z2') + (M_z*x3' , M_z*y3' , M_z*z3') + O;
+                   = ((M1_x*x1')+(M1_y*x2)+(M1_z*x3) , (M1_x*y1) + (M1_y*y2) + (M1_z*y2) , (M1_z*z1 + M1_z*z2 + M1_z*z3)) + O;
+            FOV;
+            Orthogonality:
+                LDN=(x(Camera)-((Width)/(2)),y(Camera)-((Heigh)/(2)),NearPlane)
+                LUN=(x(Camera)-((Width)/(2)),y(Camera)+((Heigh)/(2)),NearPlane)
+                RDN=(x(Camera)+((Width)/(2)),y(Camera)-((Heigh)/(2)),NearPlane)
+                RUN=(x(Camera)+((Width)/(2)),y(Camera)+((Heigh)/(2)),NearPlane)
+
+                LDF=(x(Camera)-((Width)/(2)),y(Camera)-((Heigh)/(2)),FarPlane)
+                LUF=(x(Camera)-((Width)/(2)),y(Camera)+((Heigh)/(2)),FarPlane)
+                RDF=(x(Camera)+((Width)/(2)),y(Camera)-((Heigh)/(2)),FarPlane)
+                RUF=(x(Camera)+((Width)/(2)),y(Camera)+((Heigh)/(2)),FarPlane)
+
+            Perspevtity:
+                无变换:
+                    LDN=(-tan(FOV) NearPlane,-tan(FOV) NearPlane,NearPlane)
+                    LUN=(-tan(FOV) NearPlane,tan(FOV) NearPlane,NearPlane)
+                    RDN=(tan(FOV) NearPlane,-tan(FOV) NearPlane,NearPlane)
+                    RUN=(tan(FOV) NearPlane,tan(FOV) NearPlane,NearPlane)
+
+                    LDF=(-tan(FOV) FarPlane,-tan(FOV) FarPlane,FarPlane)
+                    LUF=(-tan(FOV) FarPlane,tan(FOV) FarPlane,FarPlane)
+                    RDF=(tan(FOV) FarPlane,-tan(FOV) FarPlane,FarPlane)
+                    RUF=(tan(FOV) FarPlane,tan(FOV) FarPlane,FarPlane)
+                坐标系变换到Camera下:
+                    LDN=((((-tan(FOV) NearPlane)*x(cameraLeft)) + (-tan(FOV) NearPlane*x(cameraUp)) + (NearPlane*x(cameraDir))),(((-tan(FOV) NearPlane)*y(cameraLeft)) + (-tan(FOV) NearPlane*y(cameraUp)) + (NearPlane*y(cameraDir))),(((-tan(FOV) NearPlane)*z(cameraLeft)) + (-tan(FOV) NearPlane*z(cameraUp)) + (NearPlane*z(cameraDir))))+Camera
+                    LUN=((((-tan(FOV) NearPlane)*x(cameraLeft)) + (tan(FOV) NearPlane*x(cameraUp)) + (NearPlane*x(cameraDir))),(((-tan(FOV) NearPlane)*y(cameraLeft)) + (tan(FOV) NearPlane*y(cameraUp)) + (NearPlane*y(cameraDir))),(((-tan(FOV) NearPlane)*z(cameraLeft)) + (tan(FOV) NearPlane*z(cameraUp)) + (NearPlane*z(cameraDir))))+Camera
+                    RDN=((((tan(FOV) NearPlane)*x(cameraLeft)) + (-tan(FOV) NearPlane*x(cameraUp)) + (NearPlane*x(cameraDir))),(((tan(FOV) NearPlane)*y(cameraLeft)) + (-tan(FOV) NearPlane*y(cameraUp)) + (NearPlane*y(cameraDir))),(((tan(FOV) NearPlane)*z(cameraLeft)) + (-tan(FOV) NearPlane*z(cameraUp)) + (NearPlane*z(cameraDir))))+Camera
+                    RUN=((((tan(FOV) NearPlane)*x(cameraLeft)) + (tan(FOV) NearPlane*x(cameraUp)) + (NearPlane*x(cameraDir))),(((tan(FOV) NearPlane)*y(cameraLeft)) + (tan(FOV) NearPlane*y(cameraUp)) + (NearPlane*y(cameraDir))),(((tan(FOV) NearPlane)*z(cameraLeft)) + (tan(FOV) NearPlane*z(cameraUp)) + (NearPlane*z(cameraDir))))+Camera
+
+                    LDF=((((-tan(FOV) FarPlane)*x(cameraLeft)) + (-tan(FOV) FarPlane*x(cameraUp)) + (FarPlane*x(cameraDir))),(((-tan(FOV) FarPlane)*y(cameraLeft)) + (-tan(FOV) FarPlane*y(cameraUp)) + (FarPlane*y(cameraDir))),(((-tan(FOV) FarPlane)*z(cameraLeft)) + (-tan(FOV) FarPlane*z(cameraUp)) + (FarPlane*z(cameraDir))))+Camera
+                    LUF=((((-tan(FOV) FarPlane)*x(cameraLeft)) + (tan(FOV) FarPlane*x(cameraUp)) + (FarPlane*x(cameraDir))),(((-tan(FOV) FarPlane)*y(cameraLeft)) + (tan(FOV) FarPlane*y(cameraUp)) + (FarPlane*y(cameraDir))),(((-tan(FOV) FarPlane)*z(cameraLeft)) + (tan(FOV) FarPlane*z(cameraUp)) + (FarPlane*z(cameraDir))))+Camera
+                    RDF=((((tan(FOV) FarPlane)*x(cameraLeft)) + (-tan(FOV) FarPlane*x(cameraUp)) + (FarPlane*x(cameraDir))),(((tan(FOV) FarPlane)*y(cameraLeft)) + (-tan(FOV) FarPlane*y(cameraUp)) + (FarPlane*y(cameraDir))),(((tan(FOV) FarPlane)*z(cameraLeft)) + (-tan(FOV) FarPlane*z(cameraUp)) + (FarPlane*z(cameraDir))))+Camera
+                    RUF=((((tan(FOV) FarPlane)*x(cameraLeft)) + (tan(FOV) FarPlane*x(cameraUp)) + (FarPlane*x(cameraDir))),(((tan(FOV) FarPlane)*y(cameraLeft)) + (tan(FOV) FarPlane*y(cameraUp)) + (FarPlane*y(cameraDir))),(((tan(FOV) FarPlane)*z(cameraLeft)) + (tan(FOV) FarPlane*z(cameraUp)) + (FarPlane*z(cameraDir))))+Camera
+
+                组点:
+                    L1={RUN,RDN,LDN,LUN}
+                    L2={LUN,LUF,LDF,LDN}
+                    L3={LDN,LDF,RDF,RDN}
+                    L4={RUN,LUN,LUF,RUF}
+                    L5={RDN,RDF,RUF,RUN}
+                视锥体:
+                    q1=Polygon(L1)
+                    q2=Polygon(L2)
+                    q3=Polygon(L3)
+                    q4=Polygon(L4)
+                    q5=Polygon(L5)
+
+
