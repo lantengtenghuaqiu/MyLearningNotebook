@@ -86,7 +86,7 @@
 						g++ <main>.cpp <A>.cpp -D <F1> -o <main>.exe
 			
 			
-			-#库文件生成:
+			->#库文件生成:
 				MinGW:
 					1.MinGW下编译生成静态库:
 						首先要准备头文件<stlb>.hpp和对应的实现文件<stlb>.cpp
@@ -129,7 +129,48 @@
 							g++ <folder/main>.cpp -I <Includer_Path> -L <Library_Path> -l <stlb> -o <folder/main>.exe
 												//其中-L.中的.表示当前目录.
 												//如果不在当前目录可以使用-L </folder/stlb> 表示在当前目录下的folder文件夹内
-										
+			->#终端构建的完整流程:
+				->#文件目录:
+					Name:
+						includes:
+							head1.hpp
+							head2.hpp
+						src:
+							head1.cpp
+							head2.cpp
+						lib:
+							libhead1.a
+							libhead2.a
+						project:
+							main.cpp
+				->#详解:
+					main.cpp中包含并调用了head1.hpp和head2.hpp中的方法.
+					(但是头文件只是函数的引用不包含方法,因此他只是一个目录,真正的实现方法在src中的cpp文件中)
+					因此首先需要构建两个头文件成二进制文件:
+						Mac下:
+							1.构建头文件:
+								构建头文件1:
+									../include>clang++ -E head1.cpp -o head1.ii 这一步将文本编译为 预编译文件
+									../include>clang++ -S head1.ii -o head1.s 这一步为将预编译文件编译为 汇编文件
+									../include>clang++ -c head1.s -o head1.obj 这一步是将汇编文件编译为 二进制文件 | 等待链接
+									../include>ar rcs libhead1.a head1.obj 这一步是将二进制文件编译为 静态库.a文件
+								构建头文件2:
+									../include>clang++ -E head2.cpp -o head2.ii 这一步将文本编译为 预编译文件
+									../include>clang++ -S head2.ii -o head2.s 这一步为将预编译文件编译为 汇编文件
+									../include>clang++ -c head2.s -o head2.obj 这一步是将汇编文件编译为 二进制文件 | 等待链接
+									../include>ar rcs libhead2.a head2.obj 这一步是将二进制文件编译为 静态库.a文件
+
+							2.构建main文件:
+								../include>clang++ -E main.cpp -o main.ii 这一步将文本编译为 预编译文件
+								../include>clang++ -S main.ii -o main.s 这一步为将预编译文件编译为 汇编文件
+								../include>clang++ -c main.s -o main.obj 这一步是将汇编文件编译为 二进制文件 | 等待链接
+
+							3.链接二进制文件:
+								../include>clang++ main.obj -I ../includes -L ../lib -lhead1 -lhead2 -o main
+								(这里需要注意,因为链接库文件,因此不需要在链接时添加对应的头文件的obj文件)
+
+								如果不链接库文件
+									../include>clang++ main.obj ../src/head1.obj ../src/head2.obj -I ../includes -o main
 
 		->#线程专栏#:
 			-#对于c++的线程休眠:

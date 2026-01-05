@@ -199,8 +199,12 @@
                     使用glGenBuffer(count , &VBO);生成buffer ID
                     传递给glBindBuffer(Data type , buffer ID)进行绑定缓冲区,设置顶点缓冲区.(这里还不是传递数据给GPU的,这里是告诉GPU申请的现存区域).
                     glBufferData(Data type , sizeof vertices data , vertices data , Draw type)是进行将顶点传递给绑定的缓冲区,进行数据存储(这里是将数据传递到显存中的阶段).
-
-                    
+                        Draw type有三种形式,根据功能区分
+                            GL_DYNAMIC_DRAW:是指一些数据平凡替换的数据,如角色动画,移动的物体的顶点数据等.在此进行标记,会存储到可读写的快速存储区;
+                            GL_STATIC_DRAW:是指那些静态数据,比如不动的桌子椅子等.会存储到高速显存中;
+                            GL_STREAM_DRAW:是一些存在时间较短,并且会销毁的数据,比如粒子系统.会存储到临时显存中;
+                            
+                        
                     LearnOpen中讲的VBO(vertex buffer objects)就是buffer ID.是一个int类型数据.
 
                 这个阶段是将数据整合,并传递给GPU,存储到缓存中.(并不是Draw Call)
