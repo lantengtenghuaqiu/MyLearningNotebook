@@ -53,10 +53,14 @@ void InitGlad(GLint width , GLint height){
 
 float vertices[]={
     -1.0,-2.0,0.0,
-    -2.0,0.5,0.0,
+    0.5,0.5,0.0,
     2.0,0.5,0.0
 };
-
+float vertices2[]={
+    -1.0,-1.0,0.0,
+    0.5,1.0,0.0,
+    2.0,0.5,0.0
+};
 // void SetVertexArrayBuffer(int size , unsigned int &bufferID, void * data,GLenum darw_type){
 //     glGenBuffers(size,&bufferID);
 //     glBindBuffer(GL_ARRAY_BUFFER,bufferID);
@@ -124,12 +128,61 @@ int main() {
 
     InitGlad(width,height);
 
+    GLint success;
+
+
+
     //创建数据缓冲区
+    //用于记录
+    unsigned int vertex_arribute_ids[2];
+    glGenVertexArrays(2,vertex_arribute_ids);
+
+
+
+    
     //1.创建vertex缓冲区
-    unsigned int vertex_buffer_id_1;
-    glGenBuffers(1,&vertex_buffer_id_1);
-    glBindBuffer(GL_ARRAY_BUFFER,vertex_buffer_id_1);
+    unsigned int vertex_buffer_ids[2];
+    glGenBuffers(2,vertex_buffer_ids);
+    glBindBuffer(GL_ARRAY_BUFFER,vertex_buffer_ids[0]);
     glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
+
+    glBindVertexArray(vertex_arribute_ids[0]);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+    /**
+     *  逻辑和底层原理:
+     *      告诉GPU如何从当前绑定的VBO中,读取数据,并传递给着色器程序绑定的vertex中的值.
+     * 
+     *  参数一:这个跟Vertex Shader中的location index有关,这里的0表示对应的是location 0
+     *  参数二:对应Location index的类型,如vec 则对应数量为3,如果是vec4 则对应4
+     *  参数三:对应location index中值类型,这里选择的是float类型
+     *  参数四:对传入的location index数据是否归一化处理
+     *  参数五:对应的location每组值的跨度,这里是3则对应012是一组,然后下一组的索引会从3开始数三个345.....
+     *  参数六:指针,从哪里开始,这里0表示从第一个值开始.
+     */
+    glEnableVertexAttribArray(0);
+
+
+
+
+    glBindBuffer(GL_ARRAY_BUFFER,vertex_buffer_ids[1]);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(vertices2),vertices2,GL_STATIC_DRAW);
+
+    glBindVertexArray(vertex_arribute_ids[1]);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+    /**
+     *  逻辑和底层原理:
+     *      告诉GPU如何从当前绑定的VBO中,读取数据,并传递给着色器程序绑定的vertex中的值.
+     * 
+     *  参数一:这个跟Vertex Shader中的location index有关,这里的0表示对应的是location 0
+     *  参数二:对应Location index的类型,如vec 则对应数量为3,如果是vec4 则对应4
+     *  参数三:对应location index中值类型,这里选择的是float类型
+     *  参数四:对传入的location index数据是否归一化处理
+     *  参数五:对应的location每组值的跨度,这里是3则对应012是一组,然后下一组的索引会从3开始数三个345.....
+     *  参数六:指针,从哪里开始,这里0表示从第一个值开始.
+     */
+    glEnableVertexAttribArray(0);
+
+
     //2.加载vertex shader
     char * vertex_shader = ReadFile("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\HelloOpenGL\\hello_opengl.vertex");
     //3.配置vertex shader
@@ -138,6 +191,10 @@ int main() {
     //4.编译vertex shader
     glCompileShader(vertex_shader_id);  //glCompileShader()是将ID对应的着色器源码在cpu端使用GPU驱动程序编译成GPU能看懂的二进制指令(中间码/机器码)
 
+    glGetShaderiv(vertex_shader_id,GL_COMPILE_STATUS,&success);
+    if(!success){
+        printwrong;
+    }
 
     //5.加载fragment shader
     char * fragment_shader = ReadFile("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\HelloOpenGL\\hello_opengl.fragment");
@@ -148,20 +205,30 @@ int main() {
     //7.加载fragment shader
     glCompileShader(fragment_shader_id);
 
+    glGetShaderiv(fragment_shader_id,GL_COMPILE_STATUS,&success);
+    if(!success){
+        printwrong;
+    }
 
     //8.链接所有shader
     unsigned int shader_program_id = glCreateProgram();
-    glAttachShader(shader_program_id , vertex_buffer_id_1);
+    glAttachShader(shader_program_id , vertex_shader_id);
     glAttachShader(shader_program_id , fragment_shader_id);
     glLinkProgram(shader_program_id);
     
+    glGetProgramiv(shader_program_id,GL_LINK_STATUS,&success);
+    if(!success){
+        printwrong;
+    }
+
     //9.因为编译并链接完成,则vertex shader和fragment shader都不需要了,则需要删除.
     delete(vertex_shader);
     delete(fragment_shader);
-    glDeleteShader(vertex_buffer_id_1);
+    glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
     glUseProgram(shader_program_id);
+
 
 
     glfwSetKeyCallback(window , callback_keyboard);
@@ -170,16 +237,15 @@ int main() {
     glClearStencil(0.0f);
     
     while(!glfwWindowShouldClose(window)){
-        
         glClear(GL_COLOR_BUFFER_BIT);
         
-
-
-
-        glfwSwapBuffers(window);
+        glUseProgram(shader_program_id);
+        glBindVertexArray(vertex_arribute_ids[1]);
+        glDrawArrays(GL_TRIANGLES,0,3);
+        
+        glfwSwapBuffers(window);//如果他在绘制三角形前面会导致,当glClear()完成后,背景内容会被Swap,但是还没绘制,等之后绘制之后,没有Swap就会导致绘制的图形不显示.
         // EscapeWindow();
         glfwPollEvents();
-        
     }
     //销毁窗口
     glfwDestroyWindow(window);

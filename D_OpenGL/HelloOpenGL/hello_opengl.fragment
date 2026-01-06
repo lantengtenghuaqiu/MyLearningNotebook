@@ -1,5 +1,5 @@
-#version 460 core
-output vec4 fragment_color;
+#version 330 core
+out vec4 fragment_color;
 
 void main()
 {
