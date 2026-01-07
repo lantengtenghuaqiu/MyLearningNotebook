@@ -5,7 +5,7 @@
         deprecated function 弃用的函数
         immediate 表示立刻的,一种十分短的时间出现的.
         specific 表示形容某个东西是具体的确切的
-
+        isolate 与世隔绝的;独立的;使..独立;独立
 
     ->#编译架构:
         首先,需要准备环境:
@@ -74,10 +74,13 @@
                     glfwWindowHint(GLFW_OPENGL_PROFILE , GLFW_OPENGL_CORE_PROFILE);     指定OpenGL的兼容模式
                                                                                         GLFW_OPENGL_CORE_PROFILE:为核心模式,表示强制禁用3.0前的函数.
                                                                                         GLFW_OPENGL_COMPAT_PROFILE:兼容模式,表示保留老旧函数
+                    GLFWwindow * window=glfwCreateWindow(width,height,"title",nullptr,nullptr);
+                    glfwMakeContextCurrent(window);
+            
             第三步
                 创建主循环:
                     创建事件:
-                        glfwSetKeyCallback(GLFWwindow * window , callback function);
+                    glfwSetKeyCallback(GLFWwindow * window , callback function);
                     while(!glfwWindowShouldClose(GLFWwindow*window)){
                         glfwPollEvents();
                         glfwSwapBuffers(window);//可选
@@ -97,16 +100,18 @@
                                 因此,当GPU对一个项目进行计算时,渲染完成的内容不直接写入到前台缓冲区中,而是写入到后台显示缓冲区中.
                                 当完全渲染完毕之后再将整个后台显示缓冲区的内容交给前台缓冲区,显示器在该帧读取前台缓冲区的内容,就会显示完整的渲染画面,而不是割裂的画面.
 
+        
         ->#配置GLAD:
             第四步
-                glfwMakeContextCurrent(window);
-
+                ...glfwMakeContextCurrent(...);
                 if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
                     printwrong;
                     glViewport(..,..,..,..);
                     return -1;
                 }
                 glClearColor(0.2f,0.2f,0.2f,1.0f);
+                glClearDepth(0.0f);
+                glClearStencil(0.0f);
 
                 while(...){
                 glClear(...);
@@ -213,7 +218,53 @@
                 首先进行
 
 
+    ->#理解GLSL:
+        glsl作为OpenGL的着色器语言,主要包含vertex shader和fragment shader.
+        shader之间是isolated的,之间的交流只有output到input.开头都包含版本信息#version version_number core
 
+        Vertex Shader:
+            #version version_number core
+            layerout (location = 0) in type vertex_value_1;
+            layerout (location = 1) in type vertex_value_2;
+
+            out type deliver_to_fragment_date;
+
+            uniform type uniform_name;
+
+            int main(){
+                gl_Position = vertex_value_n;
+                deliver_to_fragment_date = processing_value;
+            }
+            layerout (location = 0) 他有最大上限数量,由硬件决定,OpenGL guaranteed至少16 4-component vertex attributes
+            ->#Max Vertex Attributes:
+                最大数量可以通过glGetInterv(GL_MAX_VERTER_ATTRIBS , &int_parameter)查看.
+            gl_Position 是固定的内置输出变量.
+
+        Fragment Shader:
+            #version 460 core
+            out type out_fragment_date;
+
+            in type input_date_from_vertex_shader
+
+            int main(){
+                processing...
+                    input_date_from_vertex_shader
+                    other date
+                .........
+
+                out_fragment_date = Processed_vec4_date;
+            }
+
+
+        其中in type in_variable_name;是指从外部传入的值
+
+        ->#数据类型:
+            与c语言类型相似,但更以多components为主,最大一般为4:
+                vecn 浮点类型,是默认使用最多的数据类型
+                dvecn 双精度浮点类型
+                bvecn bool类型如bvec1 bvec2 bvec3...
+                ivecn 整数类型
+                uvecn 无符号整数类型
 
 
 
