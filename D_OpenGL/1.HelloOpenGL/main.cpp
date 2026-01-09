@@ -184,7 +184,7 @@ int main() {
 
 
     //2.加载vertex shader
-    char * vertex_shader = ReadFile("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\HelloOpenGL\\hello_opengl.vertex");
+    char * vertex_shader = ReadFile("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\1.HelloOpenGL\\hello_opengl.vertex");
     //3.配置vertex shader
     unsigned int vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader_id,1,&vertex_shader,NULL);
@@ -197,7 +197,7 @@ int main() {
     }
 
     //5.加载fragment shader
-    char * fragment_shader = ReadFile("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\HelloOpenGL\\hello_opengl.fragment");
+    char * fragment_shader = ReadFile("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\1.HelloOpenGL\\hello_opengl.fragment");
     //6.加载fragment shader
     //因为前面已经创建了vertex shader,所以fragmen 的 id不是1而是2
     unsigned int fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);

@@ -339,3 +339,4 @@ games101变换
                     q5=Polygon(L5)
 
 
+{{x(Forward), x(Up), x(Right), -x(Camera')}, {y(Forward), y(Up), y(Right), -y(Camera')}, {z(Forward), z(Up), z(Right), -z(Camera')}, {0, 0, 0, 1}}

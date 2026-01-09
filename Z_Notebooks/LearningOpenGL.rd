@@ -109,6 +109,30 @@
                     glViewport(..,..,..,..);
                     return -1;
                 }
+
+                1.创建VAO的索引Id:
+                    什么是VAO?
+                        VAO是Vertex Array Object的缩写,它的功能是记录当前通过glBufferData绑定在gpu中的顶点数据.
+                        因为glBindBuffer一次只能绑定一个vertex数据,此外它不具有索引可以告诉gpu我要拿哪一个我绑定的顶点数据.
+                    unsigned int VAO[number];
+
+                    glGenVertexArray(number,VAO);
+
+                2.创建绑定Vertex数据的索引Id:
+                    unsigned int VBO[number];
+
+                    glGenBuffer(number,VBO);
+
+                3.绑定第一个VBO和顶点数据:
+                    glBindBuffer(GL_ARRAY_BUFFER , VBO[0]);
+                        将GL_ARRAY_BUFFER类型的buffer,与VBO[0]这个索引Id绑定.
+                    glBufferData(GL_ARRAY_BUFFER , sizeof(vertics_1),vertex_1_dates,Draw type);
+                        将vertics_1的顶点数据,传递给GL_ARRAY_BUFFER类型的buffer中,并指定绘制类型,并传递给GPU,存储到显存中.
+                            Draw type有三种形式,根据功能区分
+                                GL_DYNAMIC_DRAW:是指一些数据平凡替换的数据,如角色动画,移动的物体的顶点数据等.在此进行标记,会存储到可读写的快速存储区;
+                                GL_STATIC_DRAW:是指那些静态数据,比如不动的桌子椅子等.会存储到高速显存中;
+                                GL_STREAM_DRAW:是一些存在时间较短,并且会销毁的数据,比如粒子系统.会存储到临时显存中;
+                    
                 glClearColor(0.2f,0.2f,0.2f,1.0f);
                 glClearDepth(0.0f);
                 glClearStencil(0.0f);
