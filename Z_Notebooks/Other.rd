@@ -15,17 +15,6 @@ GPU的大致组成.一般的,中心为GPU芯片,以NAVIDA的GPU举例,
                 特殊处理核心:计算三角函数,根号,除法
         除了GPC外GPU还包含控制器(NVLink,PCIe..),显卡缓存器,以太网接口等组成
 
-(-(Ch / 2) x(CameraLeft'), -(Ch / 2) y(CameraLeft'), -(Ch / 2) z(CameraLeft')) + (-(Ch / 2) x(CameraUp'), -(Ch / 2) y(CameraUp'), -(Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
-(-(Ch / 2) x(CameraLeft'), -(Ch / 2) y(CameraLeft'), -(Ch / 2) z(CameraLeft')) + ((Ch / 2) x(CameraUp'), (Ch / 2) y(CameraUp'), (Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
-((Ch / 2) x(CameraLeft'), (Ch / 2) y(CameraLeft'), (Ch / 2) z(CameraLeft')) + (-(Ch / 2) x(CameraUp'), -(Ch / 2) y(CameraUp'), -(Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
-((Ch / 2) x(CameraLeft'), (Ch / 2) y(CameraLeft'), (Ch / 2) z(CameraLeft')) + ((Ch / 2) x(CameraUp'), (Ch / 2) y(CameraUp'), (Ch / 2) z(CameraUp')) + (0 x(CameraDir'), 0 y(CameraDir'), 0 z(CameraDir'))+Camera
 
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) - OHeight / 2), (z(OCenter) - OLength))
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) + OHeight / 2), (z(OCenter) - OLength))
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) - OHeight / 2), (z(OCenter) - OLength))
-((NearPlane/(z(OCenter) - OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) - OLength))(y(OCenter) + OHeight / 2), (z(OCenter) - OLength))
 
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) - OHeight / 2), (z(OCenter) + OLength))
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) - OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) + OHeight / 2), (z(OCenter) + OLength))
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) - OHeight / 2), (z(OCenter) + OLength))
-((NearPlane/(z(OCenter) + OLength))(x(OCenter) + OWidth / 2),(NearPlane/(z(OCenter) + OLength))(y(OCenter) + OHeight / 2), (z(OCenter) + OLength))
+

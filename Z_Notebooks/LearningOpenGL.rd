@@ -283,18 +283,90 @@
         其中in type in_variable_name;是指从外部传入的值
 
         ->#数据类型:
-            与c语言类型相似,但更以多components为主,最大一般为4:
-                vecn 浮点类型,是默认使用最多的数据类型
-                dvecn 双精度浮点类型
-                bvecn bool类型如bvec1 bvec2 bvec3...
-                ivecn 整数类型
-                uvecn 无符号整数类型
+            ->#修饰符:
+                layout (location number) ...
+                    这是修饰用,不同于uniform,没有存储功能,通过glVertexAttribPointer(locatoin,...);传入
+                    编译后无法修改;
+                    着色器间不能共用;
+            ->#值类型:
+                与c语言类型相似,但更以多components为主,最大一般为4:
+                    vecn 浮点类型,是默认使用最多的数据类型
+                    dvecn 双精度浮点类型
+                    bvecn bool类型如bvec1 bvec2 bvec3...
+                    ivecn 整数类型
+                    uvecn 无符号整数类型
 
+            ->#存储容器类型:
+                uniform:
+                    是一个相对于每个shader program的全局变量,vertex shader和fragment shader都可以使用.
+                    数据并且会一直保持,知道重置或更新.
 
+                    代码上:
+                        unsigned _color_index = glGetUniformLocation(shader_program_id,"color");
+                            从当前的ShaderProgram中的shader中找到对应的uniform type color;这一步是找到并记录.下一步是传值进去
+                        
+                        
+                        glUniform4f(_color_index,1.0f,0.0f,0.0f,1.0f);
+                            传递具体值:
+                                f:对应float;
+                                i:对应int;
+                                ui:对应unsigned int;
+                                3f:对应3float(vec3);
+                                4f:对应4float(vec4);
+                                fv:对应vector数组;
 
+    ->#加载贴图:
+        1.首先需要生成贴图索引id:
+            unsigned int textures[number];
+            glGenTextures(number , texutres);
+            接下来对贴图的设置以及数据加载都会绑定在当前贴图索引id;
+        2.绑定挡墙要设置的,贴图索引id:
+            glBindTexture(GL_TEXTURE_2D , texture[0]);
+            设置贴图属性:
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S , GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T , GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S , GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S , GL_REPEAT);
 
+        详解:
+            glBindTexture(Texture_type , Bind_texture_id)
+                Texture_type:
+                    指的是当前的要设置的贴图属性的类型:
+                        GL_TEXTURE2D:贴图图片
+                        GL_TEXTURE_CUBE_MAP:立方体(天空球)贴图
+                        GL_TEXTURE_1D:一维纹理
+                        GL_TEXTURE_3D:三维纹理
+                    
+                Bind_texture_id:绑定当前纹理的Id;
+            
+            glTexParameteri(Texture_type, Texture_filtering , Patten);
+                用于设置贴图配置属性.
+                Texture_type:同上
 
+                Texture_filtering:
+                    设置纹理过滤相关配置问题,有固定选项与之对应:
+                            GL_TEXTURE_MAG_FILTER 当前纹理小于<映射目标像素时
+                            GL_TEXTURE_MIN_FILTER 当前纹理小于>映射目标像素时
+                    Patten:
+                            GL_NEAREST  {OpenGL 会选择「纹理坐标最接近的那个纹理像素」的颜色作为采样结果.纹理会呈现 「像素化 / 马赛克」风格，边缘锐利，放大后能看到明显的像素块}
+                            GL_LINEAR   {会取「纹理坐标周围的 4 个纹理像素」，对它们的颜色做加权平均计算，得到最终采样颜色.纹理会呈现 「平滑 / 模糊」风格，放大后边缘过渡自然，没有明显的像素块}
 
+                Texture_wrapping:
+                    纹理环绕方式,解决,纹理超出边界后的处理效果:
+                        GL_TEXTURE_WRAP_S 水平纹理环绕方式
+                        GL_TEXTURE_WRAP_T 竖直纹理环绕方式
+                        GL_TEXTURE_WRAP_R 深度纹理环绕方式(3D纹理)
+
+                        Patten:
+                            GL_REPEAT 重复纹理:
+                                纹理坐标超出 [0,1] 的部分，会无限重复平铺纹理图片；
+                            GL_MIRRORED_REPEAT 反向重复纹理:
+                                纹理坐标超出 [0,1] 的部分，会镜像翻转后重复平铺；
+                            GL_CLAMP_TO_EDGE 重复贴图边缘纹理:
+                                纹理坐标超出 [0,1] 的部分，会使用纹理边缘的像素颜色填充；
+                            GL_CLAMP_TO_BORDER 边缘色纹理:
+                                纹理坐标超出 [0,1] 的部分，会使用一个自定义的「边框颜色」填充；
+                                需要用 glTexParameterfv（浮点版）设置边框颜色，否则用默认的黑色透明色；
 ->#编译报错:
     E:/Environments/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/13.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: ..\lib/libglfw3.a(wgl_context.c.obj):wgl_context.c:(.text+0x127a): undefined reference to `__imp_SetPixelFormat'
 collect2.exe: error: ld returned 1 exit status

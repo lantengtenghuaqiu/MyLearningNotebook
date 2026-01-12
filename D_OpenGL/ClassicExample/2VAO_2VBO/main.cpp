@@ -6,9 +6,9 @@
 
 #include "../include/glad/glad.h"
 #include "../include/GLFW/glfw3.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "./stb_image.h"
+
 // #define LOG_DELTTIME
+
 #define printwrong(success)                     \
     if (!success)                               \
     {                                           \
@@ -23,8 +23,6 @@ class AutoFile
 
 private:
     FILE *file;
-    unsigned int mutable width_attri = 0;
-    unsigned int mutable height_attrib = 0;
 
 public:
     explicit AutoFile(const char *path, const char *mode)
@@ -35,13 +33,6 @@ public:
             printf("Wrong : file is empty");
         }
     }
-    ~AutoFile()
-    {
-        if (this->file)
-        {
-            fclose(this->file);
-        }
-    }
 
     AutoFile(const AutoFile &) = delete;
     AutoFile &operator=(const AutoFile &) = delete;
@@ -50,71 +41,12 @@ public:
     {
         return this->file;
     }
-
-    unsigned int width()
+    ~AutoFile()
     {
-        return this->width_attri;
-    }
-    unsigned int height()
-    {
-        return this->height_attrib;
-    }
-
-    unsigned char *ReadFile() const
-    {
-        if (this->get() == NULL)
+        if (this->file)
         {
-            printf("File is Wrong");
-            return NULL;
+            fclose(this->file);
         }
-
-        fseek(this->get(), 0, SEEK_END);
-        long file_size = ftell(this->get());
-
-        if (file_size == 0)
-        {
-            printf("Wrong .File_size is 0 ");
-            return NULL;
-        }
-        fseek(this->get(), 0, SEEK_SET);
-        unsigned char *contents = new unsigned char[file_size + 1]();
-
-        fread(contents, 1, file_size, this->get());
-
-        {
-            // unsigned int type = -1;
-            {
-                bool is_png = true;
-                unsigned char png_sign[8] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
-                for (int i = 0; i < 8; i++)
-                {
-                    if (contents[i] != png_sign[i])
-                    {
-                        is_png = false;
-                        break;
-                    }
-                }
-                if (is_png)
-                {
-                    this->width_attri = (unsigned int)contents[16] << 24 |
-                                        (unsigned int)contents[17] << 16 |
-                                        (unsigned int)contents[18] << 8 |
-                                        (unsigned int)contents[19];
-
-                    this->height_attrib = (unsigned int)contents[20] << 24 |
-                                          (unsigned int)contents[21] << 16 |
-                                          (unsigned int)contents[22] << 8 |
-                                          (unsigned int)contents[23];
-                    printf("%d\n", this->width_attri);
-                    printf("%d\n", this->height_attrib);
-                }
-                else
-                {
-                    printf("Wrong is not png\n");
-                }
-            }
-        }
-        return contents;
     }
 };
 
@@ -141,30 +73,12 @@ char *ReadFile(const char *path)
     char *contents = new char[file_size + 1]();
 
     fread(contents, 1, file_size, file.get());
+
     return contents;
 }
 
-// 项目初始化异常缓冲区
-bool InitProjection()
-{
-    AutoFile file("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\maizhimeng.png", "rb");
-    if (file.get())
-    {
-        file.ReadFile();
-
-        return true;
-    }
-    printf("Something Wrong in init Projection\n");
-    return false;
-}
-//---------------------------------------
-
 int main()
 {
-    if (!InitProjection())
-    {
-        exit(0);
-    }
     // 初始化glfw:
     glfwInit();
 
@@ -200,98 +114,70 @@ int main()
 
     // 创建vertex attribute object index:
     unsigned int VAO[2];
-    unsigned int EBO;
     glGenVertexArrays(2, VAO);
-
-    // 创建材质贴图Index
-    unsigned int texture_id[2];
-    glGenTextures(2, texture_id);
 
     // 进行临时数据加载和绑定逻辑
     {
         // 准备顶点数据------------------------------------------------
-        const float vertices[] = {
-            // positions
-            0.5f, 0.5f, 0.0f,   // top right
-            0.5f, -0.5f, 0.0f,  // bottom right
-            -0.5f, -0.5f, 0.0f, // bottom left
-            -0.5f, 0.5f, 0.0f   // top left
-        };
-        unsigned int indices[] = {
-            0, 1, 3, // first triangle
-            1, 2, 3  // second triangle
-        };
-        const float color_coordinates[] = {
-            0.5f, 0.5f, 0.0f, // vertices color p0
-            1.0f, 1.0f,       // texture coordinates p0
+        const float vertices1[] = {
+            0.2f, 0.2f, 0.0f, // vertices
+            0.5f, 0.5f, 0.0f, // vertices color
+            // 0.0f, 0.0f,         // texture coordinates
 
-            1.0f, 0.0f, 0.0f, // vertices color p1
-            1.0f, 0.0f,       // texture coordinates p1
+            0.8f, 0.2f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            // 1.0f, 0.0f,
 
-            0.0f, 0.0f, 1.0f, // vertices color p2
-            0.0f, 0.0f,       // texture coordinates p2
-
-            0.0f, 1.0f, 1.0f, // vertices color p3
-            0.0f, 1.0f        // texture coordinates p3
+            0.5f, 0.8f, 0.0f,
+            0.0f, 0.0f, 1.0f
+            // 0.5f, 1.0f
         };
+
+        const float vertices2[] = {
+            -0.8f, -0.8f, 0.0f,
+            -0.2f, -0.8f, 0.0f,
+            -0.5f, -0.2f, 0.0f};
 
         const char *vertex_shader = ReadFile("G:/user/desktop/C++/GraphicLearning/D_OpenGL/2.Shaders/shaders.vertex");
         const char *fragment_shader = ReadFile("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\2.Shaders\\shaders.fragment");
-
-        int width, height, nrChannels;
-        unsigned char *texture_data = stbi_load("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\2.Shaders\\0047.png", &width, &height, &nrChannels, 0);
-
         //--------------------------------------------------------
 
         // 创建Vertex buffer object index:---------------------------------------
         unsigned int VBO[2];
-
         glGenBuffers(2, VBO);
-        glGenBuffers(1, &EBO);
         //----------------------------------------------------------------------
 
         // 绑定顶点缓冲区1:-------------------------------------------------------
         glBindVertexArray(VAO[0]);
         glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-        // 绑定vertices layout 0:
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)0);
+        // 绑定layout 0:
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)0);
         glEnableVertexAttribArray(0);
 
-        // 解绑:
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // 绑定color layout 1:
-        glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(color_coordinates), color_coordinates, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
+        // 绑定layout 1:
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-        // color_coordinates layout 2:
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)4);
-        glEnableVertexAttribArray(2);
 
+        // 解绑:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         //----------------------------------------------------------------------
 
-        // 加载texture:-------------------------------------------------------
-        glBindTexture(GL_TEXTURE_2D, texture_id[0]);
-        // 为当前texture[0]设置属性
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        // 绑定顶点缓冲区2:-------------------------------------------------------
+        glBindVertexArray(VAO[1]);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(texture_data);
-        //----------------------------------------------------------------------
+        glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
 
+        // 绑定layout 0:
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float), (void *)0);
+        glEnableVertexAttribArray(0);
+
+        // 解绑:
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
         //----------------------------------------------------------------------
 
         // 绑定Shader:----------------------------------------------------------
@@ -323,9 +209,6 @@ int main()
         // 传递Uniform值
         unsigned _color_index = glGetUniformLocation(shader_program_id, "color");
         glUniform4f(_color_index, 1.0f, 0.0f, 0.0f, 1.0f);
-
-        // unsigned _texture_id = glGetUniformLocation(shader_program_id, "texture2d");
-        // glUniform1i(_texture_id, 0);
     }
 
     // 设置每帧重置属性
@@ -355,30 +238,28 @@ int main()
         printf("time: %f\n", time);
 #endif
 
-        // Clearning
+        // Clearning  
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
         glClear(GL_STENCIL_BUFFER_BIT);
 
-        // Events
+        //Events
         glfwPollEvents();
-
-        // 绘制第1个三角形:
-        // glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture_id[0]);
 
         // Drawing:
         glUseProgram(shader_program_id);
+        
+        // 绘制第1个三角形:
         glBindVertexArray(VAO[0]);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // 绘制第2个三角形:
-        glBindVertexArray(VAO[0]);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(VAO[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        // Swap front and back of frame buffer
+        //Swap front and back of frame buffer
         glfwSwapBuffers(window);
     }
-    
+
     return 0;
 }
