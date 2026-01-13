@@ -161,6 +161,10 @@ bool InitProjection()
 
 int main()
 {
+    char * absoulte_path[512];
+    absoulte_path = _fullpath("../0047.png",absoulte_path,sizeof(absoulte_path));
+
+    printf("%s",*absoulte_path);
     if (!InitProjection())
     {
         exit(0);
