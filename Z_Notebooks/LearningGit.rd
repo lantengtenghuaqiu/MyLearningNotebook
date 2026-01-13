@@ -48,19 +48,15 @@ Merge:
 	git merge <需要合并进来的分支名>		切换到需要合并的分支,可以将<需要合并进来的分支名>合并到当前分支.
 
 Remote
- 	git remote add <远端仓库名> SSH/HTTPS 添加远端分支到本地
+ 	git remote add <远端仓库名> <远端库的链接> SSH/HTTPS 添加远端分支到本地
 	git remote -v 查看远端的关联库是什么
-	git remote remove <远端仓库名> 删除本地与远端的关联
+	git remote remove <远端仓库名> 删除本地与远端库的关联(非上下游分支的关联)
 
 Reset
 	git reset 将添加到暂存区中的文件回退
-
 	git reset --soft	回退到某一版本,并保留工作区和暂存区的所有修改内容,只是回退版本commit的文件会回到暂存区,并保留当前版本工作区的内容
-
 	gir reset --hard 	回退到某一版本,并丢弃工作区和暂存区的所有修改内容回退后,当前版本之后的commit工作区和暂存区的所有文件会被丢弃
-
 	git reset --mixed 	回退到某一版本,[保留]工作区和[丢弃]暂存区的所有修改内容回退后,当前版本后的commit暂存区中所有文件会丢弃,但工作区内容保留,可重新add和commit
-
 	git reset --soft/hard/mixed	HEAD^ 回退到上一版本
 
 Ls-files:
@@ -89,8 +85,7 @@ Switch:
 
 Branch
 	git branch 查看当前本地所有分支,带有*号的为当前分支
-
-git branch -r 查看远端分支
+	git branch -r 查看远端分支
 	git branch -a 查看所有分支包括远程分支,远程分支一般带remote/... 或者 origin/..
 	git branch <新分支名称> 会根据当前所在分支创建新分支,创建后不跳转新分支,留在当前分支--!!!该分支无上下游
 	git branch -d <分支名称> 删除分支
@@ -98,6 +93,7 @@ git branch -r 查看远端分支
 	git branch -m <新分支名称> 强制修改当前分支的分支名,无论是否存在,存在则覆盖
 	git branch -vv 查看所有分支的上下游关系
 	git branch --set-upstream-to=<远端仓库名><远端分支名> <本地分支名>		使本地分支与远端仓库中的分支建立上下游关系
+	git branch --unset-upstream  <本地分支名称>	解除本地分支与上游分支的链接
 
 Tag
 	tag是一个独立的存在,名称只能唯一.
