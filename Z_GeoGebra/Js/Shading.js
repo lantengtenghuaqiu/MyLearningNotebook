@@ -1,26 +1,45 @@
 function ggbOnInit() {
-    ModelToWorldTransformation();
+    text_index = [2];
+    ModelToWorldTransformationMatrix(text_index);
+    light = [0, 0, 0];
+
+    CreatePoint(3, "Light", light[0], light[1], light[2]);
+    ggbApplet.evalCommand(`a=${text_index[0]}`);
+    ggbApplet.evalCommand(`b=x(Light)^2`);
+
+    Normalize(3, "Light'", "Light");
+
 }
 
-function CreateText(name) {
+function CreateText(name,text_index) {
     ggbApplet.evalCommand(`"${name}"`);
-
+    if(Array.isArray(text_index)){
+        //设置产生的文本为不可见物体,减少视图杂乱
+        if(ggbApplet.exists(`text${text_index[0]}`)){
+            ggbApplet.setVisible(`text${text_index[0]}`,false);
+            text_index[0]=text_index[0]+1;
+        }
+    }
 }
 
 function CreateBoolean(name) {
     ggbApplet.evalCommand(`${name}=false`);
-
 }
 
 function CreateSilder(name, min, max, increase, speed, board, bool1, bool2, bool3, bool4) {
     ggbApplet.evalCommand(`${name} = Slider(${min},${max},${increase},${speed},${board},${bool1},${bool2},${bool3},${bool4})`);
 }
-function CreatePoint(name,x,y,z) {
-    ggbApplet.evalCommand(`${name} =(${x},${y},${z})`);
+
+function CreatePoint(coord, name, x, y, z) {
+    if (coord == 2)
+        ggbApplet.evalCommand(`${name} =(${x},${y})`);
+    if (coord == 3)
+        ggbApplet.evalCommand(`${name} =(${x},${y},${z})`);
 }
 
 
-
+//Utility function
+//Matrices
 function CreateMatrix_NxN(number, type, name, array) {
     if (Array.isArray(array)) {
         if (type == "create") {
@@ -102,23 +121,27 @@ function MakeMatrix_NxN(number, array) {
 }
 
 
-function ModelToWorldTransformation(){
-    CreateText("Translation Silder:");
-    CreateSilder("Sx", "0", "180", "0.1", 1, false, false, false, false, false);
-    CreateSilder("Sy", "0", "180", "0.1", 1, false, false, false, false, false);
-    CreateSilder("Sz", "0", "180", "0.1", 1, false, false, false, false, false);
+function ModelToWorldTransformationMatrix(text_index) {
 
-    CreateText("Rotation Silder:");
-    CreateSilder("Rx", "0°", "180°", "0.1°", 1, false, false, false, false, false);
-    CreateSilder("Ry", "0°", "180°", "0.1°", 1, false, false, false, false, false);
-    CreateSilder("Rz", "0°", "180°", "0.1°", 1, false, false, false, false, false);
+    CreateText("Translation Silder:",text_index);
+    ggbApplet.setVisible("text2", false);
+    CreateSilder("Sx", "0", "180", "0.1", 1, 100, false, true, false, false);
+    CreateSilder("Sy", "0", "180", "0.1", 1, 100, false, true, false, false);
+    CreateSilder("Sz", "0", "180", "0.1", 1, 100, false, true, false, false);
+    CreateText("Rotation Silder:",text_index);
 
-    CreateText("Translation Silder:");
-    CreateSilder("Tx", "0°", "180°", "0.1°", 1, false, false, false, false, false);
-    CreateSilder("Ty", "0°", "180°", "0.1°", 1, false, false, false, false, false);
-    CreateSilder("Tz", "0°", "180°", "0.1°", 1, false, false, false, false, false);
 
-    CreateText("Model to world matrix:");
+    CreateSilder("Rx", "0°", "180°", "0.1°", 1, 100, false, true, false, false);
+    CreateSilder("Ry", "0°", "180°", "0.1°", 1, 100, false, true, false, false);
+    CreateSilder("Rz", "0°", "180°", "0.1°", 1, 100, false, true, false, false);
+
+
+    CreateText("Translation Silder:",text_index);
+    CreateSilder("Tx", "0°", "180°", "0.1°", 1, 100, false, true, false, false);
+    CreateSilder("Ty", "0°", "180°", "0.1°", 1, 100, false, true, false, false);
+    CreateSilder("Tz", "0°", "180°", "0.1°", 1, 100, false, true, false, false);
+
+    CreateText("Model to world matrix:",text_index);
     let SM = [
         "Sx", 0, 0, 0,
         0, "Sy", 0, 0,
@@ -145,7 +168,7 @@ function ModelToWorldTransformation(){
         0, "sin(Rz)", "cos(Rz)", 0,
         0, 0, 0, 1
     ];
-    let RotationMatrix = CombineMatrices_1xN(3,"multi",[MakeMatrix_NxN(4,RXM),MakeMatrix_NxN(4,RYM),MakeMatrix_NxN(4,RZM)]);
+    let RotationMatrix = CombineMatrices_1xN(3, "multi", [MakeMatrix_NxN(4, RXM), MakeMatrix_NxN(4, RYM), MakeMatrix_NxN(4, RZM)]);
 
 
     let TM = [
@@ -155,6 +178,45 @@ function ModelToWorldTransformation(){
         0, 0, 0, 1
     ];
     let TranslateMatrix = MakeMatrix_NxN(4, TM);
-    let M = [ScaleMatrix,RotationMatrix, TranslateMatrix];
+    let M = [ScaleMatrix, RotationMatrix, TranslateMatrix];
     CreateMatrix_NxN(3, "multi", "M", M);
+}
+
+
+//Math
+function Dot(vector1, vector2) {
+    if (Array.isArray(vector1) && Array.isArray(vector2) && vector1.length == vector2.length) {
+        result = 0.0;
+        for (i = 0; i < vector1.length; i++) {
+            result += vector1[i] * vector2[i];
+        }
+        return result;
+    } else {
+        CreateText("(Dot(vector1 , vector2))Wrong creation",false);
+    }
+}
+
+function Normalize(n, name, object) {
+    if (ggbApplet.exists(`${object}`)) {
+        if (ggbApplet.exists(`${name}`)) {
+            CreateText(`(Normalize(..,!,..)) : object of ${name} is exist`,false);
+        } else {
+            switch (n) {
+                case 2:
+                    ggbApplet.evalCommand(`${name} = (x(${object})/sqrt(x(${object})^2 + y(${object})^2 + z(${object})^2) , y(${object})/sqrt(x(${object})^2 + y(${object})^2 + z(${object})^2))`)
+                    break;
+
+                case 3:
+                    ggbApplet.evalCommand(`${name} = (x(${object})/sqrt(x(${object})^2 + y(${object})^2 + z(${object})^2) , y(${object})/sqrt(x(${object})^2 + y(${object})^2 + z(${object})^2) , z(${object})/sqrt(x(${object})^2 + y(${object})^2 + z(${object})^2))`)
+                    break;
+            }
+        }
+
+    } else {
+        CreateText(`(Normalize(..,..,!)) : object of ${object} is not exist`,false);
+
+    }
+
+
+
 }

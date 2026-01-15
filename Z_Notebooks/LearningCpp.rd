@@ -172,6 +172,8 @@
 								如果不链接库文件
 									../include>clang++ main.obj ../src/head1.obj ../src/head2.obj -I ../includes -o main
 
+			
+
 		->#线程专栏#:
 			-#对于c++的线程休眠:
 				_sleep(time) 这个函数需要包含#include<thread>,但是使用MinGW时在编译时会提示不推荐使用
@@ -847,46 +849,58 @@
 					AutoFile(const AutoFile&) = delete;
 					AutoFile & operator=(const AutoFile&)=delete;
 
+		->#变量初始化问题:
+			数组初始化:
+				type variable []={};				表示空数组
+				type variable [n]={};				表示有长度数组,内容为0;
+				type variable [n]={value};			表示有长度数组,所有内容为value;
+				type variable [n]={v1,v2,v3...};	表示有长度数组,内容为v1,v2,v3...
+				type variable []={v1,v2};			无显示声明长度数组,根据内容数量自动推断为2,内容为v1,v2
 
-		->#优化思路#
-			内存优化:
-				1.在内存拷贝中,有一些类似自定义结构体的数据,他需要传递给另一个结构体的时候,其实并不需要将整个结构体传递过去,而是可以传递该结构体的地址即可:
-					例如以下例子:
-						这是一个vulkan创建Application Info 和Create Info的例子,通过创建A和B之后,B会携带A的信息,最后通过一个函数创建真正的Vulkan实例.
-						但B携带A的时候并不是将结构体的数据传递给B,而是地址,这样节省了一个结构体的字节空间
-						相对的损耗的则是寻址时间消耗和一个额外的地址指针字节空间
-						此外需要主义的一点就是,这样的创建代表A和B只是临时数据,生命周期并不长
 
-						VkApplicationInfo vk_app_info = {};
-						vk_app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-						vk_app_info.pNext = nullptr;
-						vk_app_info.pApplicationName = "HelloVulkan";
-						vk_app_info.apiVersion = VK_API_VERSION_1_0;
-						vk_app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-						vk_app_info.pEngineName = "No Engine";
-						vk_app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+		->#帧每秒:
+			
 
-						// 绑定创建vulkan实例需要的相关信息
-						  VkInstanceCreateInfo vk_create_info = {};
-						  vk_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-						* vk_create_info.pApplicationInfo = &vk_app_info; 
-						  vk_create_info.pNext = nullptr;
-						  vk_create_info.enabledExtensionCount = glfw_externs_count_to_vulkan;
-						  vk_create_info.ppEnabledExtensionNames = glfw_extens_to_vulkan;
-						  vk_create_info.enabledLayerCount = static_cast<uint32_t>(vk_validation_layer.size());
-						  vk_create_info.ppEnabledLayerNames = vk_validation_layer.data();
 
-						//其中有加*号的部分就是传递地址代替传递结构体数据.的部分
+	->#优化思路#
+		内存优化:
+			1.在内存拷贝中,有一些类似自定义结构体的数据,他需要传递给另一个结构体的时候,其实并不需要将整个结构体传递过去,而是可以传递该结构体的地址即可:
+				例如以下例子:
+					这是一个vulkan创建Application Info 和Create Info的例子,通过创建A和B之后,B会携带A的信息,最后通过一个函数创建真正的Vulkan实例.
+					但B携带A的时候并不是将结构体的数据传递给B,而是地址,这样节省了一个结构体的字节空间
+					相对的损耗的则是寻址时间消耗和一个额外的地址指针字节空间
+					此外需要主义的一点就是,这样的创建代表A和B只是临时数据,生命周期并不长
 
-		-框架分析:
-			对于一下例子:
-				这是一个Vulkan创建队列族的方法:
-					这里想要通过传递this->vk_physical_devices一个指针,最后获得queue_family_count并赋值
-					vkGetPhysicalDeviceQueueFamilyProperties(this->vk_physical_devices, &queue_family_count, nullptr);
-					printf("%d : QueueFamilyCount : %d\n", __LINE__, queue_family_count);
+					VkApplicationInfo vk_app_info = {};
+					vk_app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+					vk_app_info.pNext = nullptr;
+					vk_app_info.pApplicationName = "HelloVulkan";
+					vk_app_info.apiVersion = VK_API_VERSION_1_0;
+					vk_app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+					vk_app_info.pEngineName = "No Engine";
+					vk_app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 
-					但是我不明白的是如果只需要获得queue_family_count又何必再去传递vk_physical_devices的指针呢?他本身初始化是一个空指针
-					后来我想到,在初始化Vulkan的时候会有一些我看不到的静态全局变量或者其他数据,而传递该vk_physical_devices指针的目的就是将那些全局的数据地址传递给这个指针,以便之后调用.
+					// 绑定创建vulkan实例需要的相关信息
+						VkInstanceCreateInfo vk_create_info = {};
+						vk_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+					* vk_create_info.pApplicationInfo = &vk_app_info; 
+						vk_create_info.pNext = nullptr;
+						vk_create_info.enabledExtensionCount = glfw_externs_count_to_vulkan;
+						vk_create_info.ppEnabledExtensionNames = glfw_extens_to_vulkan;
+						vk_create_info.enabledLayerCount = static_cast<uint32_t>(vk_validation_layer.size());
+						vk_create_info.ppEnabledLayerNames = vk_validation_layer.data();
+
+					//其中有加*号的部分就是传递地址代替传递结构体数据.的部分
+
+	->#框架分析#:
+		对于一下例子:
+			这是一个Vulkan创建队列族的方法:
+				这里想要通过传递this->vk_physical_devices一个指针,最后获得queue_family_count并赋值
+				vkGetPhysicalDeviceQueueFamilyProperties(this->vk_physical_devices, &queue_family_count, nullptr);
+				printf("%d : QueueFamilyCount : %d\n", __LINE__, queue_family_count);
+
+				但是我不明白的是如果只需要获得queue_family_count又何必再去传递vk_physical_devices的指针呢?他本身初始化是一个空指针
+				后来我想到,在初始化Vulkan的时候会有一些我看不到的静态全局变量或者其他数据,而传递该vk_physical_devices指针的目的就是将那些全局的数据地址传递给这个指针,以便之后调用.
 				 
 
 
