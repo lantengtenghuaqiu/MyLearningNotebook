@@ -1,105 +1,99 @@
-//Main logic-------------------------------------------------------------------
-Main();
-//-----------------------------------------------------------------------------
+//GLOBAL------------------------------------------------------------------
 
-//Logic function definations---------------------------------------------------
+//------------------------------------------------------------------------
+
+
+
+
+//Main logic--------------------------------------------------------------
+Main();
+//------------------------------------------------------------------------
+
+//Logic function definitions-----------------------------------------------
 function Main() {
-    text_index = [0];
-    state = ["Init", "Update"];
-    Init(state, text_index);
+    state = ["Init", "Update", "Destory"];
+    Init(state);
     Update(state);
+    Destory(state);
 }
 
 //When the object is create, it will not be created again if existed.
-function Init(state, text_index) {
+function Init(state) {
     if (!ggbApplet.exists(state[0])) {
         ggbApplet.evalCommand(`init="Init"`);
         ggbApplet.setVisible("init", false);
-
         ggbApplet.evalCommand(`${state[0]}=false`);
-    } else if (!ggbApplet.exists(state[1]) && GetValue(state[0])) {
+    } else if (ggbApplet.exists(state[0]) && GetValue(state[0])) {
         ggbApplet.evalCommand(`${state[1]}=false`);
-
-        //Lights
-        //Directional light
-        CreateText("Light Group", text_index);
-        MakeModelToWolrdTransform(0, text_index,1,0,10,0);
-        CreatePoint(3, "LightPos", 0, 0, 0, null);
-        SetVisible("LightPos", false);
-
-        CreatePoint(3, "LightDir", 0, -1, 0, "M_0");
-        SetVisible("LightDir", false);
-
-        CreateObjectByExists("LightPos'", "M_0 * LightPos");
-        CreateEvalCommand("LightDir' = UnitVector(Vector(LightPos',LightPos'+LightDir))");
+        ggbApplet.evalCommand(`${state[2]}=false`);
+        //Init your objects-----------------------------------------------
+        //Create a point
+        // CreatePoint(coordinate , name , x , y , z , withMatirx);
 
 
-        //Objects
-        CreateText("Object Group", text_index);
-        MakeModelToWolrdTransform(1, text_index,1,0,0,0);
 
-        CreatePoint(3, "OB1", 0, 0, 0, null);
-        SetVisible("OB1", false);
-
-        CreatePoint(3, "nOB1", 0, 1, 0, "M_1");
-        SetVisible("nOB1", false);
-
-        CreateObjectByExists("OB1'", "M_1 * OB1");
-        CreateEvalCommand("nOB1' = UnitVector(Vector(OB1',OB1'+nOB1))");
-
-        CreateText("Distance of Light to OB1", text_index);
-        CreateEvalCommand("Dist' = Distance(OB1',LightPos')");
-
-        CreateText("N dot L", text_index);
-
-        CreateEvalCommand("ndl' = Dot(nOB1,-LightDir)");
-        
+        //----------------------------------------------------------------
+        ggbApplet.evalCommand(`${state[0]} = false`);
     }
 }
 
 function Update(state) {
+    if (ggbApplet.exists(`${state[1]}`) && !GetValue(`${state[1]}`)) {
 
-    // SetColor("OB1'",c,c,c);
-    if (ggbApplet.exists(`${state[1]}`) && GetValue(`${state[1]}`)) {
-        ndl = Clamp((GetValue("ndl'")) * 255,0,255);
-        c = ndl;
-        SetColor("OB1'",c,c,c);
     }
+    else if (ggbApplet.exists(`${state[1]}`)) {
+        //Update logic----------------------------------------------------
 
+
+
+
+
+        //----------------------------------------------------------------
+    }
 }
 
 function Events() {
 
 }
-//-----------------------------------------------------------------------------
+
+function Destory(state) {
+    if (ggbApplet.exists(`${state[2]}`) && ggbApplet.getValue(`${state[2]}`)) {
+        ggbApplet.setValue(`${state[0]}`, false);
+        ggbApplet.setValue(`${state[1]}`, false);
+        ggbApplet.setValue(`${state[2]}`, false);
+        allnames = [];
+        allnames = ggbApplet.getAllObjectNames();
+        for (i = allnames.length - 1; i > 4; i--) {
+            if (ggbApplet.exists(`${allnames[i]}`))
+                ggbApplet.deleteObject(allnames[i]);
+        }
+        ggbApplet.stopAnimation();
+    }
+}
+//------------------------------------------------------------------------
 
 
 
-//-----------------------------------------------------------------------------
-function MakeModelToWolrdTransform(index, text_index,scale,tx,ty,tz) {
-    CreateText("Translation Silder:", text_index);
-    CreateSilder(false, `Sx_${index}`, -100, 100, "0.1", 1, false, false, false, false, false);
-    ggbApplet.setValue(`Sx_${index}`, scale);
-    CreateSilder(false, `Sy_${index}`, -100, 100, "0.1", 1, false, false, false, false, false);
-    ggbApplet.setValue(`Sy_${index}`, scale);
-    CreateSilder(false, `Sz_${index}`, -100, 100, "0.1", 1, false, false, false, false, false);
-    ggbApplet.setValue(`Sz_${index}`, scale);
+//Special Creations-------------------------------------------------------
+//Model to world transform matrix
+function MakeModelToWolrdTransform(index, scale, tx, ty, tz) {
+    CreateText("Translation Silder:");
+    CreateSilder(false, `Sx_${index}`, -100, 100, "0.1", 1, 1, scale);
+    CreateSilder(false, `Sy_${index}`, -100, 100, "0.1", 1, 1, scale);
+    CreateSilder(false, `Sz_${index}`, -100, 100, "0.1", 1, 1, scale);
 
 
-    CreateText("Rotation Silder:", text_index);
-    CreateSilder(false, `Rx_${index}`, "0°", "360°", "0.1°", 1, false, false, false, false, false);
-    CreateSilder(false, `Ry_${index}`, "0°", "360°", "0.1°", 1, false, false, false, false, false);
-    CreateSilder(false, `Rz_${index}`, "0°", "360°", "0.1°", 1, false, false, false, false, false);
+    CreateText("Rotation Silder:");
+    CreateSilder(false, `Rx_${index}`, "0°", "360°", "0.1°", 1, 1);
+    CreateSilder(false, `Ry_${index}`, "0°", "360°", "0.1°", 1, 1);
+    CreateSilder(false, `Rz_${index}`, "0°", "360°", "0.1°", 1, 1);
 
-    CreateText("Translation Silder:", text_index);
-    CreateSilder(false, `Tx_${index}`, -100, 100, "0.1", 1, false, false, false, false, false);
-    ggbApplet.setValue(`Tx_${index}`, tx);
-    CreateSilder(false, `Ty_${index}`, -100, 100, "0.1", 1, false, false, false, false, false);
-    ggbApplet.setValue(`Ty_${index}`, ty);
-    CreateSilder(false, `Tz_${index}`, -100, 100, "0.1", 1, false, false, false, false, false);
-    ggbApplet.setValue(`Tz_${index}`, tz);
+    CreateText("Translation Silder:");
+    CreateSilder(false, `Tx_${index}`, -100, 100, "0.1", 1, 1, tx);
+    CreateSilder(false, `Ty_${index}`, -100, 100, "0.1", 1, 1, ty);
+    CreateSilder(false, `Tz_${index}`, -100, 100, "0.1", 1, 1, tz);
 
-    CreateText("Model to world matrix:", text_index);
+    CreateText("Model to world matrix:");
 
     let SM = [
         `Sx_${index}`, 0, 0, 0,
@@ -140,12 +134,13 @@ function MakeModelToWolrdTransform(index, text_index,scale,tx,ty,tz) {
     let TranslateMatrix = MakeMatrix_NxN(4, TM);
     let M = [TranslateMatrix, RotationMatrix, ScaleMatrix];
     CreateMatrix_NxN(3, "multi", `M_${index}`, M);
-
+    STATIC.matrix = STATIC.matrix + 1;
 
 
 }
+//------------------------------------------------------------------------
 
-//Utility functions-------------------------------------------------
+//Utility functions-------------------------------------------------------
 //Matrices
 function CreateMatrix_NxN(number, type, name, array) {
     if (!ggbApplet.exists(`${name}`)) {
@@ -153,13 +148,13 @@ function CreateMatrix_NxN(number, type, name, array) {
             if (type == "create") {
                 switch (number) {
                     case 2:
-                        ggbApplet.evalCommand(`${name} = {{${array[0]}, ${array[1]}},{${array[2]},${array[3]}}}`)
+                        ggbApplet.evalCommand(`${name} = {{${array[0]}, ${array[1]}},{${array[2]},${array[3]}}}`);
                         break;
                     case 3:
-                        ggbApplet.evalCommand(`${name} = {{${array[0]},${array[1]},${array[2]}},{${array[3]},${array[4]},${array[5]}},{${array[6]},${array[7]},${array[8]}}}`)
+                        ggbApplet.evalCommand(`${name} = {{${array[0]},${array[1]},${array[2]}},{${array[3]},${array[4]},${array[5]}},{${array[6]},${array[7]},${array[8]}}}`);
                         break;
                     case 4:
-                        ggbApplet.evalCommand(`${name} = {{${array[0]},${array[1]},${array[2]},${array[3]}},{${array[4]},${array[5]},${array[6]},${array[7]}},{${array[8]},${array[9]},${array[10]},${array[11]}}}`)
+                        ggbApplet.evalCommand(`${name} = {{${array[0]},${array[1]},${array[2]},${array[3]}},{${array[4]},${array[5]},${array[6]},${array[7]}},{${array[8]},${array[9]},${array[10]},${array[11]}}}`);
                         break;
                     default:
                         break;
@@ -236,13 +231,12 @@ function CreateEvalCommand(contents) {
     ggbApplet.evalCommand(contents);
 }
 
-function CreateText(contents, text_index) {
-
-    if (Array.isArray(text_index)) {
-        if (!ggbApplet.exists(`t${text_index[0]}`)) {
-            ggbApplet.evalCommand(`t${text_index[0]}="${contents}"`);
-            ggbApplet.setVisible(`t${text_index[0]}`, false);
-            text_index[0] = text_index[0] + 1;
+function CreateText(contents) {
+    if (Array.isArray(STATIC.text_index)) {
+        if (!ggbApplet.exists(`t${STATIC.text_index[0]}`)) {
+            ggbApplet.evalCommand(`t${STATIC.text_index[0]}="${contents}"`);
+            ggbApplet.setVisible(`t${STATIC.text_index[0]}`, false);
+            STATIC.text_index[0] = STATIC.text_index[0] + 1;
         }
     } else {
         ggbApplet.evalCommand(`"(CreateText(..,!):Not array"`);
@@ -258,10 +252,15 @@ function CreateBoolean(name) {
 
 }
 
-function CreateSilder(play, name, min, max, increase, speed, board, bool1, bool2, bool3, bool4) {
+function CreateSilder(isAngle, name, min, max, increase, speed, board, inital = 0, bool1 = false, bool2 = false, bool3 = false, bool4 = false,) {
     if (!ggbApplet.exists(`${name}`)) {
-        ggbApplet.evalCommand(`${name} = Slider(${min},${max},${increase},${speed},${board},${bool1},${bool2},${bool3},${bool4})`);
-        ggbApplet.setAnimating(`${name}`, play);
+        if (!isAngle) {
+            ggbApplet.evalCommand(`${name} = Slider(${min},${max},${increase},${speed},${board},${bool1},${bool2},${bool3},${bool4})`);
+            ggbApplet.setValue(`${name}`, inital);
+        }else{
+            ggbApplet.evalCommand(`${name} = Slider(${min}°,${max}°,${increase}°,${speed},${board},${bool1},${bool2},${bool3},${bool4})`);
+            ggbApplet.setValue(`${name}`, inital);
+        }
     }
 }
 
@@ -292,6 +291,10 @@ function CreateObjectByExists(name, object) {
     }
 }
 
+function CreateSphere(name, center, radius) {
+    ggbApplet.evalCommand(`${name} : (x-x(${center}))^2 + (y-y(${center}))^2 + (z-z(${center}))^2 = ${radius}`);
+}
+
 //Get value of object
 function GetValue(name) {
     if (ggbApplet.exists(`${name}`)) {
@@ -311,20 +314,36 @@ function GetCoords(name, coord) {
     }
 }
 //Set objects
+function SetValue(name, value) {
+    if (ggbApplet.exists(`${name}`)) {
+        ggbApplet.setValue(`${name}`, value);
+    }
+}
 function SetVisible(name, visible) {
     if (ggbApplet.exists(`${name}`)) {
         ggbApplet.setVisible(`${name}`, visible);
     }
 }
 
+function SetSize(name, size) {
+    if (ggbApplet.exists(`${name}`) && size >= 0) {
+        ggbApplet.setPointSize(`${name}`, size);
+    }
+}
+
 function SetColor(name, r, g, b) {
     if (ggbApplet.exists(`${name}`))
         ggbApplet.setColor(`${name}`, r, g, b);
+}
+
+function SetAuxiliary(name, boolean) {
+    if (ggbApplet.exists(`${name}`))
+        ggbApplet.setAuxiliary(`${name}`, boolean);
 
 }
 
 //Math
-function Dot(vector1, vector2, text_index) {
+function Dot(vector1, vector2) {
     if (Array.isArray(vector1) && Array.isArray(vector2) && vector1.length == vector2.length) {
         result = 0.0;
         for (i = 0; i < vector1.length; i++) {
@@ -332,19 +351,49 @@ function Dot(vector1, vector2, text_index) {
         }
         return result;
     } else {
-        CreateText("(Dot(vector1 , vector2))Wrong creation", text_index);
+        CreateText("(Dot(vector1 , vector2))Wrong creation");
     }
 }
 
-function Ceil(value){
+function Ceil(value) {
     return value - (value % 1);
 }
 
 function Clamp(value, min, max) {
-    if (value <= min)
-        value = min;
-    if (value >= max)
-        value = max;
+    if (Array.isArray(value)) {
+        for (i = 0; i < value.length; i++) {
+            if (value[i] <= min)
+                value[i] = min;
+            if (value[i] >= max)
+                value[i] = max;
+        }
+    } else {
+        if (value <= min)
+            value = min;
+        if (value >= max)
+            value = max;
+    }
+
     return value;
 }
-//---------------------------------------------------------------------
+
+function Pow(value, times) {
+    result = value;
+    for (i = 0; i < times; i++) {
+        result *= value;
+    }
+    return result;
+}
+
+function Abs(value) {
+    if (value < 0)
+        value *= -1;
+    return value;
+}
+
+function Max(value, max) {
+    if (value < max)
+        return max;
+    return value;
+}
+//------------------------------------------------------------------------

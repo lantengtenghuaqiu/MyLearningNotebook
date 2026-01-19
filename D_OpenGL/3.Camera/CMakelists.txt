@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(Camera LANGUAGES CXX)
+
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
+
+if(WIN32)
+    set(CMAKE_CXX_COMPILER "g++")
+    set(CMAKE_MAKE_PROGRAM "mingw32-make")
+endif()
+
+set(CPP_FILE_SOURCES
+    ${PROJECT_SOURCE_DIR}/main.cpp
+    ${PROJECT_SOURCE_DIR}/../src/glad.c
+)
+
+add_executable(Camera ${CPP_FILE_SOURCES})
+
+set_target_properties(Camera PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}
+    OUTPUT_NAME "main"
+)
+
+set(INCLUDES
+    ${PROJECT_SOURCE_DIR}/../includes
+    ${PROJECT_SOURCE_DIR}/../../0_MyFunctions/includes
+)
+
+target_include_directories(Camera PRIVATE ${INCLUDES})
+
+set(LIBS
+    ${PROJECT_SOURCE_DIR}/../libs
+)
+
+target_link_directories(Camera PRIVATE ${LIBS})
+
+set(LINKS 
+    opengl32
+    glfw3
+    gdi32
+    user32
+    shell32
+)
+
+target_link_libraries(Camera PRIVATE ${LINKS})
+
+message(STATUS "Path:  ${LIBS}")
+

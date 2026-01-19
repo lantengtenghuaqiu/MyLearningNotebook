@@ -56,3 +56,27 @@
         因为if()是在运行时判断,但是在编译时无论条件判断为true还是false,都会进行遍历,所以在编译的时候这两个类型无法互相转换,则报错;
         因此需要在条件判断中添加修饰符if constexpr(){},如此在编译期间就会进行判断,如果是false则跳过该分支.
         此外,对于if constexpr(<param>)中的<param>可以在编译期间进行初始化并判断是因为,特化模板中的参数也是constexpr
+
+
+
+ MinGW 编译 Win32 原生窗口导致的字符编码不匹配:
+PS G:\user\desktop\C++\GraphicLearning\D_OpenGL\3.Camera> g++ main.cpp ..\src\glad.c -I ..\includes -L ..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -std=c++17 -o main.exe
+main.cpp: In function 'HWND__* CreateMainWindow(HINSTANCE)':
+main.cpp:29:24: error: cannot convert 'const wchar_t [16]' to 'LPCSTR' {aka 'const char*'} in assignment     
+   29 |     wc.lpszClassName = L"MainWindowClass";
+      |                        ^~~~~~~~~~~~~~~~~~
+      |                        |
+      |                        const wchar_t [16]
+main.cpp:36:9: error: cannot convert 'const wchar_t*' to 'LPCSTR' {aka 'const char*'}
+   36 |         L"MainWindowClass",             // 绐         ^~~~~~~~~~~~~~~~~~
+      |         |
+      |         const wchar_t*
+In file included from E:/Environments/mingw64/x86_64-w64-mingw32/include/windows.h:72,
+                 from main.cpp:2:
+
+
+    对于windows的窗口代码中会使用到L类型(宽字符类型),MinGW默认是多字节编译模式,因此需要改变编译模式:
+    在编译时添加:-DUNICODE -D_UNICODE
+    完全:
+        g++ main.cpp ..\src\glad.c -I ..\includes -L ..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -std=c++17 -DUNICODE -D_UNICODE -o main.exe
+        
