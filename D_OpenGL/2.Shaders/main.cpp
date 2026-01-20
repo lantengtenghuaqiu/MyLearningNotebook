@@ -4,8 +4,8 @@
 
 #include <chrono>
 
-#include "../include/glad/glad.h"
-#include "../include/GLFW/glfw3.h"
+#include "../includes/glad/glad.h"
+#include "../includes/GLFW/glfw3.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "./stb_image.h"
 // #define LOG_DELTTIME
