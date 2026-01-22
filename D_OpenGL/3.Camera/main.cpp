@@ -3,15 +3,14 @@
 #define _UNICODE
 #define WIN32_LEAN_AND_MEAN
 
-#include<windows.h>
+#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
+#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
 
-// #include <gl/wglext.h>
-#include "glad/glad.h"
-#define WGL_CONTEXT_MAJOR_VERSION_ARB     0x2091
-#define WGL_CONTEXT_MINOR_VERSION_ARB     0x2092
-#define WGL_CONTEXT_PROFILE_MASK_ARB      0x9126
-#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB  0x00000001
-
+#include <windows.h>
+#include <stdio.h>
+#include "../includes/glad/glad.h"
 
 static HWND hwnd = NULL;
 static HDC hdc = NULL;
@@ -22,9 +21,8 @@ static const int height = 600;
 
 static const wchar_t *windowclassname = L"Windows";
 
-typedef HGLRC (WINAPI * PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);
+typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
 PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
-
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -129,7 +127,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPervInstance, LPSTR lpCmdLine
     hdc = GetDC(hwnd);
 
     PIXELFORMATDESCRIPTOR pixel_format_descriptor = {0};
-    pixel_format_descriptor.nSize =  sizeof(PIXELFORMATDESCRIPTOR);
+    pixel_format_descriptor.nSize = sizeof(PIXELFORMATDESCRIPTOR);
     pixel_format_descriptor.nVersion = 1;                                                         // 版本号，固定为1
     pixel_format_descriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER; // 核心标记
     pixel_format_descriptor.iPixelType = PFD_TYPE_RGBA;                                           // 颜色模式：RGBA
@@ -139,7 +137,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPervInstance, LPSTR lpCmdLine
 
     int pixel_format = ChoosePixelFormat(hdc, &pixel_format_descriptor);
 
-    SetPixelFormat(hdc,pixel_format , &pixel_format_descriptor);
+    SetPixelFormat(hdc, pixel_format, &pixel_format_descriptor);
 
     HGLRC temp_hglrc = wglCreateContext(hdc);
 
@@ -151,14 +149,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPervInstance, LPSTR lpCmdLine
         WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
         WGL_CONTEXT_MINOR_VERSION_ARB, 6,
         WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-        0
-    };
-    
+        0};
+
     HGLRC hglrc = nullptr;
     if (wglCreateContextAttribsARB)
     {
         // 创建新的OpenGL上下文
-        hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
+        hglrc = wglCreateContextAttribsARB(hdc, temp_hglrc, attribs);
         // 删除临时上下文
         wglMakeCurrent(nullptr, nullptr);
         wglDeleteContext(temp_hglrc);
@@ -167,34 +164,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPervInstance, LPSTR lpCmdLine
     }
     else
     {
-        // 如果不支持wglCreateContextAttribsARB，则使用临时上下文（可能只支持旧版本OpenGL）
+        printf("Wrong");
         hglrc = temp_hglrc;
-    }
-    
-    // 8. 使用Glad加载OpenGL函数指针
-    if (!gladLoadGL())
-    {
-        // 处理错误：无法加载OpenGL函数
-        // 注意：如果使用临时上下文，gladLoadGL可能会失败，因为临时上下文可能不支持现代OpenGL函数
-        // 因此，最好使用wglCreateContextAttribsARB创建指定版本的上下文后再加载
     }
 
     int success;
     success = gladLoadGLLoader((GLADloadproc)wglGetProcAddress);
 
-    MSG msg = {0};
+    glViewport(0, 0, width, height);
 
-    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    // glClearColor(1.0,1.0,0.0,1.0);
+    MSG msg = {0};
 
     while (GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        // glClear(GL_COLOR_BUFFER_BIT);
 
         SwapBuffers(hdc);
     }
-
+    ClearUpOpenGLWin32();
     return (int)msg.wParam;
 }

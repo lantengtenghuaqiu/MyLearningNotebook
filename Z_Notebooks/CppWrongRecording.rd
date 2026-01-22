@@ -57,6 +57,8 @@
         因此需要在条件判断中添加修饰符if constexpr(){},如此在编译期间就会进行判断,如果是false则跳过该分支.
         此外,对于if constexpr(<param>)中的<param>可以在编译期间进行初始化并判断是因为,特化模板中的参数也是constexpr
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
  MinGW 编译 Win32 原生窗口导致的字符编码不匹配:
@@ -80,3 +82,15 @@ In file included from E:/Environments/mingw64/x86_64-w64-mingw32/include/windows
     完全:
         g++ main.cpp ..\src\glad.c -I ..\includes -L ..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -std=c++17 -DUNICODE -D_UNICODE -o main.exe
         
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PS G:\user\desktop\C++\GraphicLearning\0_MyFunctions> g++ main.cpp -fno-permissive -std=c++17
+In file included from main.cpp:1:
+./includes/xyl_math.hpp:113:27: error: expected ')' before '<' token
+  113 |         mat4x4(coordinate4<T> coordinate1,
+      |               ~           ^
+      |                           )
+
+这里是因为没有加名称空间:
+    xyl::coordinate4<T> ....就好了
