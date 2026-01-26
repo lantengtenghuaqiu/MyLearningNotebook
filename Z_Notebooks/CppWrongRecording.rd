@@ -94,3 +94,44 @@ In file included from main.cpp:1:
 
 这里是因为没有加名称空间:
     xyl::coordinate4<T> ....就好了
+
+
+
+
+
+
+
+
+
+
+E:/Environments/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/13.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\LENOVO\AppData\Local\Temp\cc6JyPgm.o:main.cpp:
+(.rdata$.refptr._ZN6Entity5widthE[.refptr._ZN6Entity5widthE]+0x0): 
+undefined reference to `Entity::width'
+
+问题源代码:
+struct Entity
+{
+public:
+    static const int width = 1280;
+    static const int height = 1080;
+    GLFW glfw;
+    GLAD glad;
+};
+
+int main()
+{
+    Entity entity;
+    entity.glfw.InitGlfw(Entity::width, Entity::height, "Camera");
+......
+}
+
+
+问题原因:
+    报错是C++ 静态成员变量的声明 / 定义分离规则导致的链接错误，与语法、编译器（MinGW）无关，是 C++ 语言标准要求；
+核心解决步骤：类内声明（static + 类型 + 变量名）+ 类外定义（类型 + 类名：：变量名，可初始化）；
+
+解决办法:
+    static const int width = 1280;
+    static const int height = 1080;
+    在类外定义;
+    也可以单独在一个hpp文件里声明,然后在cpp中定义,这样就会有一次编译,对该静态变量可以初始化成功.

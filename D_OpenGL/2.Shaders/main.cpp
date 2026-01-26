@@ -185,7 +185,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
     // 实例化窗口程序:
-    static GLFWwindow *window = glfwCreateWindow(width, height, "Shaders", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(width, height, "Shaders", nullptr, nullptr);
     if (window == NULL)
         exit(0);
 
