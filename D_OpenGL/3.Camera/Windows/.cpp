@@ -1,14 +1,12 @@
 #include <stdio.h>
-#include <vector>
 // #include
 // #incldue
 
-#include "../includes/glad/glad.h"
-#include "../includes/GLFW/glfw3.h"
-#include "../includes/stb_image.h"
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+#include "stb_image.h"
 #include "../includes/xyl_tools.hpp"
-#include "../includes/Camera.hpp"
-// g++ main.cpp ..\..\src\glad.c -I ..\..\includes -L ..\..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -Werror=conversion  -std=c++17 -o main.exe
+// g++ main.cpp ..\src\glad.c -I ..\include -L ..\lib -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -Werror=conversion  -std=c++17 -o main.exe
 // clang++ main.cpp ../src/glad.c  -I ../includes -L ../libs -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo  -o main
 #define FAIL 0
 #define SUCCESS 1
@@ -92,19 +90,10 @@ typedef struct ObjectAttributes
     unsigned int *EBO;
     unsigned int *TEX;
 
-    unsigned int sizeVAO;
-    unsigned int sizeVBO;
-    unsigned int sizeEBO;
-    unsigned int sizeTEX;
-
     ObjectAttributes() {}
 
     ObjectAttributes(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
     {
-        this->sizeVAO = sizeVAO;
-        this->sizeVBO = sizeVBO;
-        this->sizeEBO = sizeEBO;
-        this->sizeTEX = sizeTEX;
         this->VAO = new unsigned int[sizeVAO];
         this->VBO = new unsigned int[sizeVBO];
         this->EBO = new unsigned int[sizeEBO];
@@ -209,7 +198,7 @@ public:
 
         if (checker == FAIL)
         {
-            // ShaderChecker
+            ShaderChecker
         }
         else
         {
@@ -224,17 +213,14 @@ public:
         glGetProgramiv(shader_program, GL_LINK_STATUS, &checker);
         if (checker == FAIL)
         {
-            // LinkChecker
+            LinkChecker
         }
     }
 
     void UseShaderProgram(unsigned int shader_program)
     {
         if (shader_program != FAIL)
-        {
-            printf("Use the shader program : %d\n", shader_program);
             glUseProgram(shader_program);
-        }
         else
             printf("Shader program has something wrong\n");
     }
@@ -243,28 +229,18 @@ public:
     {
         glDeleteShader(shader);
     }
-
-    int GetUniformLoaction(const unsigned int sahder_program, const char *keyword)
-    {
-        return glGetUniformLocation(sahder_program, keyword);
-    }
 };
 
 static int width = 860;
 static int height = 720;
 
-typedef struct Textures
-{
-    std::vector<int> textures;
-} Tex;
-
 // 准备顶点数据------------------------------------------------
 const float vertices[] = {
     // positions
-    10.5f, 10.5f, 10.0f,   // top right
-    10.5f, -10.5f, 10.0f,  // bottom right
-    -10.5f, -10.5f, 10.0f, // bottom left
-    -10.5f, 10.5f, 10.0f   // top left
+    0.5f, 0.5f, 0.0f,   // top right
+    0.5f, -0.5f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f, // bottom left
+    -0.5f, 0.5f, 0.0f   // top left
 };
 const unsigned int indices[] = {
     0, 1, 3, // first triangle
@@ -288,19 +264,17 @@ int main()
 {
     GLFW glfw;
     GLAD<float> glad;
-    Textures textures;
-    xyl::Camera camera(0.1f, 100.0f, 200.0f, 200.0f);
     Attributes attri(2, 2, 2, 2);
     ReadFile file;
-    
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {
         glad.InitGlad(width, height);
 
-        glGenVertexArrays(attri.sizeVAO, attri.VAO);
-        glGenBuffers(attri.sizeEBO, attri.EBO);
-        glGenBuffers(attri.sizeVBO, attri.VBO);
-        glGenTextures(attri.sizeTEX, attri.TEX);
+
+
+        glGenVertexArrays(2, attri.VAO);
+        glGenBuffers(2, attri.EBO);
+        glGenBuffers(2, attri.VBO);
 
         glad.BindVAO(attri.VAO[0]);
         glad.BindEBO(attri.EBO[0], sizeof(indices), indices, GL_STATIC_DRAW);
@@ -321,39 +295,20 @@ int main()
 
         Shader shaders;
         // Vertex Shader
-        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\Windows\\shaders.vertex", "rb", shaders.ShaderData);
+        file.GetContent("/Users/bytedance/Desktop/C++/OJSN%!A12YHA/A_Mac/A_OpenGLClass/shaders.vertex", "rb", shaders.ShaderData);
         glad.CompileAndAttachShader(shaders.ShaderProgram, shaders.VertexShader, shaders.ShaderData, "vertex shader");
 
         // Fragment Shader
-        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\Windows\\shaders.fragment", "rb", shaders.ShaderData);
+        file.GetContent("/Users/bytedance/Desktop/C++/OJSN%!A12YHA/A_Mac/A_OpenGLClass/shaders.fragment", "rb", shaders.ShaderData);
         glad.CompileAndAttachShader(shaders.ShaderProgram, shaders.FragmentShader, shaders.ShaderData, "fragment shader");
 
         // Link Shader Program
         glad.LinkeShaderPorgram(shaders.ShaderProgram);
         glad.UseShaderProgram(shaders.ShaderProgram);
 
-        // int _color = glGetUniformLocation(shaders.ShaderProgram, "_color");
-        // float _Color[] = {0.0, 1.0, 1.0, 1.0};
-        // // glUniform4f(_color ,1.0f,1.0f,1.0f,1.0f);
-        // // glUniform4fv(_color,1,_Color);
-        // printf("Get uniform of _color : %d\n", _color);
-        // // 2. 手动构造4x4正交投影矩阵（行主序：4行，每行4个浮点数，共16个）
-        // // 正交投影矩阵参数：left, right, bottom, top, near, far
-        // float left = -1.0f, right = 1.0f;
-        // float bottom = -1.0f, top = 1.0f;
-        // float near = 0.1f, far = 20.0f;
-        // float projMat[16] = {// 行主序存储：第1行→[0-3]，第2行→[4-7]，第3行→[8-11]，第4行→[12-15]
-        //                      2.0f, 0.0f, 0.0f, 1.0f,
-        //                      0.0f, 2.0f, 0.0f, 1.0f,
-        //                      0.0f, 0.0f, -2.0f, 1.0f,
-        //                      0.0f, 0.0f, 0.0f, 1.0f};
 
-        // int proj = glGetUniformLocation(shaders.ShaderProgram, "proj");
-        // printf("Get uniform of proj : %d\n", proj);
-        // glUniformMatrix4fv(proj, 1, GL_FALSE, projMat);
+        
 
-        // textures.textures.emplace_back(glGetUniformLocation(shaders.ShaderProgram, "MaiZhiMeng"));
-        // printf("Texture location : %d",textures.textures.at(0));
 
         // 设置每帧重置属性
         glClearColor(0.4f, 0.2f, 0.1f, 1.0f);

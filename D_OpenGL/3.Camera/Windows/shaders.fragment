@@ -1,15 +1,11 @@
-#version 460 core
+#version 410 core
 out vec4 fragment_color;
 
-in vec3 our_color;
-in vec2 coordinates;
+uniform vec4 _color;
 
-uniform vec4 color;
-
-uniform sampler2D texture2d;
+uniform sampler2D MaiZhiMeng;
 
 void main()
 {
-    vec4 texturecolor = texture(texture2d,coordinates);
-    fragment_color = texturecolor;
+    fragment_color = _color;
 }

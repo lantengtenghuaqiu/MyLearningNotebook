@@ -167,7 +167,44 @@
                         GL_DEPTH_BUFFER_BIT     : 清空深度缓冲区
                         GL_STENCIL_BUFFER_BIT   : 清空模板缓冲区
         ->#处理Vertex数据:
-            
+
+        ->#Uniform 传入数据:
+            传入float4:
+                int _color = glGetUniformLocation(shaders.ShaderProgram, "_color");
+                传入方式一:
+                    glUniform4f(_color ,1.0f,1.0f,1.0f,1.0f);
+                传入方式二:
+                    传入单个float:
+                        float _Color[]={0.0,1.0,1.0,1.0};
+                        glUniform4fv(_color,1,_Color);
+                            |shader:
+                            |   uniform vec4 _color;
+                    传入多个float:
+                        float _Color[]={
+                                        0.0,1.0,1.0,1.0,
+                                        1.0,0.0,1.0,1.0
+                                        };
+                        glUniform4fv(_color,2,_Color);
+                            |shader:
+                            |   uniform vec4 _color[2];
+                            |   ...
+                            |   fragmentColor = _color[0];
+            传入Matrix float4:
+                先获取location:
+                    int proj = glGetUniformLocation(shaders.ShaderProgram, "proj");
+                传入:
+                    float projMat[16] = {
+                                        2.0f, 0.0f, 0.0f, 0.0f,
+                                        0.0f, 2.0f, 0.0f, 0.0f,
+                                        0.0f, 0.0f, -2.0f, 0.0f,
+                                        0.0f, 0.0f, 0.0f, 1.0f};
+                    glUniformMatrix4fv(proj, 1, GL_FALSE, projMat);
+                        参数含义:
+                            第一个参数,为location.
+                            第二个参数,为矩阵个数,与4fv相同,可以传入多个,用[]表示.
+                            第三个参数,为是否转置.
+                            第四个参数,为矩阵数据.
+
 
     ->#理解OpenGL:
         首先,无论是对于3D items,还是2D items,都是在3D空间下的.而最终显示在屏幕上的都是2D空间下的.因此OpenGL流水线的绝大部份工作都是将3D空间信息通过变换,变成2D空间信息.
