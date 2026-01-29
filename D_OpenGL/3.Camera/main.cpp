@@ -2,13 +2,21 @@
 #include <vector>
 // #include
 // #incldue
+#define STB_IMAGE_IMPLEMENTATION
 
 #include "../includes/glad/glad.h"
 #include "../includes/GLFW/glfw3.h"
+
 #include "../includes/stb_image.h"
+#include "../glm/glm.hpp"
 #include "../includes/xyl_tools.hpp"
 #include "../includes/Camera.hpp"
+#include "./MVP.hpp"
+
 // g++ main.cpp ..\..\src\glad.c -I ..\..\includes -L ..\..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -Werror=conversion  -std=c++17 -o main.exe
+// clang++ main.cpp ../src/glad.c  -I ../includes -L ../libs -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo  -o main
+
+// g++ main.cpp ..\src\glad.c -I ..\include -L ..\lib -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -Werror=conversion  -std=c++17 -o main.exe
 // clang++ main.cpp ../src/glad.c  -I ../includes -L ../libs -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo  -o main
 #define FAIL 0
 #define SUCCESS 1
@@ -91,12 +99,10 @@ typedef struct ObjectAttributes
     unsigned int *VBO;
     unsigned int *EBO;
     unsigned int *TEX;
-
     unsigned int sizeVAO;
     unsigned int sizeVBO;
     unsigned int sizeEBO;
     unsigned int sizeTEX;
-
     ObjectAttributes() {}
 
     ObjectAttributes(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
@@ -126,6 +132,12 @@ typedef struct ObjectAttributes
         this->VAO = nullptr;
     }
 } Attributes;
+
+typedef struct TextureAttribute
+{
+    int TEXTURE_TYPE = GL_TEXTURE_2D;
+
+} Sampler2D;
 
 typedef struct ShadersProgram
 {
@@ -180,15 +192,19 @@ public:
 
     void BindVBO(unsigned int &VBO, const int bytesize, const Binder binder, const T *data)
     {
-        if (binder.AttributeChecker())
+        if (true)
         {
-            printf("Bind VBO : %d\n", VBO);
+            printf("Bind VBO : %d\n\n", VBO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, bytesize, data, binder.DRAWYPE);
             // 第二个参数表示分量vec2传2, vec3传3, vec4传4
             glVertexAttribPointer(binder.Location, binder.DataSize, binder.DATATYPE, binder.NORMILAZED, sizeof(float) * binder.Stride, (void *)binder.StartPointer);
             glEnableVertexAttribArray(binder.Location);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+        else
+        {
+            printf("Something wrong in binding VBO\n");
         }
     }
 
@@ -243,7 +259,6 @@ public:
     {
         glDeleteShader(shader);
     }
-
     int GetUniformLoaction(const unsigned int sahder_program, const char *keyword)
     {
         return glGetUniformLocation(sahder_program, keyword);
@@ -253,46 +268,68 @@ public:
 static int width = 860;
 static int height = 720;
 
-typedef struct Textures
-{
-    std::vector<int> textures;
-} Tex;
-
 // 准备顶点数据------------------------------------------------
-const float vertices[] = {
-    // positions
-    10.5f, 10.5f, 10.0f,   // top right
-    10.5f, -10.5f, 10.0f,  // bottom right
-    -10.5f, -10.5f, 10.0f, // bottom left
-    -10.5f, 10.5f, 10.0f   // top left
-};
+
+float vertices[] = {
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
+
 const unsigned int indices[] = {
     0, 1, 3, // first triangle
     1, 2, 3  // second triangle
 };
-const float color_coordinates[] = {
-    0.5f, 0.5f, 0.0f, // vertices color p0
-    1.0f, 1.0f,       // texture coordinates p0
-
-    1.0f, 0.0f, 0.0f, // vertices color p1
-    1.0f, 0.0f,       // texture coordinates p1
-
-    0.0f, 0.0f, 1.0f, // vertices color p2
-    0.0f, 0.0f,       // texture coordinates p2
-
-    0.0f, 1.0f, 1.0f, // vertices color p3
-    0.0f, 1.0f        // texture coordinates p3
-};
+const float uv[] = {
+    1.0f, 1.0f,
+    1.0f, 0.0f,
+    0.0f, 0.0f,
+    0.0f, 1.0f};
 
 int main()
 {
     GLFW glfw;
     GLAD<float> glad;
-    Textures textures;
-    xyl::Camera camera(0.1f, 100.0f, 200.0f, 200.0f);
-    Attributes attri(2, 2, 2, 2);
+    Attributes attri(2, 2, 1, 1);
+
     ReadFile file;
-    
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {
         glad.InitGlad(width, height);
@@ -305,55 +342,73 @@ int main()
         glad.BindVAO(attri.VAO[0]);
         glad.BindEBO(attri.EBO[0], sizeof(indices), indices, GL_STATIC_DRAW);
 
-        Binder VBO0;
-        {
-            VBO0.DATATYPE = GL_FLOAT;
-            VBO0.DataSize = 3;
-            VBO0.DRAWYPE = GL_STATIC_DRAW;
-            VBO0.Location = 0;
-            VBO0.NORMILAZED = GL_FALSE;
-            VBO0.Stride = 3;
-            VBO0.StartPointer = 0;
-        }
-        glad.BindVBO(attri.VBO[0], sizeof(vertices), VBO0, vertices);
 
+        printf("Bind VBO : %d\n\n", attri.VBO[0]);
+        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[0]);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
+        glEnableVertexAttribArray(0);
+
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glad.UnbindVAO();
 
         Shader shaders;
         // Vertex Shader
-        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\Windows\\shaders.vertex", "rb", shaders.ShaderData);
+        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\shaders.vertex", "rb", shaders.ShaderData);
         glad.CompileAndAttachShader(shaders.ShaderProgram, shaders.VertexShader, shaders.ShaderData, "vertex shader");
 
         // Fragment Shader
-        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\Windows\\shaders.fragment", "rb", shaders.ShaderData);
+        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\shaders.fragment", "rb", shaders.ShaderData);
         glad.CompileAndAttachShader(shaders.ShaderProgram, shaders.FragmentShader, shaders.ShaderData, "fragment shader");
 
         // Link Shader Program
         glad.LinkeShaderPorgram(shaders.ShaderProgram);
         glad.UseShaderProgram(shaders.ShaderProgram);
+        //-----------------------------------------------------------------------------
 
-        // int _color = glGetUniformLocation(shaders.ShaderProgram, "_color");
-        // float _Color[] = {0.0, 1.0, 1.0, 1.0};
-        // // glUniform4f(_color ,1.0f,1.0f,1.0f,1.0f);
-        // // glUniform4fv(_color,1,_Color);
-        // printf("Get uniform of _color : %d\n", _color);
-        // // 2. 手动构造4x4正交投影矩阵（行主序：4行，每行4个浮点数，共16个）
-        // // 正交投影矩阵参数：left, right, bottom, top, near, far
-        // float left = -1.0f, right = 1.0f;
-        // float bottom = -1.0f, top = 1.0f;
-        // float near = 0.1f, far = 20.0f;
-        // float projMat[16] = {// 行主序存储：第1行→[0-3]，第2行→[4-7]，第3行→[8-11]，第4行→[12-15]
-        //                      2.0f, 0.0f, 0.0f, 1.0f,
-        //                      0.0f, 2.0f, 0.0f, 1.0f,
-        //                      0.0f, 0.0f, -2.0f, 1.0f,
-        //                      0.0f, 0.0f, 0.0f, 1.0f};
+        {
+            int _color = glGetUniformLocation(shaders.ShaderProgram, "_color");
+            float _Color[] = {1.0f, 1.0f, 1.0f, 1.0f};
+            glUniform4fv(_color, 1, _Color);
+            printf("Get uniform of _Color : %d\n", _color);
+            //传入MVP矩阵
+            int _identity = glGetUniformLocation(shaders.ShaderProgram, "_identity");
+            printf("Get uniform of identity : %d\n", _identity);
+            glUniformMatrix4fv(_identity, 1, GL_FALSE, identity);
+        }
+        // Set Textures
 
-        // int proj = glGetUniformLocation(shaders.ShaderProgram, "proj");
-        // printf("Get uniform of proj : %d\n", proj);
-        // glUniformMatrix4fv(proj, 1, GL_FALSE, projMat);
+        glBindTexture(GL_TEXTURE_2D, attri.TEX[0]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        // textures.textures.emplace_back(glGetUniformLocation(shaders.ShaderProgram, "MaiZhiMeng"));
-        // printf("Texture location : %d",textures.textures.at(0));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        int width, height, nChanel;
+        stbi_set_flip_vertically_on_load(true); 
+        const char *path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\maizhimeng.png";
+        unsigned char *image_date = stbi_load(path, &width, &height, &nChanel, 4);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_date);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+        stbi_image_free(image_date);
+
+        unsigned int textureLocation[2];
+        textureLocation[0] = glGetUniformLocation(shaders.ShaderProgram, "_MaiZhiMeng");
+        glUniform1i(textureLocation[0], 0);
+
+        //-----------------------------------------------------------------------------
 
         // 设置每帧重置属性
         glClearColor(0.4f, 0.2f, 0.1f, 1.0f);
@@ -365,10 +420,19 @@ int main()
             glfwPollEvents();
             // Clearning
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            // Textures-----------------------------------
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, attri.TEX[0]);
+            glUniform1i(textureLocation[0], 0);
 
+            //-------------------------------------------
+
+            // Draw Triangles-----------------------------
             glUseProgram(shaders.ShaderProgram);
             glBindVertexArray(attri.VAO[0]);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+            // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            //-------------------------------------------
 
             glfwSwapBuffers(glfw.window);
         }

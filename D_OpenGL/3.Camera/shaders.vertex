@@ -1,0 +1,14 @@
+#version 410 core
+layout (location = 0) in vec3 triangle;
+layout (location = 1) in vec2 uv;
+
+out vec2 _uv;
+
+uniform mat4 _identity;
+
+void main()
+{
+    mat4 MVP = _identity;
+    gl_Position = MVP* vec4(triangle.x , triangle.y , triangle.z ,1.0f);
+    _uv = uv;
+}
