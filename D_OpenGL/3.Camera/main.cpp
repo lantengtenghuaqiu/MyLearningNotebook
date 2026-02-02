@@ -1,269 +1,11 @@
-#include <stdio.h>
 #include <vector>
-// #include
-// #incldue
-#define STB_IMAGE_IMPLEMENTATION
+#include <chrono>
 
-#include "../includes/glad/glad.h"
-#include "../includes/GLFW/glfw3.h"
-
-#include "../includes/stb_image.h"
-#include "../glm/glm.hpp"
-#include "../includes/xyl_tools.hpp"
-#include "../includes/Camera.hpp"
-#include "./MVP.hpp"
-
-// g++ main.cpp ..\..\src\glad.c -I ..\..\includes -L ..\..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -Werror=conversion  -std=c++17 -o main.exe
+#include "../includes/Window.hpp"
+#include "../includes/Transformation.hpp"
+#include "../includes/Event.hpp"
+// g++ main.cpp ..\src\glad.c -I ..\includes -L ..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -pedantic -std=c++17 -o main.exe
 // clang++ main.cpp ../src/glad.c  -I ../includes -L ../libs -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo  -o main
-
-// g++ main.cpp ..\src\glad.c -I ..\include -L ..\lib -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -Werror=conversion  -std=c++17 -o main.exe
-// clang++ main.cpp ../src/glad.c  -I ../includes -L ../libs -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo  -o main
-#define FAIL 0
-#define SUCCESS 1
-
-class GLFW
-{
-public:
-    GLFWwindow *window;
-    GLFW() {}
-    int InitGlfw(const int &width, const int &height, const char *title, GLFWmonitor *glfwmonitor = nullptr, GLFWwindow *share = nullptr)
-    {
-        printf("Init Glfw\n");
-        if (glfwInit() != FAIL)
-        {
-            printf("Init Glfw Succeed\n");
-
-            glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-            glfwWindowHint(GLFW_MAXIMIZED, GL_FALSE);
-            glfwWindowHint(GLFW_DECORATED, GL_TRUE);
-            glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
-
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-            this->window = glfwCreateWindow(width, height, title, glfwmonitor, share);
-
-            if (this->window != NULL)
-            {
-                glfwMakeContextCurrent(this->window);
-            }
-            else
-            {
-                printf("window is NULL!!!\n");
-                glfwTerminate();
-            }
-        }
-        else
-        {
-            printf("glfwInit with something wrong,initiation is failed!!!\n");
-            glfwTerminate();
-        }
-
-        return SUCCESS;
-    }
-
-    ~GLFW()
-    {
-        glfwTerminate();
-    }
-};
-
-typedef struct BufferBinderAttributes
-{
-    int BUFFERTYPE = GL_ARRAY_BUFFER;
-    int DRAWYPE = GL_STATIC_DRAW;
-
-    int Location = -1;
-    int DataSize = 3;
-    int DATATYPE = GL_FLOAT;
-
-    unsigned char NORMILAZED = GL_FALSE;
-    int Stride = 0;
-    int StartPointer = 0;
-    bool AttributeChecker() const
-    {
-        if (this->DRAWYPE != 0 && this->Location >= 0 && DataSize > 0)
-            return true;
-        else
-            return false;
-    }
-
-} Binder;
-
-typedef struct ObjectAttributes
-{
-    unsigned int *VAO;
-    unsigned int *VBO;
-    unsigned int *EBO;
-    unsigned int *TEX;
-    unsigned int sizeVAO;
-    unsigned int sizeVBO;
-    unsigned int sizeEBO;
-    unsigned int sizeTEX;
-    ObjectAttributes() {}
-
-    ObjectAttributes(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
-    {
-        this->sizeVAO = sizeVAO;
-        this->sizeVBO = sizeVBO;
-        this->sizeEBO = sizeEBO;
-        this->sizeTEX = sizeTEX;
-        this->VAO = new unsigned int[sizeVAO];
-        this->VBO = new unsigned int[sizeVBO];
-        this->EBO = new unsigned int[sizeEBO];
-        this->TEX = new unsigned int[sizeTEX];
-    }
-    ~ObjectAttributes()
-    {
-
-        delete[] (this->VBO);
-        this->VBO = nullptr;
-
-        delete[] (this->EBO);
-        this->EBO = nullptr;
-
-        delete[] (this->TEX);
-        this->TEX = nullptr;
-
-        delete[] (this->VAO);
-        this->VAO = nullptr;
-    }
-} Attributes;
-
-typedef struct TextureAttribute
-{
-    int TEXTURE_TYPE = GL_TEXTURE_2D;
-
-} Sampler2D;
-
-typedef struct ShadersProgram
-{
-    unsigned int ShaderProgram = 0;
-    unsigned int VertexShader = 0;
-    unsigned int FragmentShader = 0;
-    char *ShaderData;
-    ShadersProgram()
-    {
-        ShaderData = new char;
-        this->ShaderProgram = glCreateProgram();
-        this->VertexShader = glCreateShader(GL_VERTEX_SHADER);
-        this->FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    }
-
-} Shader;
-
-template <typename T>
-class GLAD
-{
-public:
-    int status = 0;
-
-    GLAD() {}
-
-    void InitGlad(const int width, const int height)
-    {
-        printf("Init Glad\n");
-        this->status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        if (this->status == SUCCESS)
-        {
-            printf("Init Glad Succeed\n");
-            glViewport(0, 0, width, height);
-        }
-        else
-        {
-            printf("Init the glad failed\n");
-        }
-    }
-    void BindVAO(unsigned int &VAO)
-    {
-        printf("Bind VAO : %d\n", VAO);
-        glBindVertexArray(VAO);
-    }
-
-    void BindEBO(unsigned int &EBO, const int bytesize, const unsigned int *index, int ebo_draw_type = GL_STATIC_DRAW)
-    {
-        printf("Bind EBO : %d\n", EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, bytesize, index, ebo_draw_type);
-    }
-
-    void BindVBO(unsigned int &VBO, const int bytesize, const Binder binder, const T *data)
-    {
-        if (true)
-        {
-            printf("Bind VBO : %d\n\n", VBO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, bytesize, data, binder.DRAWYPE);
-            // 第二个参数表示分量vec2传2, vec3传3, vec4传4
-            glVertexAttribPointer(binder.Location, binder.DataSize, binder.DATATYPE, binder.NORMILAZED, sizeof(float) * binder.Stride, (void *)binder.StartPointer);
-            glEnableVertexAttribArray(binder.Location);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
-        else
-        {
-            printf("Something wrong in binding VBO\n");
-        }
-    }
-
-    void UnbindVAO()
-    {
-        glBindVertexArray(0);
-    }
-
-    void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id, char *shader_data, char *shader_type)
-    {
-        printf("Compile Shader %s : %d\n", shader_type, shader_id);
-
-        glShaderSource(shader_id, 1, &shader_data, NULL);
-        glCompileShader(shader_id);
-
-        int checker;
-        glGetShaderiv(shader_id, GL_COMPILE_STATUS, &checker);
-
-        if (checker == FAIL)
-        {
-            // ShaderChecker
-        }
-        else
-        {
-            printf("Attached shader program(%d -> %d).\n", shader_id, shader_program);
-            glAttachShader(shader_program, shader_id);
-        }
-    }
-    void LinkeShaderPorgram(unsigned int shader_program)
-    {
-        glLinkProgram(shader_program);
-        int checker;
-        glGetProgramiv(shader_program, GL_LINK_STATUS, &checker);
-        if (checker == FAIL)
-        {
-            // LinkChecker
-        }
-    }
-
-    void UseShaderProgram(unsigned int shader_program)
-    {
-        if (shader_program != FAIL)
-        {
-            printf("Use the shader program : %d\n", shader_program);
-            glUseProgram(shader_program);
-        }
-        else
-            printf("Shader program has something wrong\n");
-    }
-
-    void DeleteShaders(unsigned int shader)
-    {
-        glDeleteShader(shader);
-    }
-    int GetUniformLoaction(const unsigned int sahder_program, const char *keyword)
-    {
-        return glGetUniformLocation(sahder_program, keyword);
-    }
-};
 
 static int width = 860;
 static int height = 720;
@@ -323,13 +65,20 @@ const float uv[] = {
     0.0f, 0.0f,
     0.0f, 1.0f};
 
+float speed = 0.0f;
+
 int main()
 {
     GLFW glfw;
     GLAD<float> glad;
     Attributes attri(2, 2, 1, 1);
 
-    ReadFile file;
+    ReadFile::TheFile file;
+
+    SceneRoot objects(2);
+
+    TexAttri *texAttri = new TexAttri[2];
+
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {
         glad.InitGlad(width, height);
@@ -342,32 +91,20 @@ int main()
         glad.BindVAO(attri.VAO[0]);
         glad.BindEBO(attri.EBO[0], sizeof(indices), indices, GL_STATIC_DRAW);
 
-
-        printf("Bind VBO : %d\n\n", attri.VBO[0]);
-        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[0]);
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
-        glEnableVertexAttribArray(0);
-
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glad.UnbindVAO();
+        Vertices *vertex = new Vertices[2];
+        vertex[0].vertices = vertices;
+        vertex[0].size = sizeof(vertices);
+        VBO(attri, vertex[0]);
 
         Shader shaders;
         // Vertex Shader
-        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\shaders.vertex", "rb", shaders.ShaderData);
+        file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\shaders.vertex";
+        file.GetContent(file.path, "rb", shaders.ShaderData);
         glad.CompileAndAttachShader(shaders.ShaderProgram, shaders.VertexShader, shaders.ShaderData, "vertex shader");
 
         // Fragment Shader
-        file.GetContent("G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\shaders.fragment", "rb", shaders.ShaderData);
+        file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\3.Camera\\shaders.fragment";
+        file.GetContent(file.path, "rb", shaders.ShaderData);
         glad.CompileAndAttachShader(shaders.ShaderProgram, shaders.FragmentShader, shaders.ShaderData, "fragment shader");
 
         // Link Shader Program
@@ -375,57 +112,157 @@ int main()
         glad.UseShaderProgram(shaders.ShaderProgram);
         //-----------------------------------------------------------------------------
 
-        {
-            int _color = glGetUniformLocation(shaders.ShaderProgram, "_color");
-            float _Color[] = {1.0f, 1.0f, 1.0f, 1.0f};
-            glUniform4fv(_color, 1, _Color);
-            printf("Get uniform of _Color : %d\n", _color);
-            //传入MVP矩阵
-            int _identity = glGetUniformLocation(shaders.ShaderProgram, "_identity");
-            printf("Get uniform of identity : %d\n", _identity);
-            glUniformMatrix4fv(_identity, 1, GL_FALSE, identity);
-        }
-        // Set Textures
+        int _color = glGetUniformLocation(shaders.ShaderProgram, "_color");
+        float _Color[] = {1.0f, 1.0f, 1.0f, 1.0f};
+        glUniform4fv(_color, 1, _Color);
+        printf("Get uniform of _Color : %d\n", _color);
+        // 传入MVP矩阵
+        int _identity = glGetUniformLocation(shaders.ShaderProgram, "_identity");
+        printf("Get uniform of _model_identity : %d\n", _identity);
+        glUniformMatrix4fv(_identity, 1, GL_FALSE, identity);
 
-        glBindTexture(GL_TEXTURE_2D, attri.TEX[0]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        mat4 model_scale;
+        Transform::Scale(1.0f, 1.0f, 1.0f, model_scale._mat4);
+        int _model_scale = glGetUniformLocation(shaders.ShaderProgram, "_model_scale");
+        printf("Get uniform of _model_scale : %d\n", _model_scale);
+        glUniformMatrix4fv(_model_scale, 1, GL_FALSE, model_scale._mat4);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        int width, height, nChanel;
-        stbi_set_flip_vertically_on_load(true); 
-        const char *path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\maizhimeng.png";
-        unsigned char *image_date = stbi_load(path, &width, &height, &nChanel, 4);
+        mat4 model_rotation;
+        Transform::Rotation(0.0f, 0.0f, 0.0f, model_rotation._mat4);
+        int _model_rotation = glGetUniformLocation(shaders.ShaderProgram, "_model_rotation");
+        printf("Get uniform of _model_rotation : %d\n", _model_rotation);
+        glUniformMatrix4fv(_model_rotation, 1, GL_TRUE, model_rotation._mat4);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_date);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        mat4 model_translate;
+        Transform::Translate(0.0f, 0.0f, 0.0f, model_translate._mat4);
+        int _model_translate = glGetUniformLocation(shaders.ShaderProgram, "_model_translate");
+        printf("Get uniform of _model__translate : %d\n", _model_translate);
+        glUniformMatrix4fv(_model_translate, 1, GL_TRUE, model_translate._mat4);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
-        stbi_image_free(image_date);
+        //---------------------------------------------------------------------
+        // Camera:
+        // mat4 camera_scale;
+        // Transform::Scale(1.0f, 1.0f, 1.0f, camera_scale._mat4);
+        // int _camera_scale = glGetUniformLocation(shaders.ShaderProgram, "_camera_scale");
+        // printf("Get uniform of _camera_scale : %d\n", _camera_scale);
+        // glUniformMatrix4fv(_camera_scale, 1, GL_TRUE, camera_scale._mat4);
+        // mat4 camera_rotation;
+        // Transform::Rotation(0.0f, 0.0f, 0.0f, camera_rotation._mat4);
+        // int _camera_rotation = glGetUniformLocation(shaders.ShaderProgram, "_camera_rotation");
+        // printf("Get uniform of _camera_rotation : %d\n", _camera_rotation);
+        // glUniformMatrix4fv(_camera_rotation, 1, GL_TRUE, camera_rotation._mat4);
+        // mat4 camera_translate;
+        // Transform::Translate(0.0f, 0.0f, 0.0f, camera_translate._mat4);
+        // int _camera_translate = glGetUniformLocation(shaders.ShaderProgram, "_camera_translate");
+        // printf("Get uniform of _camera_rotation : %d\n", _camera_translate);
+        // glUniformMatrix4fv(_camera_translate, 1, GL_TRUE, camera_translate._mat4);
+        // // Vec4 Eye(Tx, Ty, Tz, 1.0f);
+        Camera camera;
+        float cameraspacematrix[] = {
+            (camera.Right).x, (camera.Up).x, (camera.Forward).x, 0.0f,
+            (camera.Right).y, (camera.Up).y, (camera.Forward).y, 0.0f,
+            (camera.Right).z, (camera.Up).z, (camera.Forward).z, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f};
+        mat4 camera_space_matrix(cameraspacematrix);
+        int _camera_space_matrix = glGetUniformLocation(shaders.ShaderProgram, "_camera_space_matrix");
+        printf("Get uniform of _camera_space_matrix : %d\n", _camera_space_matrix);
+        glUniformMatrix4fv(_camera_space_matrix, 1, GL_TRUE, camera_space_matrix._mat4);
+        //---------------------------------------------------------------------
 
-        unsigned int textureLocation[2];
-        textureLocation[0] = glGetUniformLocation(shaders.ShaderProgram, "_MaiZhiMeng");
-        glUniform1i(textureLocation[0], 0);
+        // Projection matrix:
+        float w = 5.0f;
+        float h = 5.0f;
+        float n = 0.01f;
+        float f = 30.0f;
+
+        float projection[] = {
+            2.0f / w, 0.0f, 0.0f, 0.0f,
+            0.0f, 2.0f / h, 0.0f, 0.0f,
+            0.0f, 0.0f, 2.0f / (f - n), (f + n) / (f - n),
+            0.0f, 0.0f, 0.0f, 1.0f};
+
+        mat4 P(projection);
+        int _P = glGetUniformLocation(shaders.ShaderProgram, "_P");
+        printf("Get uniform of _P : %d\n", _P);
+        glUniformMatrix4fv(_P, 1, GL_TRUE, P._mat4);
+
+        // for (int i = 0; i < 16; i++)
+        // {
+        //     printf("%f ", model_rotation._mat4[i]);
+        //     if ((i + 1) % 4 == 0)
+        //         printf("\n");
+        // }
+
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     printf("%f ", Forward.v[i]);
+        //     if ((i + 1) % 4 == 0)
+        //         printf("\n");
+        // }
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     printf("%f ", Up.v[i]);
+        //     if ((i + 1) % 4 == 0)
+        //         printf("\n");
+        // }
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     printf("%f ", Right.v[i]);
+        //     if ((i + 1) % 4 == 0)
+        //         printf("\n");
+        // }
+
+        // Set Textures--------------------------------------------------------
+        Texture(&attri,texAttri,shaders);
+
 
         //-----------------------------------------------------------------------------
 
         // 设置每帧重置属性
         glClearColor(0.4f, 0.2f, 0.1f, 1.0f);
-        glClearDepth(0.0f);
+        glClearDepth(1.0f);
         glClearStencil(0.0f);
+        glEnable(GL_DEPTH_TEST);
 
+        // 记录帧速率:--------------------------------------------------------
+        auto first_frame_time = std::chrono::high_resolution_clock::now();
+        auto last_frame_time = std::chrono::high_resolution_clock::now();
+        auto current_frame_time = std::chrono::high_resolution_clock::now();
+        float deltTime = 0;
+        float time = 0;
+        //-------------------------------------------------------------------
         while (!glfwWindowShouldClose(glfw.window))
         {
+
+            // 帧速率:
+            current_frame_time = std::chrono::high_resolution_clock::now();
+            deltTime = std::chrono::duration_cast<std::chrono::duration<float>>(current_frame_time - last_frame_time).count();
+            time = std::chrono::duration_cast<std::chrono::duration<float>>(current_frame_time - first_frame_time).count();
+            last_frame_time = std::chrono::high_resolution_clock::now();
+
+#ifdef LOG_DELTTIME
+            printf("delt time: %f\n", deltTime);
+            printf("time: %f\n", time);
+#endif
             glfwPollEvents();
             // Clearning
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             // Textures-----------------------------------
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, attri.TEX[0]);
-            glUniform1i(textureLocation[0], 0);
+            //--------------------------------------------
 
-            //-------------------------------------------
+            // printf("Degbug\n");
+            // Key Board Event-----------------------------
+            speed = deltTime;
+            KeyRotate(glfw.window, objects.scene_objects[0], speed * 20.0f, model_rotation._mat4, _model_rotation);
+            KeyTranslate(glfw.window, objects.scene_objects[0], speed * 10.0f, model_translate._mat4, _model_translate);
+
+            // Camera
+            // CameraRotate(glfw.window, camera, speed * 20.0f, camera_rotation._mat4, _camera_rotation);
+            // CameraTranslate(glfw.window, camera, speed * 10.0f, camera_translate._mat4, _camera_translate);
+            // printf("%f : %f : %f\n",objects.scene_objects[0].rotationX,objects.scene_objects[0].rotationY,objects.scene_objects[0].rotationZ);
+            // CameraRotate(glfw.window,)
 
             // Draw Triangles-----------------------------
             glUseProgram(shaders.ShaderProgram);
@@ -449,3 +286,5 @@ int main()
 
     return 0;
 }
+
+//{{cos(b) cos(c), -cos(b) sin(c), sin(b), 0}, {sin(a) sin(b) cos(c) + cos(a) sin(c), sin(a) sin(b) sin(c) + cos(a) cos(c), -sin(a) cos(b), 0}, {-cos(a) sin(b) cos(c) + sin(a) sin(c), cos(a) sin(b) sin(c) + sin(a) cos(c), cos(b), 0}, {0, 0, 0, 1}}
