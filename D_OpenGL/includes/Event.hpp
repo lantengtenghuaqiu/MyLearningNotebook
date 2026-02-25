@@ -5,24 +5,26 @@
 #include "Transformation.hpp"
 #include "SceneObject.hpp"
 
-void CameraRotate(GLFWwindow *window, SceneObject &entity, float speed, float *mat, int location)
+void CameraRotate(GLFWwindow *window, Camera &camera, float speed)
 {
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        entity.rotationY += speed;
-        Transform::Rotation(0.0f, entity.rotationY, 0.0f, mat);
-        glUniformMatrix4fv(location, 1, GL_TRUE, mat);
+        // camera.Position.y -= speed;
+        camera.rotationY += speed;
+        Transform::Rotation(0.0f,camera.rotationY,0.0f,camera.rotationMatrix._mat4);
+        camera.Right = camera.rotationMatrix * camera.Right;
+        camera.Up = camera.rotationMatrix * camera.Up;
+        camera.Forward = camera.rotationMatrix * camera.Forward;
+
     }
 
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        entity.rotationY -= speed;
-
-        Transform::Rotation(0.0f, entity.rotationY, 0.0f, mat);
-        glUniformMatrix4fv(location, 1, GL_TRUE, mat);
+        camera.Position.y += speed;
     }
 }
-void CameraTranslate(GLFWwindow *window, SceneObject &entity, float speed, float *mat, int location)
+
+void CameraTranslate(GLFWwindow *window, TransformAttribute &entity, float speed, float *mat, int location)
 {
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
@@ -54,7 +56,7 @@ void CameraTranslate(GLFWwindow *window, SceneObject &entity, float speed, float
     glUniformMatrix4fv(location, 1, GL_TRUE, mat);
 }
 
-void KeyRotate(GLFWwindow *window, SceneObject &entity, float speed, float *mat, int location)
+void KeyRotate(GLFWwindow *window, TransformAttribute &entity, float speed, float *mat, int location)
 {
     
 
@@ -104,7 +106,7 @@ void KeyRotate(GLFWwindow *window, SceneObject &entity, float speed, float *mat,
     }
 }
 
-void KeyTranslate(GLFWwindow *window, SceneObject &entity, float speed, float *mat, int location)
+void KeyTranslate(GLFWwindow *window, TransformAttribute &entity, float speed, float *mat, int location)
 {
 
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
@@ -117,22 +119,29 @@ void KeyTranslate(GLFWwindow *window, SceneObject &entity, float speed, float *m
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
     {
-        entity.translatY -= speed;
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
-    {
         entity.translatY += speed;
     }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    #ifdef __APPLE__
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
     {
-        entity.translatZ -= speed;
+        entity.translatY -= speed;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    #else
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+    {
+        entity.translatY -= speed;
+    }
+    #endif
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         entity.translatZ += speed;
     }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        entity.translatZ -= speed;
+    }
 
     Transform::Translate(entity.translatX, entity.translatY, entity.translatZ, mat);
-    glUniformMatrix4fv(location, 1, GL_TRUE, mat);
+    glUniformMatrix4fv(location, 1, GL_FALSE, mat);
 }
 #endif

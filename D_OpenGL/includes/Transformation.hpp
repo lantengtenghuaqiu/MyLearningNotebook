@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdio.h>
 #include "Data.hpp"
+#include "xyl_tools.hpp"
 #define pi 3.1415926
 #define rad pi / 180.0
 
@@ -81,11 +82,13 @@ namespace Transform
         float x = _x * rad;
         float y = _y * rad;
         float z = _z * rad;
-
+        //等待之后优化改为对每个元素的修改而不是现在的赋值形式.
+        // _mat[0] =cos(y) * cos(z);
+        
         float mat[16] = {
-            cos(y) * cos(z), -cos(y) * sin(z), sin(y), 0.0f,
-            sin(x) * sin(y) * cos(z) + cos(x) * sin(z), -sin(x) * sin(y) * sin(z) + cos(x) * cos(z), -sin(x) * cos(y), 0.0f,
-            -cos(x) * sin(y) * cos(z) + sin(x) * sin(z), cos(x) * sin(y) * sin(z) + sin(x) * cos(z), cos(x) * cos(y), 0.0f,
+            cos(y) * cos(z), sin(x) * sin(y) * cos(z) + cos(x) * sin(z), -cos(x) * sin(y) * cos(z) + sin(x) * sin(z), 0.0f,
+            -cos(y) * sin(z), -sin(x) * sin(y) * sin(z) + cos(x) * cos(z), cos(x) * sin(y) * sin(z) + sin(x) * cos(z), 0.0f,
+            sin(y), -sin(x) * cos(y), cos(x) * cos(y), 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f};
 
         for (int i = 0; i < 16; i++)
@@ -96,10 +99,10 @@ namespace Transform
     void Translate(float tx, float ty, float tz, float *_matrix)
     {
         float matrix[16] = {
-            1.0f, 0.0f, 0.0f, tx,
-            0.0f, 1.0f, 0.0f, ty,
-            0.0f, 0.0f, 1.0f, tz,
-            0.0f, 0.0f, 0.0f, 1.0f};
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            tx, ty, tz, 1.0f};
 
         for (int i = 0; i < 16; i++)
         {
@@ -107,7 +110,6 @@ namespace Transform
         }
     }
 }
-
 
 namespace View
 {
@@ -121,7 +123,6 @@ namespace View
     //     1.0f};
 
 }
-
 
 namespace Math
 {

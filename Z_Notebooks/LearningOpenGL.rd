@@ -114,6 +114,8 @@
                     什么是VAO?
                         VAO是Vertex Array Object的缩写,它的功能是记录当前通过glBufferData绑定在gpu中的顶点数据.
                         因为glBindBuffer一次只能绑定一个vertex数据,此外它不具有索引可以告诉gpu我要拿哪一个我绑定的顶点数据.
+                        !!!注意:glVertexAttribPointer只是写VAO的规则,并不是存入数据,真正存入数据的是glBufferData,VAO只是从glBufferData中根据现在制定好的规则去读取数据.
+
                     unsigned int VAO[number];
 
                     glGenVertexArray(number,VAO);

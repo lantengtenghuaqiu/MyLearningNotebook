@@ -1,0 +1,20 @@
+#version 410 core
+layout (location = 0) in vec3 Vertices;
+
+uniform mat4 _scale2;
+uniform mat4 _rotation2;
+uniform mat4 _translate2;
+
+uniform mat4 V;
+
+uniform mat4 P;
+
+
+void main()
+{
+    vec4 vertices = vec4(Vertices,1.0);
+    mat4 M = _translate2 * _rotation2 * _scale2;
+    mat4 MVP = P * V * M;
+    gl_Position = MVP * vertices;
+
+}

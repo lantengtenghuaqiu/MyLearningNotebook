@@ -1,0 +1,21 @@
+#version 410 core
+layout (location = 0) in vec3 x_vertices;
+layout (location = 1) in vec2 x_uv;
+
+layout (location = 2) in vec2 x_offsetPos;
+
+out vec2 _uv;
+
+void main(){
+
+    //float x = x_vertices.x ;
+
+    //float y = x_vertices.y ;
+
+    //vec4 _vertices = vec4(x,y,x_vertices.z,1.0f);
+    vec4 _vertices = vec4(x_vertices,1.0f);
+
+    gl_Position = _vertices;
+    _uv = x_uv;
+
+}

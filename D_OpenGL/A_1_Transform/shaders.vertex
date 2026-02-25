@@ -1,0 +1,44 @@
+#version 410 core
+layout (location = 0) in vec3 Vertices;
+layout (location = 1) in vec3 Normal;
+layout (location = 2) in vec2 UV;
+
+layout (std140) uniform Transform
+{
+    mat4 P;
+};
+
+out vec2 _uv;
+
+out vec3 _normal;
+
+out vec3 _vertex_pos;
+
+out vec3 _light_pos;
+
+uniform mat4 _model_scale;
+
+uniform mat4 _model_rotation;
+
+uniform mat4 _model_translate;
+
+
+
+
+uniform mat4 V;
+
+
+uniform vec3 _LightPosition;
+
+void main()
+{
+    vec4 vertices = vec4(Vertices,1.0);
+    mat4 M = _model_translate * _model_rotation * _model_scale;
+    mat4 MVP = P * V * M;
+    gl_Position = MVP * vertices;
+    _uv = UV;
+    _vertex_pos = (M * vertices).xyz;
+    _light_pos = (_LightPosition);
+    mat3 TransposeInverseMatOfNormal = transpose(inverse(mat3(M)));
+    _normal = normalize(TransposeInverseMatOfNormal * Normal);
+}

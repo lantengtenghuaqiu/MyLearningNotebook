@@ -4,7 +4,7 @@
 #include "./GLFW/glfw3.h"
 #include "./BasicIncludes.hpp"
 #include "../includes/xyl_tools.hpp"
-
+#include "./GlobalDatas.hpp"
 #define ShaderChecker                               \
     printf("Wrong Compile (%d)\n", checker);        \
     char info[512];                                 \
@@ -45,6 +45,9 @@ public:
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_DEPTH_BITS, 32);
+            glfwWindowHint(GLFW_STENCIL_BITS, 8);
+
 #ifdef __APPLE__
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -95,73 +98,6 @@ typedef struct BufferBinderAttributes
     }
 } Binder;
 
-typedef struct ObjectAttributes
-{
-    unsigned int *VAO;
-    unsigned int *VBO;
-    unsigned int *EBO;
-    unsigned int *TEX;
-
-    unsigned int sizeVAO;
-    unsigned int sizeVBO;
-    unsigned int sizeEBO;
-    unsigned int sizeTEX;
-
-    ObjectAttributes() {}
-
-    ObjectAttributes(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
-    {
-        this->sizeVAO = sizeVAO;
-        this->sizeVBO = sizeVBO;
-        this->sizeEBO = sizeEBO;
-        this->sizeTEX = sizeTEX;
-
-        this->VAO = new unsigned int[sizeVAO];
-        this->VBO = new unsigned int[sizeVBO];
-        this->EBO = new unsigned int[sizeEBO];
-        this->TEX = new unsigned int[sizeTEX];
-    }
-    ~ObjectAttributes()
-    {
-
-        delete[] (this->VBO);
-        this->VBO = nullptr;
-
-        delete[] (this->EBO);
-        this->EBO = nullptr;
-
-        delete[] (this->TEX);
-        this->TEX = nullptr;
-
-        delete[] (this->VAO);
-        this->VAO = nullptr;
-    }
-} Attributes;
-
-typedef struct TextureAttribute
-{
-    int width, height, nChanel;
-    unsigned int textureLocation;
-
-
-} TexAttri;
-
-typedef struct ShadersProgram
-{
-    unsigned int ShaderProgram = 0;
-    unsigned int VertexShader = 0;
-    unsigned int FragmentShader = 0;
-    char *ShaderData;
-    ShadersProgram()
-    {
-        ShaderData = new char;
-        this->ShaderProgram = glCreateProgram();
-        this->VertexShader = glCreateShader(GL_VERTEX_SHADER);
-        this->FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    }
-
-} Shader;
-
 template <typename T>
 class GLAD
 {
@@ -184,17 +120,20 @@ public:
             printf("Init the glad failed\n");
         }
     }
-    void BindVAO(unsigned int &VAO)
-    {
-        printf("Bind VAO : %d\n", VAO);
-        glBindVertexArray(VAO);
-    }
 
-    void BindEBO(unsigned int &EBO, const int bytesize, const unsigned int *index, int ebo_draw_type = GL_STATIC_DRAW)
+    void BindEBO(unsigned int &EBO, const int data_size, const unsigned int *index, int ebo_draw_type = GL_STATIC_DRAW)
     {
         printf("Bind EBO : %d\n", EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, bytesize, index, ebo_draw_type);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, data_size, index, ebo_draw_type);
+    }
+    
+    void BindVAO(unsigned int &VAO)
+    {
+        printf("VAO Index : %d \n", VAO);
+
+        glBindVertexArray(VAO);
+        // currentIndex += 1;
     }
 
     void BindVBO(unsigned int &VBO, const int bytesize, const Binder binder, const T *data)
@@ -213,6 +152,10 @@ public:
         {
             printf("Something wrong in binding VBO\n");
         }
+    }
+
+    void BindFBO()
+    {
     }
 
     void UnbindVAO()
@@ -272,26 +215,34 @@ public:
     }
 };
 
-struct Vertices
+void ReadVertexData(Vertices &vertex, float *vertices, unsigned long long size)
 {
-    /* data */
-    float *vertices;
-    unsigned long long size;
-} Vertex;
+    vertex.vertices = vertices;
+    vertex.size = size;
+    if (vertex.vertices != NULL)
+    {
+        printf("Vertex Size : %llu\n", vertex.size);
+    }
+    else
+        printf("Vertex is Null\n");
+}
 
-void VBO(Attributes &attri, Vertices &vertex)
+void BindVBO_WithNormalAndUV(Attributes &attri, const int &currentIndex, Vertices &vertex)
 {
-    printf("Bind VBO : %d\n", attri.VBO[0]);
+    printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
 
-    glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[currentIndex]);
 
     glBufferData(GL_ARRAY_BUFFER, vertex.size, vertex.vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
+    // glVertexAttribPointer只是写VAO的规则,并不是存入数据,真正存入数据的是glBufferData,VAO只是从glBufferData中根据现在制定好的规则去读取数据.
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)0);
     glEnableVertexAttribArray(0);
 
-    glBufferData(GL_ARRAY_BUFFER, vertex.size, vertex.vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -299,11 +250,45 @@ void VBO(Attributes &attri, Vertices &vertex)
     // vertex.vertices=NULL;
 }
 
-void Texture(Attributes *attri , TexAttri *texAttri , Shader shaders)
+void BindVBO(Attributes &attri, const int &currentIndex, Vertices &vertex)
 {
+    printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
 
+    glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[currentIndex]);
+
+    glBufferData(GL_ARRAY_BUFFER, vertex.size, vertex.vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+void BindVBO_WithUV(Attributes &attri, const int &currentIndex, Vertices &vertex)
+{
+    printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[currentIndex]);
+
+    glBufferData(GL_ARRAY_BUFFER, vertex.size, vertex.vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+void SetTextures(Attributes *attri, TexAttri *texAttri, Shader shaders)
+{
+    unsigned char *image_date;
+    const char *path;
+
+    // Texture Albedo-----------------------------------------------------------
     glBindTexture(GL_TEXTURE_2D, attri->TEX[0]);
-    printf("Bind TEX : %d\n",attri->TEX[0]);
+    printf("Bind Container Albedo TEX : %d\n", attri->TEX[0]);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -311,12 +296,9 @@ void Texture(Attributes *attri , TexAttri *texAttri , Shader shaders)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    const char *path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\maizhimeng.png";
-    unsigned char *image_date = stbi_load(path, &texAttri[0].width, &texAttri[0].height, &texAttri[0].nChanel, 4);
-    printf("Texture width : %d\n",texAttri[0].width);
-    printf("Texture height : %d\n",texAttri[0].height);
-    printf("Texture nChanel : %d\n",texAttri[0].nChanel);
-
+    path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\container2.png";
+    image_date = stbi_load(path, &texAttri[0].width, &texAttri[0].height, &texAttri[0].nChanel, 4);
+    printf("Texture Container Albedo width : %d , height : %d , nChanel : %d\n", texAttri[0].width, texAttri[0].height, texAttri[0].nChanel);
     stbi_set_flip_vertically_on_load(true);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texAttri[0].width, texAttri[0].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_date);
@@ -325,9 +307,58 @@ void Texture(Attributes *attri , TexAttri *texAttri , Shader shaders)
     glBindTexture(GL_TEXTURE_2D, 0);
     stbi_image_free(image_date);
 
-    texAttri[0].textureLocation = glGetUniformLocation(shaders.ShaderProgram, "_MaiZhiMeng");
-    printf("Texture 0 Id : %d\n",texAttri[0].textureLocation);
-    glUniform1i(texAttri[0].textureLocation, 0);
+    texAttri[0].textureLocation = glGetUniformLocation(shaders.Program, "_Conatiner");
+    printf("Texture Container Albedo Id : %d\n", texAttri[0].textureLocation);
+
+    // Texture Specular---------------------------------------------------------
+    glBindTexture(GL_TEXTURE_2D, attri->TEX[1]);
+    printf("Bind Conatiner Specular TEX : %d\n", attri->TEX[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\container2_specular.png";
+    image_date = stbi_load(path, &texAttri[1].width, &texAttri[1].height, &texAttri[1].nChanel, 4);
+    printf("Texture Conatiner Specular width : %d , height : %d , nChanel : %d\n", texAttri[1].width, texAttri[1].height, texAttri[1].nChanel);
+    stbi_set_flip_vertically_on_load(true);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texAttri[1].width, texAttri[1].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_date);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    stbi_image_free(image_date);
+
+    texAttri[1].textureLocation = glGetUniformLocation(shaders.Program, "_ConatinerSpecular");
+    printf("Texture Conatiner Specular Id : %d\n", texAttri[1].textureLocation);
 }
 
+void SetBindLogoMesh(Attributes *attri, TexAttri *texAttri, Shader shaders)
+{
+    texAttri[2].textureLocation = glGetUniformLocation(shaders.Program, "_maizhimeng");
+    printf("Texture Logo Mesh Id : %d\n", texAttri[2].textureLocation);
+
+    unsigned char *image_date;
+    const char *path;
+    // Logo texture:
+    glBindTexture(GL_TEXTURE_2D, attri->TEX[2]);
+    printf("\nBind Logo Mesh TEX : %d\n", attri->TEX[2]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\maizhimeng.png";
+    image_date = stbi_load(path, &texAttri[2].width, &texAttri[2].height, &texAttri[2].nChanel, 4);
+    printf("Texture Logo Mesh width : %d , height : %d , nChanel : %d\n", texAttri[2].width, texAttri[2].height, texAttri[2].nChanel);
+    stbi_set_flip_vertically_on_load(true);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texAttri[2].width, texAttri[2].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_date);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    stbi_image_free(image_date);
+}
 #endif

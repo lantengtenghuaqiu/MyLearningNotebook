@@ -1,11 +1,24 @@
 #ifndef XYLTOOLS
 #define XYLTOOLS
 
-
 #include "./BasicIncludes.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../includes/stb_image.h"
+
+namespace Picture
+{
+    struct Image
+    {
+        unsigned char *data;
+        char *path;
+        
+        int width;
+        int height;
+        int channels;
+
+    };
+}
 
 namespace ReadFile
 {
@@ -15,11 +28,11 @@ namespace ReadFile
         FILE *_file;
 
     public:
-        char* path;
+        char *path;
 
         TheFile() {}
 
-        void GetContent( char *path,  char *mode, char *&container)
+        void GetContent(char *path, char *mode, char *&container)
         {
             this->_file = fopen(path, mode);
             if (this->_file)
