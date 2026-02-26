@@ -240,7 +240,7 @@ public:
             glAttachShader(shader_program, shader_id);
         }
     }
-    inline void LinkeShaderPorgram(unsigned int shader_program)
+    inline void LinkShaderProgram(unsigned int shader_program)
     {
         glLinkProgram(shader_program);
         int checker;

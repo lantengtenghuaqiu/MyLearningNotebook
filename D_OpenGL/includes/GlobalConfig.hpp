@@ -2,6 +2,13 @@
 #define GLOBAL_DATAS
 
 #include "../includes/SceneObject.hpp"
+
+// 全局数据------------------------------------------------
+static int width = 1080;
+static int height = 720;
+static int frameBufferWidth = 0;
+static int frameBufferHeight = 0;
+
 struct Vertices
 {
     /* data */
@@ -67,6 +74,10 @@ typedef struct ObjectAttributes
 
         delete[] (this->FBO);
         this->FBO = nullptr;
+
+        delete[] (this->UBO);
+        this->UBO = nullptr;
+
     }
 } Attributes;
 
@@ -105,15 +116,22 @@ typedef struct CurrentIndex
     int UBO = 0;
 } CurrentID;
 
-void SetCamera(Camera &camera)
+void SetCamera(Camera &camera ,const float & frameW , const float& frameH)
 {
     camera.SetPosition(Vec4(0.0f, 0.0f, 0.0f, 1.0f));
     camera.fov = 30.0f;
-    camera.w = 860.0f;
-    camera.h = 720.0f;
+    camera.w = frameW;
+    camera.h = frameH;
     camera.n = 0.01f;
     camera.f = 30.0f;
-    camera.aspect = 860.0f / 720.0f;
-}
+    camera.aspect = frameW / frameH;
+    camera.ViewMatrix();
 
+}
+void ClearGLAttribute()
+{
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearDepth(1.0f);
+    glClearStencil(0.0f);
+}
 #endif

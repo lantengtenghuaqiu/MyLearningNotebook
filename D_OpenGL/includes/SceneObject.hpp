@@ -177,24 +177,24 @@ struct Light : public SceneObject
 {
     /* data */
     Vec4 Color;
-    float Instensity = 0;
+    float Intensity = 0;
     Vec4 Direction;
     Light()
     {
         this->Color = Vec4(1.0, 1.0, 1.0, 1.0);
-        this->Instensity = 1.0f;
+        this->Intensity = 1.0f;
         this->Direction = Vec4(1.0, 0.0, 0.0, 0.0);
     }
     Light(Vec4 color, float instensity, Vec4 dir)
     {
         this->Color = color * instensity;
-        this->Instensity = instensity;
+        this->Intensity = instensity;
         this->Direction = dir;
     }
 
     Vec4 GetColorMultipliedByInstensity()
     {
-        return this->Color * this->Instensity;
+        return this->Color * this->Intensity;
     }
     Vec4 GetColor()
     {
@@ -357,19 +357,19 @@ namespace Cube
 namespace Plane
 {
     float mesh[] = {
-        -0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
+        -1.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
         
-        0.5f, -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f};
+        1.0f, -1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f};
     float uv[] = {
         0.0f, 1.0f,
+        1.0f, 0.0f,
         0.0f, 0.0f,
         1.0f, 0.0f,
         0.0f, 1.0f,
-        1.0f, 0.0f,
         1.0f, 1.0f};
 } // namespace Plane
 

@@ -4,7 +4,7 @@
 #include "./GLFW/glfw3.h"
 #include "./BasicIncludes.hpp"
 #include "../includes/xyl_tools.hpp"
-#include "./GlobalDatas.hpp"
+#include "./GlobalConfig.hpp"
 #define ShaderChecker                               \
     printf("Wrong Compile (%d)\n", checker);        \
     char info[512];                                 \
@@ -47,7 +47,8 @@ public:
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_DEPTH_BITS, 32);
             glfwWindowHint(GLFW_STENCIL_BITS, 8);
-
+            
+            glfwWindowHint(GLFW_SAMPLES, 4);
 #ifdef __APPLE__
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -106,14 +107,15 @@ public:
 
     GLAD() {}
 
-    void InitGlad(const int width, const int height)
+    void InitGlad(GLFWwindow * window,const int width, const int height , int & frameWidth , int & frameHeight)
     {
         printf("Init Glad\n");
         this->status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         if (this->status == SUCCESS)
         {
             printf("Init Glad Succeed\n");
-            glViewport(0, 0, width, height);
+            glfwGetFramebufferSize(window,&frameWidth,&frameHeight);
+            glViewport(0, 0, frameWidth, frameHeight);
         }
         else
         {
@@ -127,7 +129,7 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, data_size, index, ebo_draw_type);
     }
-    
+
     void BindVAO(unsigned int &VAO)
     {
         printf("VAO Index : %d \n", VAO);
@@ -183,7 +185,7 @@ public:
             glAttachShader(shader_program, shader_id);
         }
     }
-    inline void LinkeShaderPorgram(unsigned int shader_program)
+    inline void LinkShaderProgram(unsigned int shader_program)
     {
         glLinkProgram(shader_program);
         int checker;
@@ -192,6 +194,14 @@ public:
         {
             LinkChecker
         }
+    }
+
+    inline void DetachAndDeleteShaders(Shader shader){
+        // Detch And Delete Shaders
+        glDetachShader(shader.Program, shader.Vertex);
+        glDetachShader(shader.Program, shader.Fragment);
+        glDeleteShader(shader.Vertex);
+        glDeleteShader(shader.Fragment);
     }
 
     void UseShaderProgram(unsigned int shader_program)
@@ -295,8 +305,11 @@ void SetTextures(Attributes *attri, TexAttri *texAttri, Shader shaders)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+#ifdef __APPLE__
+    path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/Assets/Textures/container2.png";
+#else
     path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\container2.png";
+#endif
     image_date = stbi_load(path, &texAttri[0].width, &texAttri[0].height, &texAttri[0].nChanel, 4);
     printf("Texture Container Albedo width : %d , height : %d , nChanel : %d\n", texAttri[0].width, texAttri[0].height, texAttri[0].nChanel);
     stbi_set_flip_vertically_on_load(true);
@@ -318,8 +331,12 @@ void SetTextures(Attributes *attri, TexAttri *texAttri, Shader shaders)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+#ifdef __APPLE__
+    path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/Assets/Textures/container2_specular.png";
+#else
     path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\container2_specular.png";
+#endif
+
     image_date = stbi_load(path, &texAttri[1].width, &texAttri[1].height, &texAttri[1].nChanel, 4);
     printf("Texture Conatiner Specular width : %d , height : %d , nChanel : %d\n", texAttri[1].width, texAttri[1].height, texAttri[1].nChanel);
     stbi_set_flip_vertically_on_load(true);
@@ -336,9 +353,6 @@ void SetTextures(Attributes *attri, TexAttri *texAttri, Shader shaders)
 
 void SetBindLogoMesh(Attributes *attri, TexAttri *texAttri, Shader shaders)
 {
-    texAttri[2].textureLocation = glGetUniformLocation(shaders.Program, "_maizhimeng");
-    printf("Texture Logo Mesh Id : %d\n", texAttri[2].textureLocation);
-
     unsigned char *image_date;
     const char *path;
     // Logo texture:
@@ -349,8 +363,12 @@ void SetBindLogoMesh(Attributes *attri, TexAttri *texAttri, Shader shaders)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+#ifdef __APPLE__
+    path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/Assets/Textures/maizhimeng.png";
 
+#else
     path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\maizhimeng.png";
+#endif
     image_date = stbi_load(path, &texAttri[2].width, &texAttri[2].height, &texAttri[2].nChanel, 4);
     printf("Texture Logo Mesh width : %d , height : %d , nChanel : %d\n", texAttri[2].width, texAttri[2].height, texAttri[2].nChanel);
     stbi_set_flip_vertically_on_load(true);
@@ -360,5 +378,8 @@ void SetBindLogoMesh(Attributes *attri, TexAttri *texAttri, Shader shaders)
 
     glBindTexture(GL_TEXTURE_2D, 0);
     stbi_image_free(image_date);
+
+    texAttri[2].textureLocation = glGetUniformLocation(shaders.Program, "_maizhimeng");
+    printf("Texture Logo Mesh Id : %d\n", texAttri[2].textureLocation);
 }
 #endif

@@ -4,46 +4,58 @@
 #include "../includes/Window.hpp"
 #include "../includes/Transformation.hpp"
 #include "../includes/Event.hpp"
-#include "../includes/GlobalDatas.hpp"
-#include "../includes/ModelLoader.hpp"
 
+#ifdef __WIN32__
+#include "../includes/GlobalConfig.hpp"
+#include "../includes/ModelLoader.hpp"
+#endif
 // g++ main.cpp ..\src\glad.c -I ..\includes -L ..\libs -lopengl32 -lglfw3 -lgdi32 -fno-permissive -Wall -Wextra -pedantic -std=c++17 -o main.exe
 // clang++ main.cpp ../src/glad.c  -I ../includes -L ../libs -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo  -o main
 
 // 全局数据------------------------------------------------
-static int width = 860;
-static int height = 720;
+
+Vec4 AmbientColor = Vec4(0.76f, 0.76f, 0.80f, 1.0f);
+
 // 全局 uniform
+// Cube map
 int _cubeMapProjection;
 int _cubeMapView;
-int _transform;
 
-int _camera_space_matrix;
+// Container
+// int _camera_space_matrix;
+int ViewPos;
 int _P;
 int _model_scale;
 int _model_rotation;
 int _model_translate;
+int _containerTransform;
 
-int ViewPos;
-
-int DirectionalLightDir;
-int DirectionalLightCol;
-int DirectionalLightInten;
-
+// Light Box
 int PointLightLightPos;
 int PointLightLightColor;
 int PointLightLinear;
 int PointLightConstant;
 int PointLightQuadratic;
-
 int BaseColor;
-int Ambient;
 
 int _view_space_matrix2;
 int _P2;
 int _scale2;
 int _rotation2;
 int _translate2;
+
+// Environment
+int Ambient;
+
+// Directional Light
+int DirectionalLightDir;
+int DirectionalLightCol;
+int DirectionalLightInten;
+
+// render texture:
+int _transformRT;
+int _RT_ModelTranslate;
+int _RT_ModelScale;
 
 // ----------------------------------------------------------------------------
 char *faces[] =
@@ -57,7 +69,7 @@ char *faces[] =
 //---
 float speed = 0.0f;
 
-void GlobalDrawCall()
+void GlobalFrameConfig()
 {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -88,13 +100,6 @@ void DrawCallSecond()
     glDisable(GL_BLEND);
 }
 
-void ClearGLAttribute()
-{
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClearDepth(1.0f);
-    glClearStencil(0.0f);
-}
-
 int main()
 {
     GLFW glfw;
@@ -103,7 +108,7 @@ int main()
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {
 
-        glad.InitGlad(width, height);
+        glad.InitGlad(glfw.window, width, height, frameBufferWidth, frameBufferHeight);
 
         //---------------------------------------------------------------------
         // Global Config-------------------------------------------------------
@@ -113,7 +118,8 @@ int main()
 
         // Camera--------------------------------------------------------------
         Camera camera;
-        SetCamera(camera);
+        SetCamera(camera, (float)frameBufferWidth, (float)frameBufferHeight);
+
         // Projection matrix:
         const float Projection[][16] = {
             {
@@ -124,6 +130,7 @@ int main()
                 0.0f, 0.0f, (camera.f + camera.n) / (camera.f - camera.n), 1.0f
                 //@
             },
+
             {
                 //@
                 1.0f / (camera.aspect * tan(camera.fov / 2.0f)), 0.0f, 0.0f, 0.0f,
@@ -131,7 +138,9 @@ int main()
                 0.0f, 0.0f, (camera.n + camera.f) / (camera.n - camera.f), -1.0f,
                 0.0f, 0.0f, (2.0f * camera.n * camera.f) / (camera.n - camera.f), 0.0f
                 //@
-            }};
+            }
+
+        };
         // --------------------------------------------------------------------
 
         // Used in Binding VAO & VBO & Shaders---------------------------------
@@ -140,7 +149,7 @@ int main()
 
         // All Buffer Object---------------------------------------------------
         // Buffer Object Mannger
-        Attributes attri(4, 4, 1, 4, 1, 1);
+        Attributes attri(4, 4, 1, 4, 1, 2);
         // Buffer Generation
         glGenVertexArrays(attri.sizeVAO, attri.VAO);
         glGenBuffers(attri.sizeEBO, attri.EBO);
@@ -149,20 +158,15 @@ int main()
         glGenBuffers(attri.sizeUBO, attri.UBO);
         // --------------------------------------------------------------------
         // Uniform buffer object config
-        glBindBuffer(GL_UNIFORM_BUFFER, attri.UBO[CID.UBO]);
         printf("UBO : %d\n", attri.UBO[CID.UBO]);
-        glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(float), NULL, GL_STATIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, attri.UBO[CID.UBO]);
+        glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(float) * 2, NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, 16 * sizeof(float), Projection[1]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.cameraspacematrix);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, attri.UBO[CID.UBO]);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        CID.UBO++;
 
-        // if (_transform == GL_INVALID_INDEX)
-        // {
-        //     std::cout << "未找到Transform UBO块" << std::endl;
-        //     return -1;
-        // }
-
-        CID.UBO += 1;
         // Vertex Array Mannager-----------------------------------------------
         Vertices *vertex = new Vertices[4];
         // --------------------------------------------------------------------
@@ -171,17 +175,6 @@ int main()
         Picture::Image image;
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-
-        // // Uniform buffer object config
-        // glBindBuffer(GL_UNIFORM_BUFFER, attri.UBO[CID.UBO]);
-
-        // glBufferData(GL_UNIFORM_BUFFER, 16 * 3, NULL, GL_STATIC_DRAW);
-
-        // glBindBufferBase(GL_UNIFORM_BUFFER, 0, attri.UBO[CID.UBO]);
-
-        // glBufferSubData(GL_UNIFORM_BUFFER, 0, 16 * 3, &Projection[1]);
-        // glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        // CID.UBO += 1;
 
         // Draw Cube Map-------------------------------------------------------
         printf("\n****Draw Cube map box****\n");
@@ -209,7 +202,7 @@ int main()
 
         // vertex
 #ifdef __APPLE__
-
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/Assets/Materials/CubeMap.vertex";
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Materials\\CubeMap.vertex";
 #endif
@@ -218,20 +211,17 @@ int main()
 
         // fragment
 #ifdef __APPLE__
-
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/Assets/Materials/CubeMap.fragment";
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Materials\\CubeMap.fragment";
 #endif
         file.GetContent(file.path, "rb", cubeMapShader.ShaderData);
         glad.CompileAndAttachShader(cubeMapShader.Program, cubeMapShader.Fragment, cubeMapShader.ShaderData, "Cube map fragment shader");
 
-        glad.LinkeShaderPorgram(cubeMapShader.Program);
+        glad.LinkShaderProgram(cubeMapShader.Program);
 
         // Detch And Delete Shaders
-        glDetachShader(cubeMapShader.Program, cubeMapShader.Vertex);
-        glDetachShader(cubeMapShader.Program, cubeMapShader.Fragment);
-        glad.DeleteShaders(cubeMapShader.Vertex);
-        glad.DeleteShaders(cubeMapShader.Fragment);
+        glad.DetachAndDeleteShaders(cubeMapShader);
 
         // Cube Map Texture----------------------------------------------------
         printf("\n****Cube Map****\n");
@@ -240,7 +230,7 @@ int main()
         glGenTextures(1, &cubeMapTexId);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexId);
 #ifdef __APPLE__
-
+        image.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/Assets/Textures/skybox";
 #else
         image.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\skybox";
 #endif
@@ -256,7 +246,11 @@ int main()
                 if (j < path1)
                     path[j] = image.path[j];
                 else if (j == path1)
+#ifdef __APPLE__
+                    path[j] = '/';
+#else
                     path[j] = '\\';
+#endif
                 else
                     path[j] = faces[i][(j - 1) - path1];
                 printf("%c", path[j]);
@@ -304,8 +298,6 @@ int main()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        // ReadVertexData(vertex[CID.Vertex], Cube_Normal_UV, sizeof(Cube_Normal_UV));
-        // BindVBO_WithNormalAndUV(attri, CID.VBO, vertex[CID.Vertex]);
         CID.VAO += 1;
         CID.VBO += 1;
         CID.Vertex += 1;
@@ -313,6 +305,7 @@ int main()
         Shader containerShader;
 // Vertex Shader
 #ifdef __APPLE__
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/A_1_Transform/shaders.vertex";
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\A_1_Transform\\shaders.vertex";
 #endif
@@ -322,7 +315,7 @@ int main()
 
 // Fragment Shader
 #ifdef __APPLE__
-
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/A_1_Transform/shaders.fragment";
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\A_1_Transform\\shaders.fragment";
 #endif
@@ -330,13 +323,11 @@ int main()
         glad.CompileAndAttachShader(containerShader.Program, containerShader.Fragment, containerShader.ShaderData, "fragment shader");
 
         // Link Shader Program
-        glad.LinkeShaderPorgram(containerShader.Program);
+        glad.LinkShaderProgram(containerShader.Program);
 
         // Detch And Delete Shaders
-        glDetachShader(containerShader.Program, containerShader.Vertex);
-        glDetachShader(containerShader.Program, containerShader.Fragment);
-        glad.DeleteShaders(containerShader.Vertex);
-        glad.DeleteShaders(containerShader.Fragment);
+        glad.DetachAndDeleteShaders(containerShader);
+
         //---------------------------------------------------------------------
         // Draw light box
         printf("\n****Draw light box mesh****\n");
@@ -350,6 +341,7 @@ int main()
 
         Shader lightBoxShader;
 #ifdef __APPLE__
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/A_1_Transform/Shaders/shaders.vertex";
 
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\A_1_Transform\\Shaders\\shaders.vertex";
@@ -358,7 +350,7 @@ int main()
         glad.CompileAndAttachShader(lightBoxShader.Program, lightBoxShader.Vertex, lightBoxShader.ShaderData, "Vertex Shader");
 
 #ifdef __APPLE__
-
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/A_1_Transform/Shaders/shaders.fragment";
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\A_1_Transform\\Shaders\\shaders.fragment";
 #endif
@@ -366,43 +358,44 @@ int main()
         glad.CompileAndAttachShader(lightBoxShader.Program, lightBoxShader.Fragment, lightBoxShader.ShaderData, "Fragment Shader");
 
         // Link Shader Program
-        glad.LinkeShaderPorgram(lightBoxShader.Program);
+        glad.LinkShaderProgram(lightBoxShader.Program);
 
-        glad.DeleteShaders(lightBoxShader.Vertex);
-        glad.DeleteShaders(lightBoxShader.Fragment);
+        glad.DetachAndDeleteShaders(lightBoxShader);
         //---------------------------------------------------------------------
         // Draw Render View
         printf("\n****Draw Render View Window****\n");
+        // instance datas---
+        float *translate = new float[100];
+        int index = 0;
+        float offset = 1.0f;
+        for (int y = -10; y < 10; y += 2)
+        {
+            for (int x = -10; x < 10; x += 2)
+            {
 
-        // float *translate = new float[100];
-        // int index = 0;
-        // float offset = 0.1f;
-        // for (int y = -10; y < 10; y += 2)
-        // {
-        //     for (int x = -10; x < 10; x += 2)
-        //     {
+                float xoffset = (float)x / 2.0 + offset;
+                float yoffset = (float)y / 2.0 + offset;
+                if (index % 2 == 0)
+                    translate[index] = xoffset;
+                else
+                    translate[index] = yoffset;
+                printf("index : %d | size of translate data : %f \n", index, translate[index]);
+                index++;
+            }
+        }
 
-        //         float xoffset = (float)x / 10.0f + offset;
-        //         float yoffset = (float)y / 10.0f + offset;
-        //         if (index % 2 == 0)
-        //             translate[index] = y;
-        //         else
-        //             translate[index] = x;
-        //         index++;
-        //     }
-        // }
-        // unsigned int instanceID;
+        unsigned int instanceID;
+        glGenBuffers(1, &instanceID);
+        glBindBuffer(GL_ARRAY_BUFFER, instanceID);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 100, translate, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        // glGenBuffers(1, &instanceID);
-        // glBindBuffer(GL_ARRAY_BUFFER, instanceID);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(float)*100, translate, GL_STATIC_DRAW);
-        // printf("size of translate : %llu , data : %f\n", sizeof(translate),translate[99]);
-
+        // Bind logic---
         printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", CID.Vertex, CID.VBO, CID.VAO);
         glad.BindVAO(attri.VAO[CID.VAO]);
         printf("Bind VBO : %d\n", attri.VBO[CID.VBO]);
         glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[CID.VBO]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Plane::mesh), NULL, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Plane::mesh) + sizeof(Plane::uv), NULL, GL_STATIC_DRAW);
 
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Plane::mesh), &Plane::mesh);
         glBufferSubData(GL_ARRAY_BUFFER, sizeof(Plane::mesh), sizeof(Plane::uv), &Plane::uv);
@@ -412,39 +405,38 @@ int main()
 
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)(sizeof(Plane::mesh)));
         glEnableVertexAttribArray(1);
-        // glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // glBindBuffer(GL_ARRAY_BUFFER,instanceID);
-        // glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,sizeof(float)*2 , (void*)0);
-        // glVertexAttribDivisor(2,1);
-
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-
         CID.VAO += 1;
         CID.VBO += 1;
         CID.Vertex += 1;
 
+        glBindBuffer(GL_ARRAY_BUFFER, instanceID);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)0);
+        glEnableVertexAttribArray(2);
+        glVertexAttribDivisor(2, 1);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
         Shader renderTextureShader;
 #ifdef __APPLE__
-
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/A_1_Transform/Shaders/RenderTextureShader.vertex";
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\A_1_Transform\\Shaders\\RenderTextureShader.vertex";
 #endif
         file.GetContent(file.path, "rb", renderTextureShader.ShaderData);
         glad.CompileAndAttachShader(renderTextureShader.Program, renderTextureShader.Vertex, renderTextureShader.ShaderData, "vertex shader");
 #ifdef __APPLE__
-
+        file.path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/A_1_Transform/Shaders/RenderTextureShader.fragment";
 #else
         file.path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\A_1_Transform\\Shaders\\RenderTextureShader.fragment";
 #endif
         file.GetContent(file.path, "rb", renderTextureShader.ShaderData);
         glad.CompileAndAttachShader(renderTextureShader.Program, renderTextureShader.Fragment, renderTextureShader.ShaderData, "fragment shader");
 
-        glad.LinkeShaderPorgram(renderTextureShader.Program);
+        glad.LinkShaderProgram(renderTextureShader.Program);
 
-        glad.DeleteShaders(renderTextureShader.Vertex);
-        glad.DeleteShaders(renderTextureShader.Fragment);
+        glad.DetachAndDeleteShaders(renderTextureShader);
 
         // Set Textures--------------------------------------------------------
         printf("\n****Set Textures****\n");
@@ -500,8 +492,8 @@ int main()
 
         //---------------------------------------------------------------------
         Hierarchy hierarchy;
+
         hierarchy.sceneObjects.emplace("Camera", Camera());
-        Vec4 AmbientColor = Vec4(0.76f, 0.76f, 0.80f, 1.0f);
         Camera *CameraPointer = &std::get<Camera>(hierarchy.sceneObjects["Camera"]);
         {
             // CameraPointer->Position
@@ -512,7 +504,7 @@ int main()
         {
             PointLightPointer->Color = Vec4(1.0f, 1.0f, 1.0f, 0.0f);
             PointLightPointer->Position = Vec4(0.0f, 1.0f, 5.0f, 1.0f);
-            PointLightPointer->Instensity = 1.0f;
+            PointLightPointer->Intensity = 1.0f;
         }
 
         hierarchy.sceneObjects.emplace("DirectionLight", Light());
@@ -520,7 +512,7 @@ int main()
         {
             DirectionLightPotinter->Direction.SetV(Normalize(Vec4(0.3f, 0.5f, 0.1f, 0.0f)));
             DirectionLightPotinter->Color = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
-            DirectionLightPotinter->Instensity = 1.0f;
+            DirectionLightPotinter->Intensity = 1.0f;
         }
 
         hierarchy.sceneObjects.emplace("Cube", SceneObject());
@@ -528,6 +520,11 @@ int main()
         {
             std::get<SceneObject>(hierarchy.sceneObjects["Cube"]).components.emplace("Color", ColorComponent());
             std::get<ColorComponent>(std::get<SceneObject>(hierarchy.sceneObjects["Cube"]).components["Color"]) = Vec4(0.6f, 0.5f, 0.31f, 1.0);
+        }
+
+        hierarchy.sceneObjects.emplace("RTMesh", SceneObject());
+        SceneObject *RTMesh = &std::get<SceneObject>(hierarchy.sceneObjects["RTMesh"]);
+        {
         }
 
         //---------------------------------------------------------------------
@@ -557,18 +554,20 @@ int main()
             glfwPollEvents();
             // Driver 1 (CPU -> GPU)-------------------------------------------
             // Clearning
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+#ifndef __APPLE__
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+#endif
             //--------------------------------------------
             // CameraRotate(glfw.window, camera,speed *30.0f);
             // camera.viewMatrix = camera.ViewMatrix();
             //--------------------------------------------
-
-            // Draw Call-------------------------------------------------------
-            // Draw Call 1
             glEnable(GL_CULL_FACE);
             glCullFace(GL_FRONT);
+            glEnable(GL_MULTISAMPLE);
+            // Draw Call-------------------------------------------------------
+            // Draw Call 1-----------------------------------------------------
 
             glDepthMask(GL_FALSE);
             glUseProgram(cubeMapShader.Program);
@@ -594,8 +593,9 @@ int main()
             glDepthMask(GL_TRUE);
 
             // Global Draw Call Configging
-            GlobalDrawCall();
-            // Draw Call 2
+            GlobalFrameConfig();
+
+            // Draw Call 2-----------------------------------------------------
             DrawCallFirst();
             glUseProgram(containerShader.Program);
             // Textures
@@ -622,10 +622,10 @@ int main()
                 _model_rotation = glGetUniformLocation(containerShader.Program, "_model_rotation");
                 _model_translate = glGetUniformLocation(containerShader.Program, "_model_translate");
 
-                _camera_space_matrix = glGetUniformLocation(containerShader.Program, "V");
-                // _P = glGetUniformLocation(containerShader.Program, "P");
+                // _camera_space_matrix = glGetUniformLocation(containerShader.Program, "V");
 
-                _transform = glGetUniformBlockIndex(containerShader.Program, "Transform");
+                _containerTransform = glGetUniformBlockIndex(containerShader.Program, "Transform");
+                // _P = glGetUniformLocation(containerShader.Program, "P");
                 PointLightLightPos = glGetUniformLocation(containerShader.Program, "_LightPosition");
                 PointLightLightColor = glGetUniformLocation(containerShader.Program, "_LightColor");
                 BaseColor = glGetUniformLocation(containerShader.Program, "_BaseColor");
@@ -646,19 +646,19 @@ int main()
                 glUniformMatrix4fv(_model_rotation, 1, GL_FALSE, cube->Rotation._mat4);
                 glUniformMatrix4fv(_model_translate, 1, GL_FALSE, cube->Translate._mat4);
 
-                glUniformMatrix4fv(_camera_space_matrix, 1, GL_FALSE, camera.ViewMatrix());
+                // glUniformMatrix4fv(_camera_space_matrix, 1, GL_FALSE, camera.ViewMatrix());
                 // glUniformMatrix4fv(_P, 1, GL_FALSE, Projection[1]);
-                glUniformBlockBinding(containerShader.Program, _transform, 0);
+                glUniformBlockBinding(containerShader.Program, _containerTransform, 0);
 
                 glUniform3fv(PointLightLightPos, 1, PointLightPointer->Position.v3);
-                glUniform4fv(PointLightLightColor, 1, (PointLightPointer->Color * PointLightPointer->Instensity).v);
+                glUniform4fv(PointLightLightColor, 1, (PointLightPointer->Color * PointLightPointer->Intensity).v);
                 glUniform4fv(BaseColor, 1, std::get<ColorComponent>(cube->components["Color"]).rgba);
                 glUniform4fv(Ambient, 1, AmbientColor.v);
                 glUniform4fv(ViewPos, 1, camera.Position.v);
 
                 glUniform3fv(DirectionalLightDir, 1, DirectionLightPotinter->Direction.v3);
                 glUniform4fv(DirectionalLightCol, 1, DirectionLightPotinter->Color.v);
-                glUniform1f(DirectionalLightInten, DirectionLightPotinter->Instensity);
+                glUniform1f(DirectionalLightInten, DirectionLightPotinter->Intensity);
 
                 glUniform1f(PointLightConstant, 0.8f);
                 glUniform1f(PointLightLinear, 0.009f);
@@ -709,24 +709,44 @@ int main()
             // Draw Call 3-----------------------------------------------------
             glDisable(GL_BLEND);
             glDisable(GL_DEPTH_TEST);
-
+#ifndef __APPLE__
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
-            glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
+            glBlitFramebuffer(0, 0, frameBufferWidth, frameBufferHeight, 0, 0, frameBufferWidth, frameBufferHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+#endif
             glUseProgram(renderTextureShader.Program);
             glBindVertexArray(attri.VAO[3]);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, colorBuffertTextureId);
-            glUniform1i(texAttri[2].textureLocation, 0);
 
+            glActiveTexture(GL_TEXTURE0);
+#ifdef __APPLE__
+            glBindTexture(GL_TEXTURE_2D, attri.TEX[2]);
+#else
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindTexture(GL_TEXTURE_2D, colorBuffertTextureId);
+#endif
+            glUniform1i(texAttri[2].textureLocation, 0);
             if (renderTextureShader.init == false)
             {
+                _transformRT = glGetUniformBlockIndex(renderTextureShader.Program, "Transform");
+                if (_transformRT == GL_INVALID_INDEX)
+                    printf("Wrong!!!!!!, _transformRT is error index\n");
+                else
+                    printf("Right, _transformRT index : %d\n", _transformRT);
+
+                glUniformBlockBinding(renderTextureShader.Program, _transformRT, 0);
+
+                _RT_ModelTranslate = glGetUniformLocation(renderTextureShader.Program, "translate");
+                Transform::Translate(10.8f, 7.2f, 10.0f, RTMesh->Translate._mat4);
+                glUniformMatrix4fv(_RT_ModelTranslate, 1, GL_FALSE, RTMesh->Translate._mat4);
+
+                _RT_ModelScale = glGetUniformLocation(renderTextureShader.Program, "scale");
+                Transform::Scale(camera.aspect, 1.0f, 1.0f, RTMesh->Scale._mat4);
+                glUniformMatrix4fv(_RT_ModelScale, 1, GL_FALSE, RTMesh->Scale._mat4);
 
                 renderTextureShader.init = true;
             }
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
+            // glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
             glBindVertexArray(0);
             glEnable(GL_BLEND);
             glEnable(GL_DEPTH_TEST);
