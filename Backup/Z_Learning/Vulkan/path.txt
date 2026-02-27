@@ -1,1 +1,0 @@
-g++ main.cpp -I E:\Environments\glfw3.4\include -I E:\Environments\glm-1.0.1 -I E:\Environments\Vulkan\Include -I G:\user\desktop\C++\GraphicLearning -L E:\Environments\glfw3.4\lib-mingw-w64 -l glfw3 -l gdi32 -L E:\Environments\Vulkan\Lib -l vulkan-1 -std=c++17 -fno-permissive -Wall -Wextra -o main.exe 

@@ -1,1 +1,0 @@
-CreatePoint(`A${i}`,1,2);
