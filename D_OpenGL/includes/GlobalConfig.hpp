@@ -1,13 +1,10 @@
 #ifndef GLOBAL_DATAS
 #define GLOBAL_DATAS
 
-#include "../includes/SceneObject.hpp"
+// #include "../includes/SceneObject.hpp"
 
 // 全局数据------------------------------------------------
-static int width = 1080;
-static int height = 720;
-static int frameBufferWidth = 0;
-static int frameBufferHeight = 0;
+
 
 struct Vertices
 {
@@ -105,7 +102,7 @@ typedef struct ShadersProgram
 
 } Shader;
 
-typedef struct CurrentIndex
+typedef struct ObjectIndex
 {
     int VAO = 0;
     int VBO = 0;
@@ -114,7 +111,7 @@ typedef struct CurrentIndex
     int TEX = 0;
     int FBO = 0;
     int UBO = 0;
-} CurrentID;
+} ObjectID;
 
 void SetCamera(Camera &camera ,const float & frameW , const float& frameH)
 {

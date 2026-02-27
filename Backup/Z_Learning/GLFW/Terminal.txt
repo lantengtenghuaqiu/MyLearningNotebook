@@ -1,0 +1,1 @@
+g++ Standard.cpp -I E:\Environments\glfw3.4\include\GLFW -L E:\Environments\glfw3.4\lib-mingw-w64 -l glfw3 -l gdi32 -std=c++17 -fno-permissive -Wall -Wextra -o main.exe

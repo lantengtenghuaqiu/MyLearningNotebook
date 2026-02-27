@@ -144,7 +144,7 @@ int main()
         // --------------------------------------------------------------------
 
         // Used in Binding VAO & VBO & Shaders---------------------------------
-        CurrentID CID;
+        ObjectID OID;
         // --------------------------------------------------------------------
 
         // All Buffer Object---------------------------------------------------
@@ -158,14 +158,14 @@ int main()
         glGenBuffers(attri.sizeUBO, attri.UBO);
         // --------------------------------------------------------------------
         // Uniform buffer object config
-        printf("UBO : %d\n", attri.UBO[CID.UBO]);
-        glBindBuffer(GL_UNIFORM_BUFFER, attri.UBO[CID.UBO]);
+        printf("UBO : %d\n", attri.UBO[OID.UBO]);
+        glBindBuffer(GL_UNIFORM_BUFFER, attri.UBO[OID.UBO]);
         glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(float) * 2, NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, 16 * sizeof(float), Projection[1]);
         glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.cameraspacematrix);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, attri.UBO[CID.UBO]);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, attri.UBO[OID.UBO]);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        CID.UBO++;
+        OID.UBO++;
 
         // Vertex Array Mannager-----------------------------------------------
         Vertices *vertex = new Vertices[4];
@@ -178,9 +178,9 @@ int main()
 
         // Draw Cube Map-------------------------------------------------------
         printf("\n****Draw Cube map box****\n");
-        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", CID.Vertex, CID.VBO, CID.VAO);
-        glad.BindVAO(attri.VAO[CID.VAO]);
-        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[CID.VBO]);
+        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", OID.Vertex, OID.VBO, OID.VAO);
+        glad.BindVAO(attri.VAO[OID.VAO]);
+        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[OID.VBO]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Cube::mesh) + sizeof(Cube::uv), NULL, GL_STATIC_DRAW);
 
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Cube::mesh), &Cube::mesh);
@@ -194,9 +194,9 @@ int main()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        CID.VAO += 1;
-        CID.VBO += 1;
-        CID.Vertex += 1;
+        OID.VAO += 1;
+        OID.VBO += 1;
+        OID.Vertex += 1;
 
         Shader cubeMapShader;
 
@@ -278,10 +278,10 @@ int main()
         // --------------------------------------------------------------------
         // Draw Container box
         printf("\n****Draw container box mesh****\n");
-        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", CID.Vertex, CID.VBO, CID.VAO);
-        glad.BindVAO(attri.VAO[CID.VAO]);
+        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", OID.Vertex, OID.VBO, OID.VAO);
+        glad.BindVAO(attri.VAO[OID.VAO]);
 
-        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[CID.VBO]);
+        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[OID.VBO]);
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(Cube::mesh) + sizeof(Cube::normal) + sizeof(Cube::uv), NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Cube::mesh), &Cube::mesh);
@@ -298,9 +298,9 @@ int main()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        CID.VAO += 1;
-        CID.VBO += 1;
-        CID.Vertex += 1;
+        OID.VAO += 1;
+        OID.VBO += 1;
+        OID.Vertex += 1;
 
         Shader containerShader;
 // Vertex Shader
@@ -331,13 +331,13 @@ int main()
         //---------------------------------------------------------------------
         // Draw light box
         printf("\n****Draw light box mesh****\n");
-        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", CID.Vertex, CID.VBO, CID.VAO);
-        glad.BindVAO(attri.VAO[CID.VAO]);
-        ReadVertexData(vertex[CID.Vertex], Cube::mesh, sizeof(Cube::mesh));
-        BindVBO(attri, CID.VBO, vertex[CID.Vertex]);
-        CID.VAO += 1;
-        CID.VBO += 1;
-        CID.Vertex += 1;
+        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", OID.Vertex, OID.VBO, OID.VAO);
+        glad.BindVAO(attri.VAO[OID.VAO]);
+        ReadVertexData(vertex[OID.Vertex], Cube::mesh, sizeof(Cube::mesh));
+        BindVBO(attri, OID.VBO, vertex[OID.Vertex]);
+        OID.VAO += 1;
+        OID.VBO += 1;
+        OID.Vertex += 1;
 
         Shader lightBoxShader;
 #ifdef __APPLE__
@@ -391,10 +391,10 @@ int main()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         // Bind logic---
-        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", CID.Vertex, CID.VBO, CID.VAO);
-        glad.BindVAO(attri.VAO[CID.VAO]);
-        printf("Bind VBO : %d\n", attri.VBO[CID.VBO]);
-        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[CID.VBO]);
+        printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", OID.Vertex, OID.VBO, OID.VAO);
+        glad.BindVAO(attri.VAO[OID.VAO]);
+        printf("Bind VBO : %d\n", attri.VBO[OID.VBO]);
+        glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[OID.VBO]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Plane::mesh) + sizeof(Plane::uv), NULL, GL_STATIC_DRAW);
 
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Plane::mesh), &Plane::mesh);
@@ -406,9 +406,9 @@ int main()
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)(sizeof(Plane::mesh)));
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        CID.VAO += 1;
-        CID.VBO += 1;
-        CID.Vertex += 1;
+        OID.VAO += 1;
+        OID.VBO += 1;
+        OID.Vertex += 1;
 
         glBindBuffer(GL_ARRAY_BUFFER, instanceID);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)0);

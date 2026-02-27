@@ -1,0 +1,67 @@
+#最低Cmake版本要求
+cmake_minimum_required(VERSION 3.10)
+
+#项目信息(名称 版本 支持的语言)
+project(HelloOpenGL LANGUAGES CXX)
+    #名称:
+        #用于创建可执行时指定哪个项目,名称唯一.
+    #版本:
+        #自拟,如
+            # 写法1：语义化版本（推荐）
+            #project(MyApp VERSION 1.2.3 LANGUAGES CXX)
+
+            # 写法2：仅主版本+次版本
+            #project(MyApp VERSION 2.0 LANGUAGES CXX)
+
+            # 写法3：自定义格式（不推荐，但合法）
+            #project(MyApp VERSION v1.0-beta LANGUAGES CXX)
+    #命名的项目构建支持的语言:
+        #指HellOpenGL作为命名的项目,为他的构建,指定支持的语言,CXX指cpp
+
+#设置C++标准的版本        
+set(CMAKE_CXX_STAND 17)
+#设置对应的编译器(g++/clang++)是否强制支持该版本的标准
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#禁用GNU扩展,严格遵循标准
+set(CMAKE_CXX_EXTENSIONS OFF)
+    #GNU扩展是指,为C/C++语言增加的非标准特性,一般是用来提升性能或简化开发的.
+    #这些扩展特性不属于C/C++标准.有些能被gcc/g++/clang等兼容,有些则不能,则需要其他编译器.
+    #而GNU扩展仅被gcc/clang支持,而MSVC(Visual Studio编译器则不能)等非GNU编译器会报错.
+
+#收集源文件:
+set(SOURCES 
+    ../src/glad.c
+    ./main.cpp
+)
+    #这里只是收集,类似SOURCES是一个变量,而./main.cpp 和 ../src/glad.c是值.
+
+#为创建的项目,创建可执行目标:
+add_executable(HelloOpenGL ${SOURCES})
+    #项目名称(HelloOpenGL):
+        #指定需要生成可执行目标的,是哪个项目.
+    #源文件组名(SOURCES):
+        #制定项目生成的可执行文件,所需要的源文件.
+
+if(apple)
+    find_package(glfw3 3.3 REQUIRED)
+
+    target_link_libraries(HelloOpenGL PRIVATE
+        OpenGL::GL
+        glfw
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreVideo"
+    )
+
+elseif(WIN32)
+    set(includes
+        ${PROJECT_SOURCE_DIR}/../include
+    )        
+    #指定编译需要的头文件:
+    target_include_directories(HelloOpenGL PRIVATE ${includes})
+
+    set(libs
+        ${PROJECT_SOURCE_DIR}/../lib
+    )
+
+    target_link_libraries(HelloOpenGL PRIVATE ${libs})

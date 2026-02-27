@@ -4,7 +4,13 @@
 #include "./GLFW/glfw3.h"
 #include "./BasicIncludes.hpp"
 #include "../includes/xyl_tools.hpp"
+#include "../includes/SceneObject.hpp"
 #include "./GlobalConfig.hpp"
+
+static int width = 1080;
+static int height = 720;
+static int frameBufferWidth = 0;
+static int frameBufferHeight = 0;
 #define ShaderChecker                               \
     printf("Wrong Compile (%d)\n", checker);        \
     char info[512];                                 \
@@ -47,7 +53,7 @@ public:
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_DEPTH_BITS, 32);
             glfwWindowHint(GLFW_STENCIL_BITS, 8);
-            
+
             glfwWindowHint(GLFW_SAMPLES, 4);
 #ifdef __APPLE__
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -107,14 +113,14 @@ public:
 
     GLAD() {}
 
-    void InitGlad(GLFWwindow * window,const int width, const int height , int & frameWidth , int & frameHeight)
+    void InitGlad(GLFWwindow *window, const int width, const int height, int &frameWidth, int &frameHeight)
     {
         printf("Init Glad\n");
         this->status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         if (this->status == SUCCESS)
         {
             printf("Init Glad Succeed\n");
-            glfwGetFramebufferSize(window,&frameWidth,&frameHeight);
+            glfwGetFramebufferSize(window, &frameWidth, &frameHeight);
             glViewport(0, 0, frameWidth, frameHeight);
         }
         else
@@ -165,6 +171,30 @@ public:
         glBindVertexArray(0);
     }
 
+    void GetShadersData(ReadFile::TheFile &file, const char *revalpath, Shader shader)
+    {
+#ifdef __APPLE__
+        const char *basePath = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week";
+        char full_path[strlen(basePath) + strlen(revalpath)];
+        snprintf(full_path, sizeof(full_path), "%s%s", basePath, revalpath);
+        file.path = full_path;
+
+#else
+        const char *basePath = "G:/user/desktop/C++/GraphicLearning";
+        char full_path[strlen(basePath) + strlen(revalpath)+1];
+        snprintf(full_path, sizeof(full_path), "%s%s", basePath, revalpath);
+        file.path = full_path;
+        // for (size_t i = 0; i < sizeof(full_path); i++)
+        // {
+        //     printf("%c", file.path[i]);
+        // }
+        // printf("\n");
+
+#endif
+
+        file.GetContent(file.path, "rb", shader.ShaderData);
+    }
+
     void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id, char *shader_data, char *shader_type)
     {
         printf("Compile Shader %s : %d\n", shader_type, shader_id);
@@ -196,7 +226,8 @@ public:
         }
     }
 
-    inline void DetachAndDeleteShaders(Shader shader){
+    inline void DetachAndDeleteShaders(Shader shader)
+    {
         // Detch And Delete Shaders
         glDetachShader(shader.Program, shader.Vertex);
         glDetachShader(shader.Program, shader.Fragment);

@@ -1,0 +1,13 @@
+#version 410 core
+out vec4 fragment_color;
+
+in vec2 _uv;
+
+uniform sampler2D screenTexture;
+
+void main()
+{
+    vec4 finalColor = texture(screenTexture,_uv);
+    
+    fragment_color = finalColor;
+}

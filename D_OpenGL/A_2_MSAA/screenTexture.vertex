@@ -1,0 +1,13 @@
+#version 410 core
+layout (location = 0) in vec3 Vertices;
+layout (location = 1) in vec2 UV;
+
+out vec2 _uv;
+
+void main()
+{
+    vec4 vertices = vec4(Vertices,1.0);
+    _uv = UV;
+    gl_Position = vertices;
+
+}
