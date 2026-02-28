@@ -5,15 +5,15 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../includes/stb_image.h"
-
+#define DEBUG
 namespace Picture
 {
     struct ImageManager
     {
-        static ImageManager &GetInstance()
+        static ImageManager *GetInstance()
         {
             static ImageManager instance;
-            return instance;
+            return &instance;
         }
         unsigned char *data;
         char *path;
@@ -43,7 +43,7 @@ namespace ReadFile
 
         TheFile() {}
 
-        void GetContent(char *path, char *mode, char *&container)
+        void GetContent(char *path, char *mode, char *container)
         {
             this->_file = fopen(path, mode);
             if (this->_file)
@@ -61,6 +61,18 @@ namespace ReadFile
                 container = new char[file_size + 1]();
 
                 fread(container, 1, file_size, this->_file);
+
+#ifdef DEBUG
+                for (long i = 0; i < file_size; i++)
+                {
+                    printf("%c", container[i]);
+                }
+                printf("\n");
+#endif
+            }
+            else
+            {
+                printf("File open is wrong");
             }
 
             fclose(this->_file);

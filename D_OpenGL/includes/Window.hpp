@@ -195,7 +195,7 @@ public:
         file.GetContent(file.path, "rb", shader.ShaderData);
     }
 
-    void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id, char *shader_data, char *shader_type)
+    void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id,const char *shader_data, char *shader_type)
     {
         printf("Compile Shader %s : %d\n", shader_type, shader_id);
 
@@ -214,6 +214,8 @@ public:
             printf("Attached shader program(%d -> %d).\n", shader_id, shader_program);
             glAttachShader(shader_program, shader_id);
         }
+        // delete[] shader_data;
+        // shader_data = NULL;
     }
     inline void LinkShaderProgram(unsigned int shader_program)
     {

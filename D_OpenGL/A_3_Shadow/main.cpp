@@ -7,14 +7,25 @@ int main()
     GLAD<float> glad;
     if (Init_GLFW_GLAD(glfw, glad))
     {
-        ObjectID OID;
-        OID.CreateNewIndex(OID.VAO, 1);
-        OID.CreateNewIndex(OID.VBO, 1);
-        OID.CreateNewIndex(OID.EBO, 1);
-        OID.CreateNewIndex(OID.FBO, 1);
-        OID.CreateNewIndex(OID.UBO, 1);
+        ObjectIndex * OID = ObjectIndex::GetIntance();
+        OID->CreateAndGenObjectIndex(OID_VAO, 1);
+        glGenVertexArrays(OID->sizeVAO, OID->VAO);
+        
+        OID->CreateAndGenObjectIndex(OID_VBO, 1);
+        glGenBuffers(OID->sizeVBO, OID->VBO);
 
-        Picture::ImageManager *picture = &Picture::ImageManager::GetInstance();
+        OID->CreateAndGenObjectIndex(OID_TEX, 1);
+        glGenTextures(OID->sizeTEX, OID->TEX);
+
+        OID->CreateAndGenObjectIndex(OID_EBO, 1);
+        glGenBuffers(OID->sizeEBO, OID->EBO);
+
+        OID->CreateAndGenObjectIndex(OID_UBO, 1);
+        glGenBuffers(OID->sizeUBO, OID->UBO);
+
+        OID->CreateAndGenObjectIndex(OID_FBO, 1);
+
+        Picture::ImageManager *picture = Picture::ImageManager::GetInstance();
 
         Vertices vertex;
         // glad.BindVBO(OID.VBO);
