@@ -95,7 +95,7 @@ typedef struct BufferBinderAttributes
     }
 } Binder;
 
-typedef struct ObjectAttributes
+typedef struct ObjectIndex
 {
     unsigned int *VAO;
     unsigned int *VBO;
@@ -107,9 +107,9 @@ typedef struct ObjectAttributes
     unsigned int sizeEBO;
     unsigned int sizeTEX;
 
-    ObjectAttributes() {}
+    ObjectIndex() {}
 
-    ObjectAttributes(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
+    ObjectIndex(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
     {
         this->sizeVAO = sizeVAO;
         this->sizeVBO = sizeVBO;
@@ -121,7 +121,7 @@ typedef struct ObjectAttributes
         this->EBO = new unsigned int[sizeEBO];
         this->TEX = new unsigned int[sizeTEX];
     }
-    ~ObjectAttributes()
+    ~ObjectIndex()
     {
 
         delete[] (this->VBO);
@@ -136,7 +136,7 @@ typedef struct ObjectAttributes
         delete[] (this->VAO);
         this->VAO = nullptr;
     }
-} Attributes;
+} ObjectID;
 
 typedef struct TextureAttribute
 {
@@ -279,7 +279,7 @@ struct Vertices
     unsigned long long size;
 } Vertex;
 
-void VBO(Attributes &attri, Vertices &vertex)
+void VBO(ObjectID &attri, Vertices &vertex)
 {
     printf("Bind VBO : %d\n", attri.VBO[0]);
 
@@ -299,7 +299,7 @@ void VBO(Attributes &attri, Vertices &vertex)
     // vertex.vertices=NULL;
 }
 
-void SetTextures(Attributes *attri , TexAttri *texAttri , Shader shaders)
+void SetTextures(ObjectID *attri , TexAttri *texAttri , Shader shaders)
 {
 
     glBindTexture(GL_TEXTURE_2D, attri->TEX[0]);

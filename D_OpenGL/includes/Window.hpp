@@ -181,7 +181,7 @@ public:
 
 #else
         const char *basePath = "G:/user/desktop/C++/GraphicLearning";
-        char full_path[strlen(basePath) + strlen(revalpath)+1];
+        char full_path[strlen(basePath) + strlen(revalpath) + 1];
         snprintf(full_path, sizeof(full_path), "%s%s", basePath, revalpath);
         file.path = full_path;
         // for (size_t i = 0; i < sizeof(full_path); i++)
@@ -268,7 +268,19 @@ void ReadVertexData(Vertices &vertex, float *vertices, unsigned long long size)
         printf("Vertex is Null\n");
 }
 
-void BindVBO_WithNormalAndUV(Attributes &attri, const int &currentIndex, Vertices &vertex)
+bool Init_GLFW_GLAD(GLFW &glfw, GLAD<float> &glad)
+{
+    if (glfw.InitGlfw(width, height, "Shadow", nullptr, nullptr) == SUCCESS)
+    {
+        glad.InitGlad(glfw.window, width, height, frameBufferWidth, frameBufferHeight);
+        return true;
+    }
+    printf("Init Glfw with something wrong!!!\n");
+    return false;
+}
+
+
+void BindVBO_WithNormalAndUV(ObjectID &attri, const int &currentIndex, Vertices &vertex)
 {
     printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
 
@@ -291,7 +303,7 @@ void BindVBO_WithNormalAndUV(Attributes &attri, const int &currentIndex, Vertice
     // vertex.vertices=NULL;
 }
 
-void BindVBO(Attributes &attri, const int &currentIndex, Vertices &vertex)
+void BindVBO(ObjectID &attri, const int &currentIndex, Vertices &vertex)
 {
     printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
 
@@ -305,7 +317,7 @@ void BindVBO(Attributes &attri, const int &currentIndex, Vertices &vertex)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-void BindVBO_WithUV(Attributes &attri, const int &currentIndex, Vertices &vertex)
+void BindVBO_WithUV(ObjectID &attri, const int &currentIndex, Vertices &vertex)
 {
     printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
 
@@ -322,7 +334,7 @@ void BindVBO_WithUV(Attributes &attri, const int &currentIndex, Vertices &vertex
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-void SetTextures(Attributes *attri, TexAttri *texAttri, Shader shaders)
+void SetTextures(ObjectID *attri, TexAttri *texAttri, Shader shaders)
 {
     unsigned char *image_date;
     const char *path;
@@ -382,7 +394,7 @@ void SetTextures(Attributes *attri, TexAttri *texAttri, Shader shaders)
     printf("Texture Conatiner Specular Id : %d\n", texAttri[1].textureLocation);
 }
 
-void SetBindLogoMesh(Attributes *attri, TexAttri *texAttri, Shader shaders)
+void SetBindLogoMesh(ObjectID *attri, TexAttri *texAttri, Shader shaders)
 {
     unsigned char *image_date;
     const char *path;

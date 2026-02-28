@@ -83,23 +83,23 @@ typedef struct BufferBinderAttributes
 
 } Binder;
 
-typedef struct ObjectAttributes
+typedef struct ObjectIndex
 {
     unsigned int *VAO;
     unsigned int *VBO;
     unsigned int *EBO;
     unsigned int *TEX;
 
-    ObjectAttributes() {}
+    ObjectIndex() {}
 
-    ObjectAttributes(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
+    ObjectIndex(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
     {
         this->VAO = new unsigned int[sizeVAO];
         this->VBO = new unsigned int[sizeVBO];
         this->EBO = new unsigned int[sizeEBO];
         this->TEX = new unsigned int[sizeTEX];
     }
-    ~ObjectAttributes()
+    ~ObjectIndex()
     {
 
         delete[] (this->VBO);
@@ -114,7 +114,7 @@ typedef struct ObjectAttributes
         delete[] (this->VAO);
         this->VAO = nullptr;
     }
-} Attributes;
+} ObjectID;
 
 typedef struct ShadersProgram
 {
@@ -264,7 +264,7 @@ int main()
 {
     GLFW glfw;
     GLAD<float> glad;
-    Attributes attri(2, 2, 2, 2);
+    ObjectID attri(2, 2, 2, 2);
     ReadFile file;
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {

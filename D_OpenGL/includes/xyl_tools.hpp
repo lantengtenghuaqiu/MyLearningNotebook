@@ -8,15 +8,26 @@
 
 namespace Picture
 {
-    struct Image
+    struct ImageManager
     {
+        static ImageManager &GetInstance()
+        {
+            static ImageManager instance;
+            return instance;
+        }
         unsigned char *data;
         char *path;
-        
+
         int width;
         int height;
         int channels;
 
+        ImageManager(const ImageManager &) = delete;
+        ImageManager &operator=(const ImageManager &) = delete;
+
+    private:
+        ImageManager() = default;
+        ~ImageManager() {};
     };
 }
 

@@ -71,7 +71,7 @@ int main()
 {
     GLFW glfw;
     GLAD<float> glad;
-    Attributes attri(2, 2, 1, 1);
+    ObjectID attri(2, 2, 1, 1);
 
     ReadFile::TheFile file;
 

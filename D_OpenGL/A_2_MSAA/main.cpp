@@ -44,7 +44,7 @@ void DrawCallFirst()
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
-void Container(GLAD<float> &glad, ReadFile::TheFile &file, Attributes &attri, ObjectID &CID, Shader &containerShader)
+void Container(GLAD<float> &glad, ReadFile::TheFile &file, ObjectID &attri, ObjectCurrentID &CID, Shader &containerShader)
 {
     printf("VAO Index : %d \n", attri.VAO[CID.VAO]);
     glBindVertexArray(attri.VAO[CID.VAO]);
@@ -140,13 +140,13 @@ int main()
         // --------------------------------------------------------------------
         // All Buffer Object---------------------------------------------------
         // Buffer Object Mannger
-        Attributes attri(4, 4, 1, 4, 1, 2);
-        ObjectID OID;
+        ObjectID attri(4, 4, 1, 4, 1, 2);
+        ObjectCurrentID OID;
         // Vertex Array Mannager-----------------------------------------------
         Vertices *vertex = new Vertices[4];
         // Texture Index-------------------------------------------------------
         printf("\n****Set Textures****\n");
-        Picture::Image image;
+        Picture::ImageManager image;
         TexAttri *texAttri = new TexAttri[4];
 
         // Buffer Generation

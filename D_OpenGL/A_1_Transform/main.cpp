@@ -144,12 +144,12 @@ int main()
         // --------------------------------------------------------------------
 
         // Used in Binding VAO & VBO & Shaders---------------------------------
-        ObjectID OID;
+        ObjectCurrentID OID;
         // --------------------------------------------------------------------
 
         // All Buffer Object---------------------------------------------------
         // Buffer Object Mannger
-        Attributes attri(4, 4, 1, 4, 1, 2);
+        ObjectID attri(4, 4, 1, 4, 1, 2);
         // Buffer Generation
         glGenVertexArrays(attri.sizeVAO, attri.VAO);
         glGenBuffers(attri.sizeEBO, attri.EBO);
@@ -172,7 +172,7 @@ int main()
         // --------------------------------------------------------------------
 
         // Texture Index-------------------------------------------------------
-        Picture::Image image;
+        Picture::ImageManager image;
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
 
