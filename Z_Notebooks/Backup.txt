@@ -1,0 +1,66 @@
+{
+    {2 / (x(OrthRDN) - x(OrthLDN)) OrthOrPerp + (1 - OrthOrPerp) * 1 / (Aspect tan(FOV / 2)), 0, 0, -((x(OrthRDN) + x(OrthLDN)) / (x(OrthRDN) - x(OrthLDN))) OrthOrPerp}, 
+    {0, 2 / (x(OrthRDN) - x(OrthLDN)) OrthOrPerp + (1 - OrthOrPerp) * 1 / tan(FOV / 2), 0, -((y(OrthLUN) + y(OrthLDN)) / (y(OrthLUN) - y(OrthLDN))) OrthOrPerp}, 
+    {0, 0, -(2 / (z(OrthLDF) - z(OrthLDN))) OrthOrPerp + (1 - OrthOrPerp) (-((z(OrthLDF) + z(OrthLDN)) / (z(OrthLDF) - z(OrthLDN)))), -((z(OrthLDF) + z(OrthLDN)) / (z(OrthLDF) - z(OrthLDN))) OrthOrPerp + (1 - OrthOrPerp) (-1)}, 
+    {0, 0, 0 + (1 - OrthOrPerp) (-2 z(OrthLDF z(OrthLDN)) / (z(OrthLDF) - z(OrthLDN))), 1OrthOrPerp}
+}
+
+{{2 / (x(OrthRDN) - x(OrthLDN)) OrthOrPerp + (1 - OrthOrPerp) * 1 / (Aspect tan(FOV / 2)), 0, 0, 0}, {0, 2 / (x(OrthRDN) - x(OrthLDN)) OrthOrPerp + (1 - OrthOrPerp) * 1 / tan(FOV / 2), 0, 0}, {0, 0, -(2 / (z(OrthLDF) - z(OrthLDN))) OrthOrPerp + (1 - OrthOrPerp) (-((z(OrthLDF) + z(OrthLDN)) / (z(OrthLDF) - z(OrthLDN)))),  0 + (1 - OrthOrPerp) (-2 z(OrthLDF z(OrthLDN)) / (z(OrthLDF) - z(OrthLDN)))}, {-((x(OrthRDN) + x(OrthLDN)) / (x(OrthRDN) - x(OrthLDN))) OrthOrPerp, -((y(OrthLUN) + y(OrthLDN)) / (y(OrthLUN) - y(OrthLDN))) OrthOrPerp, -((z(OrthLDF) + z(OrthLDN)) / (z(OrthLDF) - z(OrthLDN))) OrthOrPerp + (1 - OrthOrPerp) (-1), 1 * OrthOrPerp}}
+
+
+{
+    {x(CameraForward'), x(CameraUp'), x(CameraRight'), -x(Camera')}, 
+    {y(CameraForward'), y(CameraUp'), y(CameraRight'), -y(Camera')}, 
+    {z(CameraForward'), z(CameraUp'), z(CameraRight'), -z(Camera')}, 
+    {0, 0, 0, 1}
+}
+
+{
+    {x(CameraRight'), x(CameraUp'), x(CameraForward'), -x(Camera')}, 
+    {y(CameraRight'), y(CameraUp'), y(CameraForward'), -y(Camera')}, 
+    {z(CameraRight'), z(CameraUp'), z(CameraForward'), -z(Camera')}, 
+    {0, 0, 0, 1}
+}
+
+{
+    {x(CameraRight'),   x(CameraUp'),    x(CameraForward'), 0}, 
+    {y(CameraRight'),   y(CameraUp'),    y(CameraForward'), 0}, 
+    {z(CameraRight'),   z(CameraUp'),    z(CameraForward'), 0}, 
+    {-x(Camera'), -y(Camera'), -z(Camera'), 1}
+}
+
+
+{
+    {2 / (OrthFrustumHeight), 0, 0, -((x(OrthRDN) + x(OrthLDN)) / (x(OrthRDN) - x(OrthLDN)))}, 
+    {0, 2 / (OrthFrustumHeight), 0, -((y(OrthLUN) + y(OrthLDN)) / (y(OrthLUN) - y(OrthLDN)))}, 
+    {0, 0, -(2 / (OrthFrustumFar - OrthFrustumNear)), -((-z(OrthLDF) + z(OrthLDN)) / (z(OrthLDF) - z(OrthLDN)))}, 
+    {0, 0, 0, 1}
+}
+
+
+OrthLDN''=V OrthLDN'
+OrthLUN''=V OrthLUN'
+OrthRDN''=V OrthRDN'
+OrthRUN''=V OrthRUN'
+
+OrthLDF''=V OrthLDF'
+OrthLUF''=V OrthLUF'
+OrthRDF''=V OrthRDF'
+OrthRUF''=V OrthRUF'
+
+OrthFrustum={Polygon(OrthLDN',OrthLUN',OrthRUN',OrthRDN'),Polygon(OrthLDN',OrthLDF',OrthLUF',OrthLUN'),Polygon(OrthLUN',OrthLUF',OrthRUF',OrthRUN'),Polygon(OrthRUN',OrthRUF',OrthRDF',OrthRDN'),Polygon(OrthRDN',OrthRDF',OrthLDF',OrthLDN')}
+
+
+{
+    {x(CameraRight'), x(CameraUp'), x(CameraForward'), -x(Camera')}, 
+    {y(CameraRight'), y(CameraUp'), y(CameraForward'), -y(Camera')}, 
+    {z(CameraRight'), z(CameraUp'), z(CameraForward'), -z(Camera')}, 
+    {0, 0, 0, 1}    
+}
+
+{
+    {x(CameraRight'), y(CameraRight'), z(CameraRight'), -x(Camera')}, 
+    {x(CameraUp'), y(CameraUp'),z(CameraUp'), -y(Camera')}, 
+    {x(CameraForward'), y(CameraForward'), z(CameraForward'), -z(Camera')}, 
+    {0, 0, 0, 1}    
+}

@@ -1,0 +1,28 @@
+#version 410 core
+layout (location = 0) in vec3 triangle;
+layout (location = 1) in vec2 uv;
+
+out vec2 _uv;
+
+uniform mat4 _identity;
+
+uniform mat4 _model_scale;
+uniform mat4 _model_rotation;
+uniform mat4 _model_translate;
+
+uniform mat4 _camera_scale;
+uniform mat4 _camera_rotation;
+uniform mat4 _camera_translate;
+
+uniform mat4 _camera_space_matrix;
+
+uniform mat4 _P;
+
+void main()
+{
+    mat4 M = _model_translate * _model_rotation * _model_scale * _identity;
+    mat4 V = _camera_space_matrix;
+    mat4 MVP = _P * V * M;
+    gl_Position =MVP * vec4(triangle.x , triangle.y , triangle.z ,1.0f);
+    _uv = uv;
+}
