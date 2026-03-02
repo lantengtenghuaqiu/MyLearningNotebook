@@ -15,6 +15,14 @@ struct Vertices
         this->vertices = vertices;
         this->size = size;
     }
+    void Delete()
+    {
+        if (this->vertices != nullptr)
+        {
+            delete[] this->vertices;
+            this->vertices = NULL;
+        }
+    }
 } Vertex;
 
 typedef struct ObjectCurrentIndex
@@ -47,14 +55,6 @@ typedef struct ObjectIndex
 
     ObjectCurrentIndex currentId;
 
-    int CID_VAO = 0;
-    int CID_VBO = 0;
-    int CID_Vertex = 0;
-    int CID_EBO = 0;
-    int CID_TEX = 0;
-    int CID_FBO = 0;
-    int CID_UBO = 0;
-
     unsigned int *VAO;
     unsigned int *VBO;
     unsigned int *EBO;
@@ -68,6 +68,9 @@ typedef struct ObjectIndex
     unsigned int sizeTEX;
     unsigned int sizeFBO;
     unsigned int sizeUBO;
+
+    ObjectIndex(const ObjectIndex &) = delete;
+    ObjectIndex operator=(ObjectIndex &) = delete;
 
     // unsigned int currentVAOIndex = 0;
     void CreateAndGenObjectIndex(unsigned int OID_Type, const unsigned int &size)
@@ -89,7 +92,7 @@ typedef struct ObjectIndex
         {
             if (this->VBO == nullptr)
             {
-                printf("Create a new VAO\n");
+                printf("Create a new VBO\n");
                 this->VBO = new unsigned int[size];
                 this->sizeVBO = size;
             }
@@ -100,7 +103,7 @@ typedef struct ObjectIndex
         {
             if (this->EBO == nullptr)
             {
-                printf("Create a new VAO\n");
+                printf("Create a new EBO\n");
                 this->EBO = new unsigned int[size];
                 this->sizeEBO = size;
             }
@@ -111,7 +114,7 @@ typedef struct ObjectIndex
         {
             if (this->TEX == nullptr)
             {
-                printf("Create a new VAO\n");
+                printf("Create a new TEX\n");
                 this->TEX = new unsigned int[size];
                 this->sizeTEX = size;
             }
@@ -122,7 +125,7 @@ typedef struct ObjectIndex
         {
             if (this->UBO == nullptr)
             {
-                printf("Create a new VAO\n");
+                printf("Create a new UBO\n");
                 this->UBO = new unsigned int[size];
                 this->sizeUBO = size;
             }
@@ -133,10 +136,9 @@ typedef struct ObjectIndex
         {
             if (this->FBO == nullptr)
             {
-                printf("Create a new VAO\n");
+                printf("Create a new FBO\n");
                 this->FBO = new unsigned int[size];
                 this->sizeFBO = size;
-                this->CID_FBO++;
             }
         }
         break;
@@ -146,8 +148,103 @@ typedef struct ObjectIndex
         }
     }
 
+    int GetCID_VAO(const char mode)
+    {
+        if (mode == 'w')
+        {
+            int temp = this->CID_VAO;
+            this->CID_VAO++;
+            return temp;
+        }
+        else
+        {
+            return this->CID_VAO;
+        }
+    }
+    int GetCID_VBO(const char mode)
+    {
+        if (mode == 'w')
+        {
+            int temp = this->CID_VBO;
+            this->CID_VBO++;
+            return temp;
+        }
+        else
+        {
+            return this->CID_VBO;
+        }
+    }
+
+    int GetCID_EBO(const char mode)
+    {
+        if (mode == 'w')
+        {
+            int temp = this->CID_EBO;
+            this->CID_EBO++;
+            return temp;
+        }
+        else
+        {
+            return this->CID_EBO;
+        }
+    }
+    int GetCID_FBO(const char mode)
+    {
+        if (mode == 'w')
+        {
+            int temp = this->CID_FBO;
+            this->CID_FBO++;
+            return temp;
+        }
+        else
+        {
+            return this->CID_FBO;
+        }
+    }
+    int GetCID_TEX(const char mode)
+    {
+        if (mode == 'w')
+        {
+            int temp = this->CID_TEX;
+            this->CID_TEX++;
+            return temp;
+        }
+        else
+        {
+            return this->CID_TEX;
+        }
+    }
+    int GetCID_UBO(const char mode)
+    {
+        if (mode == 'w')
+        {
+            int temp = this->CID_UBO;
+            this->CID_UBO++;
+            return temp;
+        }
+        else
+        {
+            return this->CID_UBO;
+        }
+    }
+
 private:
-    ObjectIndex() : VAO(nullptr), VBO(nullptr), EBO(nullptr), TEX(nullptr), FBO(nullptr), UBO(nullptr) {}
+    int CID_VAO = 0;
+    int CID_VBO = 0;
+    int CID_EBO = 0;
+    int CID_TEX = 0;
+    int CID_FBO = 0;
+    int CID_UBO = 0;
+
+    ObjectIndex() : VAO(nullptr), VBO(nullptr), EBO(nullptr), TEX(nullptr), FBO(nullptr), UBO(nullptr)
+    {
+        this->CID_VAO = 0;
+        this->CID_VBO = 0;
+        this->CID_EBO = 0;
+        this->CID_TEX = 0;
+        this->CID_FBO = 0;
+        this->CID_UBO = 0;
+    }
 
     ~ObjectIndex()
     {

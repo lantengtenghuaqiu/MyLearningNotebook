@@ -5,7 +5,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../includes/stb_image.h"
-#define DEBUG
+// #define DEBUG
 namespace Picture
 {
     struct ImageManager
@@ -36,14 +36,20 @@ namespace ReadFile
 
     class TheFile
     {
+    private:
         FILE *_file;
+        TheFile() = default;
+        ~TheFile() {};
 
     public:
+        static TheFile *GetInstance()
+        {
+            static TheFile instance;
+            return &instance;
+        }
         char *path;
 
-        TheFile() {}
-
-        void GetContent(char *path, char *mode, char *container)
+        void GetContent(char *path, char *mode, char *&container)
         {
             this->_file = fopen(path, mode);
             if (this->_file)

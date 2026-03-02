@@ -162,6 +162,10 @@ public:
         }
     }
 
+    void BindSceneObject()
+    {
+    }
+
     void BindFBO()
     {
     }
@@ -171,7 +175,7 @@ public:
         glBindVertexArray(0);
     }
 
-    void GetShadersData(ReadFile::TheFile &file, const char *revalpath, Shader shader)
+    void GetShadersData(ReadFile::TheFile *&file, const char *revalpath, char *&data)
     {
 #ifdef __APPLE__
         const char *basePath = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week";
@@ -183,7 +187,7 @@ public:
         const char *basePath = "G:/user/desktop/C++/GraphicLearning";
         char full_path[strlen(basePath) + strlen(revalpath) + 1];
         snprintf(full_path, sizeof(full_path), "%s%s", basePath, revalpath);
-        file.path = full_path;
+        file->path = full_path;
         // for (size_t i = 0; i < sizeof(full_path); i++)
         // {
         //     printf("%c", file.path[i]);
@@ -192,10 +196,10 @@ public:
 
 #endif
 
-        file.GetContent(file.path, "rb", shader.ShaderData);
+        file->GetContent(file->path, "rb", data);
     }
 
-    void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id,const char *shader_data, char *shader_type)
+    void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id, char *&shader_data, char *shader_type)
     {
         printf("Compile Shader %s : %d\n", shader_type, shader_id);
 
@@ -214,8 +218,9 @@ public:
             printf("Attached shader program(%d -> %d).\n", shader_id, shader_program);
             glAttachShader(shader_program, shader_id);
         }
-        // delete[] shader_data;
-        // shader_data = NULL;
+        printf("\n");
+        delete[] shader_data;
+        shader_data = NULL;
     }
     inline void LinkShaderProgram(unsigned int shader_program)
     {
@@ -280,7 +285,6 @@ bool Init_GLFW_GLAD(GLFW &glfw, GLAD<float> &glad)
     printf("Init Glfw with something wrong!!!\n");
     return false;
 }
-
 
 void BindVBO_WithNormalAndUV(ObjectID &attri, const int &currentIndex, Vertices &vertex)
 {
