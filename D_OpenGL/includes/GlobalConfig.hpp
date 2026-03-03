@@ -1,7 +1,7 @@
 #ifndef GLOBAL_DATAS
 #define GLOBAL_DATAS
 
-// #include "../includes/SceneObject.hpp"
+#include "../includes/BasicIncludes.hpp"
 
 // 全局数据------------------------------------------------
 
@@ -38,12 +38,7 @@ typedef struct ObjectCurrentIndex
 
 } ObjectCurrentID;
 
-#define OID_VAO 0x900
-#define OID_VBO 0x901
-#define OID_EBO 0x902
-#define OID_TEX 0x903
-#define OID_UBO 0x904
-#define OID_FBO 0x905
+
 
 typedef struct ObjectIndex
 {
@@ -309,17 +304,19 @@ typedef struct ShadersProgram
 
 } Shader;
 
-void SetCamera(Camera &camera, const float &frameW, const float &frameH)
+void SetCamera(Camera *&camera, const float &frameW, const float &frameH)
 {
-    camera.SetPosition(Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    camera.fov = 30.0f;
-    camera.w = frameW;
-    camera.h = frameH;
-    camera.n = 0.01f;
-    camera.f = 30.0f;
-    camera.aspect = frameW / frameH;
-    camera.ViewMatrix();
+    camera->SetPosition(Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    camera->fov = 30.0f;
+    camera->w = frameW;
+    camera->h = frameH;
+    camera->n = 0.01f;
+    camera->f = 30.0f;
+    camera->aspect = camera->w / camera->h;
+    camera->UpdateCameraSpaceMatrix();
+    camera->UpdateCameraProjectionMatrix(Persp);
 }
+
 void ClearGLAttribute()
 {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);

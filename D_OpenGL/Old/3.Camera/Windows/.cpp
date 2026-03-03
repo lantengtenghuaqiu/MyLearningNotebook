@@ -265,7 +265,7 @@ int main()
     GLFW glfw;
     GLAD<float> glad;
     ObjectID attri(2, 2, 2, 2);
-    ReadFile file;
+    Tools file;
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {
         glad.InitGlad(width, height);

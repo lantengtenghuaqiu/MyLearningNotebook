@@ -146,21 +146,21 @@ public:
             float z;
             float w;
         };
-        float v[4];
+        float v4[4];
     };
 
     Vector4()
     {
         for (int i = 0; i < 4; i++)
-            this->v[i] = 0.0f;
+            this->v4[i] = 0.0f;
     }
 
     Vector4(const float &x, const float &y, const float &z, const float &w)
     {
-        this->v[0] = x;
-        this->v[1] = y;
-        this->v[2] = z;
-        this->v[3] = w;
+        this->v4[0] = x;
+        this->v4[1] = y;
+        this->v4[2] = z;
+        this->v4[3] = w;
     }
 
     Vector4 &operator*(mat4 matrix)
@@ -170,7 +170,7 @@ public:
         {
             for (int j = 0; j < 4; j++)
             {
-                temp.v[i] += matrix._mat4[i * 4 + j] * this->v[j];
+                temp.v4[i] += matrix._mat4[i * 4 + j] * this->v4[j];
             }
         }
         return temp;

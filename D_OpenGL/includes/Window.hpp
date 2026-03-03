@@ -7,10 +7,6 @@
 #include "../includes/SceneObject.hpp"
 #include "./GlobalConfig.hpp"
 
-static int width = 1080;
-static int height = 720;
-static int frameBufferWidth = 0;
-static int frameBufferHeight = 0;
 #define ShaderChecker                               \
     printf("Wrong Compile (%d)\n", checker);        \
     char info[512];                                 \
@@ -30,6 +26,17 @@ static int frameBufferHeight = 0;
         printf("%c", info[i]);                           \
     }                                                    \
     printf("\n");
+
+#ifdef __APPLE__
+#define BASEPATH "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week"
+#else
+#define BASEPATH "G:/user/desktop/C++/GraphicLearning"
+#endif
+
+static int width = 1080;
+static int height = 720;
+static int frameBufferWidth = 0;
+static int frameBufferHeight = 0;
 
 class GLFW
 {
@@ -105,7 +112,6 @@ typedef struct BufferBinderAttributes
     }
 } Binder;
 
-template <typename T>
 class GLAD
 {
 public:
@@ -113,7 +119,7 @@ public:
 
     GLAD() {}
 
-    void InitGlad(GLFWwindow *window, const int width, const int height, int &frameWidth, int &frameHeight)
+    void InitGlad(GLFWwindow *window, int &frameWidth, int &frameHeight)
     {
         printf("Init Glad\n");
         this->status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -139,67 +145,43 @@ public:
     void BindVAO(unsigned int &VAO)
     {
         printf("VAO Index : %d \n", VAO);
-
         glBindVertexArray(VAO);
-        // currentIndex += 1;
     }
 
-    void BindVBO(unsigned int &VBO, const int bytesize, const Binder binder, const T *data)
+    void GetShadersData(Tools::TheFile *&file, const char *revalpath, char *&data)
     {
-        if (true)
+        if (file->path != NULL)
         {
-            printf("Bind VBO : %d\n\n", VBO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, bytesize, data, binder.DRAWYPE);
-            // 第二个参数表示分量vec2传2, vec3传3, vec4传4
-            glVertexAttribPointer(binder.Location, binder.DataSize, binder.DATATYPE, binder.NORMILAZED, sizeof(float) * binder.Stride, (void *)binder.StartPointer);
-            glEnableVertexAttribArray(binder.Location);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            delete[] file->path;
+            file->path = NULL;
         }
-        else
+
+        if (data != NULL)
         {
-            printf("Something wrong in binding VBO\n");
+            delete[] data;
+            data = NULL;
         }
-    }
 
-    void BindSceneObject()
-    {
-    }
+        const char *basePath = BASEPATH;
 
-    void BindFBO()
-    {
-    }
+        file->path = new char[strlen(basePath) + strlen(revalpath) + 1];
+        snprintf(file->path, strlen(basePath) + strlen(revalpath) + 1, "%s%s", basePath, revalpath);
 
-    void UnbindVAO()
-    {
-        glBindVertexArray(0);
-    }
-
-    void GetShadersData(ReadFile::TheFile *&file, const char *revalpath, char *&data)
-    {
-#ifdef __APPLE__
-        const char *basePath = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week";
-        char full_path[strlen(basePath) + strlen(revalpath)];
-        snprintf(full_path, sizeof(full_path), "%s%s", basePath, revalpath);
-        file.path = full_path;
-
-#else
-        const char *basePath = "G:/user/desktop/C++/GraphicLearning";
-        char full_path[strlen(basePath) + strlen(revalpath) + 1];
-        snprintf(full_path, sizeof(full_path), "%s%s", basePath, revalpath);
-        file->path = full_path;
-        // for (size_t i = 0; i < sizeof(full_path); i++)
-        // {
-        //     printf("%c", file.path[i]);
-        // }
-        // printf("\n");
-
+#ifdef FILE_DEBUG
+        printf("basePath size : %zu\n", strlen(basePath));
+        printf("revalpath size : %zu\n", strlen(revalpath));
+        printf("file->path size : %zu\n", strlen(file->path));
+        for (size_t i = 0; i < strlen(basePath) + strlen(revalpath) + 1; i++)
+        {
+            printf("%c", file->path[i]);
+        }
+        printf("\n");
 #endif
 
         file->GetContent(file->path, "rb", data);
     }
 
-    void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id, char *&shader_data, char *shader_type)
+    void CompileAndAttachShader(unsigned int shader_program, unsigned int shader_id, char *&shader_data, const char *shader_type)
     {
         printf("Compile Shader %s : %d\n", shader_type, shader_id);
 
@@ -219,10 +201,13 @@ public:
             glAttachShader(shader_program, shader_id);
         }
         printf("\n");
-        delete[] shader_data;
-        shader_data = NULL;
+        if (shader_data != NULL)
+        {
+            delete[] shader_data;
+            shader_data = NULL;
+        }
     }
-    inline void LinkShaderProgram(unsigned int shader_program)
+    inline void LinkShaderProgram(unsigned int &shader_program)
     {
         glLinkProgram(shader_program);
         int checker;
@@ -263,6 +248,114 @@ public:
     }
 };
 
+void BindTransformUniformBufferObject(ObjectID *OID, Camera *camera)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('r')]);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(camera->CameraProjection) + sizeof(camera->CameraSpace), NULL, GL_STATIC_DRAW);
+
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(camera->CameraProjection), camera->CameraProjection);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(camera->CameraSpace), sizeof(camera->CameraSpace), camera->CameraSpace);
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, OID->UBO[OID->GetCID_UBO('w')]);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+template <typename T, size_t N1, size_t N2, size_t N3>
+void BindSceneObject(ObjectID *OID, T (&mesh)[N1], T (&normal)[N2], T (&uv)[N3])
+{
+    size_t float_size = sizeof(float);
+    glBindVertexArray(OID->VAO[OID->GetCID_VAO('w')]);
+    glBindBuffer(GL_ARRAY_BUFFER, OID->VBO[OID->GetCID_VBO('w')]);
+    glBufferData(GL_ARRAY_BUFFER, (N1 + N2 + N3) * float_size, NULL, GL_STATIC_DRAW);
+
+    glBufferSubData(GL_ARRAY_BUFFER, 0, N1 * float_size, mesh);
+    glBufferSubData(GL_ARRAY_BUFFER, N1 * float_size, N2 * float_size, normal);
+    glBufferSubData(GL_ARRAY_BUFFER, (N1 + N2) * float_size, N3 * float_size, uv);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)(N1 * float_size));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)((N1 + N2) * float_size));
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void BindCubeMapTexture(ObjectID *OID, Tools::ImageManager *&image)
+{
+    if (image->path != NULL)
+    {
+        delete[] image->path;
+        image->path = NULL;
+    }
+#ifdef __APPLE__
+    const char *base_path = "/Users/bytedance/Desktop/C++/IOLS&%@HS/Ray-Tracing-One-Week/D_OpenGL/Assets/Textures/skybox";
+    size_t base_path_size = strlen(base_path);
+    image->path = new char[base_path_size + 1];
+    strcpy(image->path, base_path);
+#else
+    const char *base_path = "G:\\user\\desktop\\C++\\GraphicLearning\\D_OpenGL\\Assets\\Textures\\skybox";
+    size_t base_path_size = strlen(base_path);
+    image->path = new char[base_path_size + 1];
+    strcpy(image->path, base_path);
+#endif
+
+    const char *faces[] =
+        {
+            "right.jpg",
+            "left.jpg",
+            "top.jpg",
+            "bottom.jpg",
+            "front.jpg",
+            "back.jpg"};
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, OID->TEX[OID->GetCID_TEX('w')]);
+    // printf(" Tex : %d\n", OID->TEX[OID->GetCID_TEX('r')]);
+    for (int i = 0; i < 6; i++)
+    {
+        size_t reval_path = strlen(faces[i]);
+        size_t whole_path_size = base_path_size + reval_path + 2;
+        char *path = new char[whole_path_size];
+        for (size_t j = 0; j < whole_path_size; j++)
+        {
+            if (j < base_path_size)
+                path[j] = image->path[j];
+            else if (j == base_path_size)
+                path[j] = '/';
+            else
+                path[j] = faces[i][(j - 1) - base_path_size];
+#ifdef FILE_DEBUG
+            printf("%c", path[j]);
+#endif
+        }
+#ifdef FILE_DEBUG
+        printf("\n");
+#endif
+
+        path[whole_path_size] = '\0';
+
+        image->data = stbi_load(path, &image->width, &image->height, &image->channels, 0);
+        if (image->data != NULL)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, image->width, image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, image->data);
+            stbi_image_free(image->data);
+        }
+        else
+        {
+            printf("Wrong image data");
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    }
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
 void ReadVertexData(Vertices &vertex, float *vertices, unsigned long long size)
 {
     vertex.vertices = vertices;
@@ -275,38 +368,15 @@ void ReadVertexData(Vertices &vertex, float *vertices, unsigned long long size)
         printf("Vertex is Null\n");
 }
 
-bool Init_GLFW_GLAD(GLFW &glfw, GLAD<float> &glad)
+bool Init_GLFW_GLAD(GLFW &glfw, GLAD &glad)
 {
     if (glfw.InitGlfw(width, height, "Shadow", nullptr, nullptr) == SUCCESS)
     {
-        glad.InitGlad(glfw.window, width, height, frameBufferWidth, frameBufferHeight);
+        glad.InitGlad(glfw.window, frameBufferWidth, frameBufferHeight);
         return true;
     }
     printf("Init Glfw with something wrong!!!\n");
     return false;
-}
-
-void BindVBO_WithNormalAndUV(ObjectID &attri, const int &currentIndex, Vertices &vertex)
-{
-    printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[currentIndex]);
-
-    glBufferData(GL_ARRAY_BUFFER, vertex.size, vertex.vertices, GL_STATIC_DRAW);
-    // glVertexAttribPointer只是写VAO的规则,并不是存入数据,真正存入数据的是glBufferData,VAO只是从glBufferData中根据现在制定好的规则去读取数据.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // vertex.vertices=NULL;
 }
 
 void BindVBO(ObjectID &attri, const int &currentIndex, Vertices &vertex)
@@ -323,23 +393,7 @@ void BindVBO(ObjectID &attri, const int &currentIndex, Vertices &vertex)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-void BindVBO_WithUV(ObjectID &attri, const int &currentIndex, Vertices &vertex)
-{
-    printf("Bind VBO : %d\n", attri.VBO[currentIndex]);
 
-    glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[currentIndex]);
-
-    glBufferData(GL_ARRAY_BUFFER, vertex.size, vertex.vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
 void SetTextures(ObjectID *attri, TexAttri *texAttri, Shader shaders)
 {
     unsigned char *image_date;

@@ -15,14 +15,14 @@ struct Vector4
             float z;
             float w;
         };
-        float v[4];
+        float v4[4];
     };
     float v3[3];
     Vector4()
     {
         for (int i = 0; i < 4; i++)
         {
-            this->v[i] = 0.0f;
+            this->v4[i] = 0.0f;
             if (i < 3)
             {
                 this->v3[i] = 0.0f;
@@ -31,10 +31,10 @@ struct Vector4
     }
     Vector4(const float &x, const float &y, const float &z, const float &w)
     {
-        this->v[0] = x;
-        this->v[1] = y;
-        this->v[2] = z;
-        this->v[3] = w;
+        this->v4[0] = x;
+        this->v4[1] = y;
+        this->v4[2] = z;
+        this->v4[3] = w;
 
         this->v3[0] = x;
         this->v3[1] = y;
@@ -45,7 +45,13 @@ struct Vector4
 struct mat4
 {
     float _mat4[16] = {0.0f};
-    mat4() {};
+    mat4()
+    {
+        this->_mat4[0] = 1.0f;
+        this->_mat4[5] = 1.0f;
+        this->_mat4[10] = 1.0f;
+        this->_mat4[15] = 1.0f;
+    };
     mat4(float *data)
     {
         for (int i = 0; i < 16; i++)
@@ -62,28 +68,46 @@ struct mat4
         {
             for (int j = 0; j < 4; j++)
             {
-                temp.v[i] += this->_mat4[j * 4 + i] * vec4.v[j];
+                temp.v4[i] += this->_mat4[j * 4 + i] * vec4.v4[j];
             }
         }
         return temp;
     }
+
+    // mat4 &operator=(const mat4 &other){
+    //     for(int i = 0 ; i<16 ; i++){
+    //         this->_mat4[i] = other._mat4[i];
+    //     }
+
+    //     return *this;
+    // }
+
+    mat4(const mat4 &) = default;
+
+    mat4(mat4 &&) = default;
+
+    mat4 &operator=(const mat4 &) = default;
+
+    mat4 &operator=(mat4 &&) = default;
 };
 
 mat4 operator*(mat4 a, mat4 b)
 {
-    mat4 temp;
-    for (int k = 0; k < 4; k++)
-    {
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
+    mat4 res;
+    for (int col = 0; col < 4; col++)
+    { // 列（OpenGL 优先）
+        for (int row = 0; row < 4; row++)
+        { // 行
+            float sum = 0.0f;
+            for (int k = 0; k < 4; k++)
             {
-                temp._mat4[k * 4 + i] += a._mat4[k * 4 + j] * b._mat4[j * 4 + i];
+                // 列主序标准计算公式
+                sum += a._mat4[k * 4 + row] * b._mat4[col * 4 + k];
             }
+            res._mat4[col * 4 + row] = sum;
         }
     }
-
-    return temp;
+    return res;
 }
 
 class Vec4 : public Vector4
@@ -100,63 +124,71 @@ public:
         this->z = z;
         this->w = w;
     }
-    // Vec4 operator*(mat4 matrix)
-    // {
-    //     Vec4 temp(0.0f, 0.0f, 0.0f, 0.0f);
-    //     for (int i = 0; i < 4; i++)
-    //     {
-    //         for (int j = 0; j < 4; j++)
-    //         {
-    //             temp.v[i] += matrix._mat4[i * 4 + j] * this->v[j];
-    //         }
-    //     }
-    //     return temp;
-    // }
+    void Set(Vec4 v4)
+    {
+        this->x = v4.x;
+        this->y = v4.y;
+        this->z = v4.z;
+        this->w = v4.w;
+    }
     Vec4 operator*(float scale)
     {
-        Vec4 temp(1.0f, 1.0f, 1.0f, 1.0f);
+        Vec4 temp;
         temp.x = this->x * scale;
         temp.y = this->y * scale;
         temp.z = this->z * scale;
         temp.w = this->w * scale;
         return temp;
     }
+
+    Vec4 operator-(Vec4 other)
+    {
+        Vec4 temp;
+        temp.x = this->x - other.x;
+        temp.y = this->y - other.y;
+        temp.z = this->z - other.z;
+        temp.w = this->w - other.w;
+        return temp;
+    }
+
     Vec4 &operator=(const Vector4 &vec4)
     {
         if (this == &vec4)
         {
             return *this;
         }
-        memcpy(this->v, vec4.v, sizeof(vec4.v));
+        memcpy(this->v4, vec4.v4, sizeof(vec4.v4));
         return *this;
     }
-    void SetV(float x , float y , float z ,float w){
-        this->v[0]=x;
-        this->v[1]=y;
-        this->v[2]=z;
-        this->v[3]=w;
+    void SetV(float x, float y, float z, float w)
+    {
+        this->v4[0] = x;
+        this->v4[1] = y;
+        this->v4[2] = z;
+        this->v4[3] = w;
 
-        this->v3[0]=x;
-        this->v3[1]=y;
-        this->v3[2]=z;
+        this->v3[0] = x;
+        this->v3[1] = y;
+        this->v3[2] = z;
     }
-    void SetV(Vector4 v){
-        this->v[0]=v.v[0];
-        this->v[1]=v.v[1];
-        this->v[2]=v.v[2];
-        this->v[3]=v.v[3];
+    void SetV(Vector4 v)
+    {
+        this->v4[0] = v.v4[0];
+        this->v4[1] = v.v4[1];
+        this->v4[2] = v.v4[2];
+        this->v4[3] = v.v4[3];
 
-        this->v3[0]=v.v[0];
-        this->v3[1]=v.v[1];
-        this->v3[2]=v.v[2];
+        this->v3[0] = v.v4[0];
+        this->v3[1] = v.v4[1];
+        this->v3[2] = v.v4[2];
     }
 };
 Vector4 Normalize(Vector4 a)
 {
     float root = sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-    a.v[0] = a.v[0] / root;
-    a.v[1] = a.v[1] / root;
-    a.v[2] = a.v[2] / root;
+    a.v4[0] = a.v4[0] / root;
+    a.v4[1] = a.v4[1] / root;
+    a.v4[2] = a.v4[2] / root;
     a.v3[0] = a.v3[0] / root;
     a.v3[1] = a.v3[1] / root;
     a.v3[2] = a.v3[2] / root;

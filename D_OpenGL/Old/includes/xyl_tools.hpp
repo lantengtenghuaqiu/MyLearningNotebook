@@ -7,7 +7,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../includes/stb_image.h"
 
-namespace ReadFile
+namespace Tools
 {
 
     class TheFile

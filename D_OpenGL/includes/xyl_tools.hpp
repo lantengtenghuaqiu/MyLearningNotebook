@@ -6,8 +6,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../includes/stb_image.h"
 // #define DEBUG
-namespace Picture
+
+namespace Tools
 {
+    // Image Manger
     struct ImageManager
     {
         static ImageManager *GetInstance()
@@ -29,11 +31,8 @@ namespace Picture
         ImageManager() = default;
         ~ImageManager() {};
     };
-}
 
-namespace ReadFile
-{
-
+    // File Manager
     class TheFile
     {
     private:
@@ -49,7 +48,7 @@ namespace ReadFile
         }
         char *path;
 
-        void GetContent(char *path, char *mode, char *&container)
+        void GetContent(const char *path, const char *mode, char *&container)
         {
             this->_file = fopen(path, mode);
             if (this->_file)
@@ -60,10 +59,6 @@ namespace ReadFile
 
                 fseek(this->_file, 0, SEEK_SET);
 
-                if (container != nullptr)
-                {
-                    delete[] (container);
-                }
                 container = new char[file_size + 1]();
 
                 fread(container, 1, file_size, this->_file);
@@ -87,6 +82,12 @@ namespace ReadFile
         TheFile(const TheFile &) = delete;
         TheFile operator=(TheFile &) = delete;
     };
-} // namespace ReadFile
+
+    template <typename T, size_t N>
+    size_t GetSizeofArray(T (&Array)[N])
+    {
+        return N;
+    }
+} // namespace Tools
 
 #endif

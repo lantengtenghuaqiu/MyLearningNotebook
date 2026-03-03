@@ -44,7 +44,7 @@ void DrawCallFirst()
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
-void Container(GLAD<float> &glad, ReadFile::TheFile *&file, ObjectID *&OID, Shader &containerShader)
+void Container(GLAD &glad, Tools::TheFile *&file, ObjectID *&OID, Shader &containerShader)
 {
     printf("VAO Index : %d , CID : %d\n", OID->VAO[OID->GetCID_VAO('r')], OID->GetCID_VAO('r'));
     glBindVertexArray(OID->VAO[OID->GetCID_VAO('w')]);
@@ -96,7 +96,7 @@ void Container(GLAD<float> &glad, ReadFile::TheFile *&file, ObjectID *&OID, Shad
 int main()
 {
     GLFW glfw;
-    GLAD<float> glad;
+    GLAD glad;
 
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {
@@ -106,7 +106,7 @@ int main()
         //---------------------------------------------------------------------
         // Global Config-------------------------------------------------------
         // File Mangger--------------------------------------------------------
-        ReadFile::TheFile *file = ReadFile::TheFile::GetInstance();
+        Tools::TheFile *file = Tools::TheFile::GetInstance();
         // Camera--------------------------------------------------------------
         Camera camera;
         SetCamera(camera, (float)frameBufferWidth, (float)frameBufferHeight);
@@ -169,7 +169,7 @@ int main()
         glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('w')]);
         glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(float) * 2, NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, 16 * sizeof(float), Projection[1]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.cameraspacematrix);
+        glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.CameraSpace);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, OID->UBO[0]);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 

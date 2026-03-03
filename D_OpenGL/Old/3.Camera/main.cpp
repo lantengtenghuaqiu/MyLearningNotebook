@@ -73,7 +73,7 @@ int main()
     GLAD<float> glad;
     ObjectID attri(2, 2, 1, 1);
 
-    ReadFile::TheFile file;
+    Tools::TheFile file;
 
     SceneRoot objects(2);
 

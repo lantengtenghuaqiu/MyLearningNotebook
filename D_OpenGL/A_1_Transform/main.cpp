@@ -103,21 +103,21 @@ void DrawCallSecond()
 int main()
 {
     GLFW glfw;
-    GLAD<float> glad;
+    GLAD *glad;
 
     if (glfw.InitGlfw(width, height, "OpenGLClass"))
     {
 
-        glad.InitGlad(glfw.window, width, height, frameBufferWidth, frameBufferHeight);
+        glad->InitGlad(glfw.window, width, height, frameBufferWidth, frameBufferHeight);
 
         //---------------------------------------------------------------------
         // Global Config-------------------------------------------------------
         // File Mangger--------------------------------------------------------
-        ReadFile::TheFile file;
+        Tools::TheFile *file = Tools::TheFile::GetInstance();
         // --------------------------------------------------------------------
 
         // Camera--------------------------------------------------------------
-        Camera camera;
+        Camera *camera;
         SetCamera(camera, (float)frameBufferWidth, (float)frameBufferHeight);
 
         // Projection matrix:
@@ -162,7 +162,7 @@ int main()
         glBindBuffer(GL_UNIFORM_BUFFER, attri.UBO[OID.UBO]);
         glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(float) * 2, NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, 16 * sizeof(float), Projection[1]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.cameraspacematrix);
+        glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.CameraSpace);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, attri.UBO[OID.UBO]);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
         OID.UBO++;
@@ -172,14 +172,14 @@ int main()
         // --------------------------------------------------------------------
 
         // Texture Index-------------------------------------------------------
-        Picture::ImageManager image;
+        Tools::ImageManager *image = Tools::ImageManager::GetInstance();
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
 
         // Draw Cube Map-------------------------------------------------------
         printf("\n****Draw Cube map box****\n");
         printf("CID | Vertex : %d , VBO : %d , VAO : %d\n", OID.Vertex, OID.VBO, OID.VAO);
-        glad.BindVAO(attri.VAO[OID.VAO]);
+        glad->BindVAO(attri.VAO[OID.VAO]);
         glBindBuffer(GL_ARRAY_BUFFER, attri.VBO[OID.VBO]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Cube::mesh) + sizeof(Cube::uv), NULL, GL_STATIC_DRAW);
 
@@ -503,7 +503,7 @@ int main()
         Light *PointLightPointer = &std::get<Light>(hierarchy.sceneObjects["PointLight"]);
         {
             PointLightPointer->Color = Vec4(1.0f, 1.0f, 1.0f, 0.0f);
-            PointLightPointer->Position = Vec4(0.0f, 1.0f, 5.0f, 1.0f);
+            PointLightPointer->position = Vec4(0.0f, 1.0f, 5.0f, 1.0f);
             PointLightPointer->Intensity = 1.0f;
         }
 
@@ -581,7 +581,7 @@ int main()
                 _cubeMapView = glGetUniformLocation(cubeMapShader.Program, "V");
                 _cubeMapProjection = glGetUniformLocation(cubeMapShader.Program, "P");
 
-                glUniformMatrix4fv(_cubeMapView, 1, GL_FALSE, camera.ViewMatrix());
+                glUniformMatrix4fv(_cubeMapView, 1, GL_FALSE, camera.UpdateCameraSpaceMatrix());
                 glUniformMatrix4fv(_cubeMapProjection, 1, GL_FALSE, Projection[1]);
 
                 cubeMapShader.init = true;
@@ -650,14 +650,14 @@ int main()
                 // glUniformMatrix4fv(_P, 1, GL_FALSE, Projection[1]);
                 glUniformBlockBinding(containerShader.Program, _containerTransform, 0);
 
-                glUniform3fv(PointLightLightPos, 1, PointLightPointer->Position.v3);
-                glUniform4fv(PointLightLightColor, 1, (PointLightPointer->Color * PointLightPointer->Intensity).v);
+                glUniform3fv(PointLightLightPos, 1, PointLightPointer->position.v3);
+                glUniform4fv(PointLightLightColor, 1, (PointLightPointer->Color * PointLightPointer->Intensity).v4);
                 glUniform4fv(BaseColor, 1, std::get<ColorComponent>(cube->components["Color"]).rgba);
-                glUniform4fv(Ambient, 1, AmbientColor.v);
+                glUniform4fv(Ambient, 1, AmbientColor.v4);
                 glUniform4fv(ViewPos, 1, camera.Position.v);
 
                 glUniform3fv(DirectionalLightDir, 1, DirectionLightPotinter->Direction.v3);
-                glUniform4fv(DirectionalLightCol, 1, DirectionLightPotinter->Color.v);
+                glUniform4fv(DirectionalLightCol, 1, DirectionLightPotinter->Color.v4);
                 glUniform1f(DirectionalLightInten, DirectionLightPotinter->Intensity);
 
                 glUniform1f(PointLightConstant, 0.8f);
@@ -680,7 +680,7 @@ int main()
             {
                 Transform::Scale(0.2f, 0.2f, 0.2f, PointLightPointer->Scale._mat4);
                 Transform::Rotation(0.0f, 0.0f, 0.0f, PointLightPointer->Rotation._mat4);
-                Transform::Translate(PointLightPointer->Position.x, PointLightPointer->Position.y, PointLightPointer->Position.z, PointLightPointer->Translate._mat4);
+                Transform::Translate(PointLightPointer->position.x, PointLightPointer->position.y, PointLightPointer->position.z, PointLightPointer->Translate._mat4);
 
                 _scale2 = glGetUniformLocation(lightBoxShader.Program, "_scale2");
                 _rotation2 = glGetUniformLocation(lightBoxShader.Program, "_rotation2");
@@ -695,7 +695,7 @@ int main()
 
                 glUniformMatrix4fv(_translate2, 1, GL_FALSE, PointLightPointer->Translate._mat4);
 
-                glUniformMatrix4fv(_view_space_matrix2, 1, GL_FALSE, camera.ViewMatrix());
+                glUniformMatrix4fv(_view_space_matrix2, 1, GL_FALSE, camera.UpdateCameraSpaceMatrix());
 
                 glUniformMatrix4fv(_P2, 1, GL_FALSE, Projection[1]);
 
