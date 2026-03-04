@@ -1,6 +1,6 @@
-// clang -c ../src/glad.c  -I ../includes -o ./builder/glad.o &&
-// clang++ -c main.cpp -I ../includes -std=c++17 -o ./builder/main.o &&
-// clang++ ./builder/main.o ./builder/glad.o -L ../libs/mac -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -std=c++17  -o main
+// clang -c ../src/glad.c  -I ../includes -o ./builders/glad.o &&
+// clang++ -c main.cpp -I ../includes -std=c++17 -o ./builders/main.o &&
+// clang++ ./builders/main.o ./builders/glad.o -L ../libs/mac -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -std=c++17  -o main
 
 // g++ main.cpp ..\src\glad.c -I ..\includes -L ..\libs -lopengl32 -lglfw3 -lgdi32 -lassimp -lz -fno-permissive -Wno-unused-variable -Wno-unused-parameter  -Wall -Wextra -std=c++17 -o main.exe
 // #define FILE_DEBUG
@@ -36,7 +36,7 @@ int main()
         hierarchy.sceneObjects.emplace("Camera", Camera());
         Camera *HierarchyPointer_camera = &std::get<Camera>(hierarchy.sceneObjects["Camera"]);
         {
-            SetCamera(HierarchyPointer_camera, 10.0f, 10.0f);
+            SetCamera(HierarchyPointer_camera, 10.0f, 10.0f,frameBufferWidth,frameBufferHeight);
         }
         BindTransformUniformBufferObject(OID, HierarchyPointer_camera);
 
@@ -54,6 +54,7 @@ int main()
 
         Loaction_CubeMap location_cubmap;
         location_cubmap._skybox = glGetUniformLocation(Shader_cubeMap.Program, "skybox");
+        location_cubmap._M = glGetUniformLocation(Shader_cubeMap.Program, "M");
 
         // Container---------------------------------------
         hierarchy.sceneObjects.emplace("Cube", SceneObject());
@@ -91,9 +92,11 @@ int main()
 
             // Draw Calls
             glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
             // Draw the cube map box
-            glCullFace(GL_FRONT);
+            // glCullFace(GL_FRONT);
             glDepthMask(GL_FALSE);
+            // glDepthFunc(GL_LEQUAL); 
             glUseProgram(Shader_cubeMap.Program);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, OID->TEX[0]);
@@ -104,23 +107,28 @@ int main()
 
                 Shader_cubeMap.init = true;
             }
-
+            // KeyTranslate(glfw.window, *HierarchyPointer_cubmap, speed * 10.0f, HierarchyPointer_cubmap->Translate._mat4);
+            HierarchyPointer_cubmap->UpdataModelMatrix();
+            glUniformMatrix4fv(location_cubmap._M, 1, GL_FALSE, HierarchyPointer_cubmap->Transform._mat4);
+            
             glBindVertexArray(OID->VAO[0]);
             glDrawArrays(GL_TRIANGLES, 0, 36);
+            
             glBindVertexArray(0);
             glDepthMask(GL_TRUE);
-            glCullFace(GL_BACK);
+            // glDepthFunc(GL_LESS); 
+            // glCullFace(GL_BACK);
 
             // Draw a container------------------------------------------------
             glUseProgram(Shader_container.Program);
 
             // Key Board Event-----------------------------
-            // KeyRotate(glfw.window, *HierarchyPointer_cube, speed * 35.0f, HierarchyPointer_cube->Rotation._mat4);
-            // KeyTranslate(glfw.window, *HierarchyPointer_cube, speed * 20.0f, HierarchyPointer_cube->Translate._mat4);
+            KeyRotate(glfw.window, *HierarchyPointer_cube, speed * 35.0f, HierarchyPointer_cube->Rotation._mat4);
+            KeyTranslate(glfw.window, *HierarchyPointer_cube, speed * 10.0f, HierarchyPointer_cube->Translate._mat4);
 
             if (Shader_container.init == false)
             {
-                Transform::TranslateZ(5.0f, HierarchyPointer_cube->Translate._mat4);
+                // Transform::TranslateZ(5.0f, HierarchyPointer_cube->Translate._mat4);
                 Shader_container.init = true;
             }
 

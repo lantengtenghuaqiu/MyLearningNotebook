@@ -38,8 +38,6 @@ typedef struct ObjectCurrentIndex
 
 } ObjectCurrentID;
 
-
-
 typedef struct ObjectIndex
 {
     static ObjectIndex *GetIntance()
@@ -304,15 +302,15 @@ typedef struct ShadersProgram
 
 } Shader;
 
-void SetCamera(Camera *&camera, const float &frameW, const float &frameH)
+void SetCamera(Camera *&camera, const float &w, const float &h, int &frameW, int &frameH)
 {
     camera->SetPosition(Vec4(0.0f, 0.0f, 0.0f, 1.0f));
     camera->fov = 30.0f;
-    camera->w = frameW;
-    camera->h = frameH;
+    camera->w = w;
+    camera->h = h;
     camera->n = 0.01f;
-    camera->f = 30.0f;
-    camera->aspect = camera->w / camera->h;
+    camera->f = 300.0f;
+    camera->aspect = (float)frameW / frameH;
     camera->UpdateCameraSpaceMatrix();
     camera->UpdateCameraProjectionMatrix(Persp);
 }

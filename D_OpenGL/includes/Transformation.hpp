@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include "Data.hpp"
 #include "xyl_tools.hpp"
-#define pi 3.1415926
-#define rad pi / 180.0
 
 float zero[16] = {
     0.0f, 0.0f, 0.0f, 0.0f,
@@ -153,9 +151,9 @@ namespace Transform
         _matrix[13] += v4.y;
         _matrix[14] += v4.z;
     }
-    void TranslateX(float v, float *_matrix) { _matrix[12] += v; }
-    void TranslateY(float v, float *_matrix) { _matrix[13] += v; }
-    void TranslateZ(float v, float *_matrix) { _matrix[14] += v; }
+    void TranslateX(float v, float *_matrix) { _matrix[12] = v; }
+    void TranslateY(float v, float *_matrix) { _matrix[13] = v; }
+    void TranslateZ(float v, float *_matrix) { _matrix[14] = v; }
 
 }
 

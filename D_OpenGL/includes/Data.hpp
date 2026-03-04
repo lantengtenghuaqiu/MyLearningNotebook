@@ -3,7 +3,8 @@
 #include <string.h>
 // #include <unordered_map>
 #include <vector>
-
+#define pi 3.1415926
+#define rad 0.01745329
 struct Vector4
 {
     union

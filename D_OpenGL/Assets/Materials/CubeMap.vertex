@@ -7,13 +7,17 @@ layout (location = 2) in vec2 _uv;
 layout (std140) uniform Transform
 {
     mat4 P;
-    mat4 V;
+    mat4 t;
+    mat4 r;
+    mat4 c;
 };
 
 out vec3 TexCoords;
+uniform mat4 M;
 
 void main()
 {
     TexCoords = _vertex;
-    gl_Position = P * V * vec4(_vertex, 1.0);
+    vec4 vectex = P * c * M * vec4(_vertex, 1.0);
+    gl_Position = vectex;
 } 

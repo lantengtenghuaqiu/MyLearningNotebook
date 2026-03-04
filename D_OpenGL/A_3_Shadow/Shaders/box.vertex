@@ -6,14 +6,17 @@ layout (location = 2) in vec2 UV;
 layout (std140) uniform Transform
 {
     mat4 P;
-    mat4 V;
+    mat4 t;
+    mat4 r;
+    mat4 c;
 };
     
 uniform mat4 M;
 
 void main()
 {
-    mat4 MVP = P * V * M;
+    mat4 V = r * t ;
+    mat4 MVP = P * c * M;
     vec4 vertices = vec4(Vertices,1.0);
 
     gl_Position = MVP * vertices;

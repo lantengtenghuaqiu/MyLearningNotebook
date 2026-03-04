@@ -251,10 +251,12 @@ public:
 void BindTransformUniformBufferObject(ObjectID *OID, Camera *camera)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('r')]);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(camera->CameraProjection) + sizeof(camera->CameraSpace), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, MAT4_SIZE * 4, NULL, GL_STATIC_DRAW);
 
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(camera->CameraProjection), camera->CameraProjection);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(camera->CameraSpace), sizeof(camera->CameraSpace), camera->CameraSpace);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, MAT4_SIZE, camera->CameraProjection);
+    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE, MAT4_SIZE, camera->TranslateMatrix);
+    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 2, MAT4_SIZE, camera->RotationMatrix);
+    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 3, MAT4_SIZE, camera->CameraSpace);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, OID->UBO[OID->GetCID_UBO('w')]);
 
@@ -337,6 +339,7 @@ void BindCubeMapTexture(ObjectID *OID, Tools::ImageManager *&image)
 
         path[whole_path_size] = '\0';
 
+        // stbi_set_flip_vertically_on_load(1);
         image->data = stbi_load(path, &image->width, &image->height, &image->channels, 0);
         if (image->data != NULL)
         {
@@ -352,6 +355,7 @@ void BindCubeMapTexture(ObjectID *OID, Tools::ImageManager *&image)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        // stbi_set_flip_vertically_on_load(0);
     }
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }

@@ -94,43 +94,40 @@ void KeyTranslate(GLFWwindow *window, TransformAttribute &entity, float speed, f
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
         entity.SetPositionX(speed);
-        Transform::TranslateX(entity.GetPosition().x,mat);
+        Transform::TranslateX(entity.GetPositionX(),mat);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
         entity.SetPositionX(-speed);
-        Transform::TranslateX(entity.GetPosition().x,mat);
+        Transform::TranslateX(entity.GetPositionX(),mat);
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
     {
         entity.SetPositionY(speed);
-        Transform::TranslateY(entity.GetPosition().y,mat);
+        Transform::TranslateY(entity.GetPositionY(),mat);
     }
 #ifdef __APPLE__
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
     {
-        entity.SetPositionY();
-        Transform::TranslateY(entity.GetPosition().y,mat);
+        entity.SetPositionY(-speed);
+        Transform::TranslateY(entity.GetPositionY(),mat);
     }
 #else
     if (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
     {
         entity.SetPositionY(-speed);
-        Transform::TranslateY(entity.GetPosition().y,mat);
+        Transform::TranslateY(entity.GetPositionY(),mat);
     }
 #endif
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         entity.SetPositionZ(speed);
-        Transform::TranslateZ(entity.GetPosition().z,mat);
+        Transform::TranslateZ(entity.GetPositionZ(),mat);
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
         entity.SetPositionZ(-speed);
-        Transform::TranslateZ(entity.GetPosition().z,mat);
+        Transform::TranslateZ(entity.GetPositionZ(),mat);
     }
-
-    // Transform::Translate(entity.GetPosition(), mat);
-    // glUniformMatrix4fv(location, 1, GL_FALSE, mat);
 }
 #endif

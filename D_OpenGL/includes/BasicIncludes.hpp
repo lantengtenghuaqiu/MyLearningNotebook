@@ -15,7 +15,8 @@
 #define Ortho 0x906
 #define Persp 0x907
 
-
+#define FLOAT_SIZE 4
+#define MAT4_SIZE 64
 
 #define FAIL 0
 #define SUCCESS 1
