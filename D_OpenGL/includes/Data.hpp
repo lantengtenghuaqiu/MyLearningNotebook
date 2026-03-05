@@ -120,17 +120,25 @@ public:
 
     void Set(float x, float y, float z, float w)
     {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-        this->w = w;
+        this->v4[0] = x;
+        this->v4[1] = y;
+        this->v4[2] = z;
+        this->v4[3] = w;
+
+        this->v3[0] = x;
+        this->v3[1] = y;
+        this->v3[2] = z;
     }
     void Set(Vec4 v4)
     {
-        this->x = v4.x;
-        this->y = v4.y;
-        this->z = v4.z;
-        this->w = v4.w;
+        this->v4[0] = v4.x;
+        this->v4[1] = v4.y;
+        this->v4[2] = v4.z;
+        this->v4[3] = v4.w;
+
+        this->v3[0] = v4.x;
+        this->v3[1] = v4.y;
+        this->v3[2] = v4.z;
     }
     Vec4 operator*(float scale)
     {
@@ -190,10 +198,19 @@ Vector4 Normalize(Vector4 a)
     a.v4[0] = a.v4[0] / root;
     a.v4[1] = a.v4[1] / root;
     a.v4[2] = a.v4[2] / root;
+
     a.v3[0] = a.v3[0] / root;
     a.v3[1] = a.v3[1] / root;
     a.v3[2] = a.v3[2] / root;
 
     return a;
 }
+
+Vec4 Normalize(float x, float y, float z, float w)
+{
+    float root = sqrt(x * x + y * y + z * z);
+    Vec4 temp(x / root, y / root, z / root, w);
+    return temp;
+}
+
 #endif

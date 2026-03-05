@@ -169,7 +169,7 @@ int main()
         glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('w')]);
         glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(float) * 2, NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, 16 * sizeof(float), Projection[1]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.CameraSpace);
+        glBufferSubData(GL_UNIFORM_BUFFER, 16 * sizeof(float), 16 * sizeof(float), camera.viewSpace);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, OID->UBO[0]);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 

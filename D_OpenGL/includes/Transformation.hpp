@@ -147,9 +147,9 @@ namespace Transform
     }
     void Translate(Vec4 v4, float *_matrix)
     {
-        _matrix[12] += v4.x;
-        _matrix[13] += v4.y;
-        _matrix[14] += v4.z;
+        _matrix[12] = v4.x;
+        _matrix[13] = v4.y;
+        _matrix[14] = v4.z;
     }
     void TranslateX(float v, float *_matrix) { _matrix[12] = v; }
     void TranslateY(float v, float *_matrix) { _matrix[13] = v; }
@@ -174,14 +174,26 @@ namespace Math
 {
     Vec4 Cross(const Vec4 &a, const Vec4 &b)
     {
-        Vec4 temp(0.0f, 0.0f, 0.0f, 0.0f);
+        Vec4 temp(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x,
+            a.w);
 
-        temp.x = a.y * b.z - a.z * b.y;
-        temp.y = a.z * b.x - a.x * b.z;
-        temp.z = a.x * b.y - a.y * b.x;
-        temp.w = a.w;
         return temp;
     }
+
+    Vec4 Cross(const Vec4 &a, float x, float y, float z)
+    {
+        Vec4 temp(
+            a.y * z - a.z * y,
+            a.z * x - a.x * z,
+            a.x * y - a.y * x,
+            a.w);
+
+        return temp;
+    }
+
     float Dot(const Vec4 &a, const Vec4 &b)
     {
         return (a.x * b.x) + (a.y * b.y) + (a.z + b.z);

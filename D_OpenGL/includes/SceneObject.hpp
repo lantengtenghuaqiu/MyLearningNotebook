@@ -70,8 +70,8 @@ public:
 
     void SetRotation(Vec4 rot) { this->rotation = rot; }
     void SetRotationX(float x) { this->rotation.x += x; }
-    void SetRotationY(float y) { this->rotation.x += y; }
-    void SetRotationZ(float z) { this->rotation.x += z; }
+    void SetRotationY(float y) { this->rotation.y += y; }
+    void SetRotationZ(float z) { this->rotation.z += z; }
 
     // Position
     Vec4 GetPosition() const { return this->position; }
@@ -136,6 +136,58 @@ struct SceneObject : public TransformAttribute
     std::unordered_map<std::string, ComponentTypes> components;
 };
 
+struct ShadowMap
+{
+    unsigned int framebufferId;
+    unsigned int textureId;
+    unsigned int location;
+    
+    int textureSize = 1024;
+
+    Vec4 right;
+    Vec4 up;
+    Vec4 forward;
+
+    mat4 shadowMatrix;
+
+    float size = 20.0f;
+    float near = 0.01f;
+    float far = 10.0f;
+
+    void InitShadowMapMatrix(int type)
+    {
+        mat4 projection;
+        mat4 space;
+        if (type == Ortho)
+        {
+           projection._mat4[0] = 2.0f / (this->size);
+
+           projection._mat4[5] = 2.0f / (this->size);
+
+           projection._mat4[10] = -2.0f / (this->far - this->near);
+
+           projection._mat4[14] = -(this->far + this->near) / (this->far - this->near);
+        }
+
+        this->right = Math::Cross(this->forward, 0.0f, 1.0f, 0.0f);
+        this->up = Math::Cross(this->right, this->forward);
+
+        space._mat4[0] = (this->right).x;
+        space._mat4[1] = (this->up).x;
+        space._mat4[2] = (this->forward).x;
+
+        space._mat4[4] = (this->right).y;
+        space._mat4[5] = (this->up).y;
+        space._mat4[6] = (this->forward).y;
+
+        space._mat4[8] = (this->right).z;
+        space._mat4[9] = (this->up).z;
+        space._mat4[10] = (this->forward).z;
+
+        this->shadowMatrix = projection * space;
+    }
+};
+
 struct Camera : public SceneObject
 {
     float fov = 30.0f;
@@ -164,13 +216,13 @@ struct Camera : public SceneObject
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f};
 
-    float CameraSpace[16] = {
+    float viewSpace[16] = {
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, -1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f};
 
-    float CameraProjection[16] = {
+    float projection[16] = {
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
@@ -180,7 +232,7 @@ struct Camera : public SceneObject
     {
         this->Right.Set(1.0f, 0.0f, 0.0f, 0.0f);
         this->Up.Set(0.0f, 1.0f, 0.0f, 0.0f);
-        this->Forward.Set(0.0f, 0.0f, 1.0f, 0.0f);
+        this->Forward.Set(0.0f, 0.0f, -1.0f, 0.0f);
     }
 
     Camera(float f, float fov, float w, float h, float n, float aspect)
@@ -203,36 +255,20 @@ struct Camera : public SceneObject
         //     camera.x, camera.y, camera.z, 1.0f
         //};
 
-        Transform::Rotation(this->GetRotation(), this->RotationMatrix);
-        Transform::Translate(this->GetPosition(), this->TranslateMatrix);
+        // Transform::Rotation(this->Forward, this->RotationMatrix);
+        // Transform::Translate(this->GetPosition(), this->TranslateMatrix);
 
-        // this->CameraSpace[0] = (this->Right).x;
-        // this->CameraSpace[1] = (this->Up).x;
-        // this->CameraSpace[2] = (this->Forward).x;
+        this->viewSpace[0] = (this->Right).x;
+        this->viewSpace[1] = (this->Up).x;
+        this->viewSpace[2] = (this->Forward).x;
 
-        // this->CameraSpace[4] = (this->Right).y;
-        // this->CameraSpace[5] = (this->Up).y;
-        // this->CameraSpace[6] = (this->Forward).y;
+        this->viewSpace[4] = (this->Right).y;
+        this->viewSpace[5] = (this->Up).y;
+        this->viewSpace[6] = (this->Forward).y;
 
-        // this->CameraSpace[8] = (this->Right).z;
-        // this->CameraSpace[9] = (this->Up).z;
-        // this->CameraSpace[10] = (this->Forward).z;
-
-        // this->CameraSpace[12] = -Math::Dot(this->Right, this->GetPosition());
-        // this->CameraSpace[13] = -Math::Dot(this->Up, this->GetPosition());
-        // this->CameraSpace[14] = -Math::Dot(this->Forward, this->GetPosition());
-
-        // this->CameraSpace[0] = (this->Right).x;
-        // this->CameraSpace[1] = (this->Right).y;
-        // this->CameraSpace[2] = (this->Right).z;
-
-        // this->CameraSpace[4] = (this->Up).x;
-        // this->CameraSpace[5] = (this->Up).y;
-        // this->CameraSpace[6] = (this->Up).z;
-
-        // this->CameraSpace[8] = (this->Forward).x;
-        // this->CameraSpace[9] = (this->Forward).y;
-        // this->CameraSpace[10] = (this->Forward).z;
+        this->viewSpace[8] = (this->Right).z;
+        this->viewSpace[9] = (this->Up).z;
+        this->viewSpace[10] = (this->Forward).z;
 
         // this->CameraSpace[12] = -Math::Dot(this->Right, this->GetPosition());
         // this->CameraSpace[13] = -Math::Dot(this->Up, this->GetPosition());
@@ -249,32 +285,29 @@ struct Camera : public SceneObject
         //};
         if (Type == Ortho)
         {
-            this->CameraProjection[0] = 2.0f / (this->w);
+            this->projection[0] = 2.0f / (this->w);
 
-            this->CameraProjection[5] = 2.0f / (this->h);
+            this->projection[5] = 2.0f / (this->h);
 
-            this->CameraProjection[10] = -2.0f / (this->f - this->n);
+            this->projection[10] = -2.0f / (this->f - this->n);
 
-            this->CameraProjection[14] = -(this->f + this->n) / (this->f - this->n);
+            this->projection[14] = -(this->f + this->n) / (this->f - this->n);
         }
         else
         {
             float tan_fov = tan((this->fov / 2.0f) * rad);
-            printf("%f\n", tan_fov);
-            printf("%f\n", this->fov);
-            printf("%f\n", (this->fov / 2.0f) * rad);
 
-            this->CameraProjection[0] = 1.0f / (this->aspect * tan_fov);
+            this->projection[0] = 1.0f / (this->aspect * tan_fov);
 
-            this->CameraProjection[5] = 1.0f / (tan_fov);
+            this->projection[5] = 1.0f / (tan_fov);
 
-            this->CameraProjection[10] = (this->n + this->f) / (this->n - this->f);
+            this->projection[10] = (this->n + this->f) / (this->n - this->f);
 
-            this->CameraProjection[11] = -1.0f;
+            this->projection[11] = -1.0f;
 
-            this->CameraProjection[14] = (2.0f * this->n * this->f) / (this->n - this->f);
+            this->projection[14] = (2.0f * this->n * this->f) / (this->n - this->f);
 
-            this->CameraProjection[15] = 0.0f;
+            this->projection[15] = 0.0f;
         }
     }
 };

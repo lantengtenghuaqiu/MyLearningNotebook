@@ -248,16 +248,17 @@ public:
     }
 };
 
-void BindTransformUniformBufferObject(ObjectID *OID, Camera *camera)
+void BindTransformUniformBufferObject(ObjectID *OID, Camera *camera,Light *Sunlight , ShadowMap showMap)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('r')]);
-    glBufferData(GL_UNIFORM_BUFFER, MAT4_SIZE * 4, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, MAT4_SIZE * 5 + VEC3_SIZE, NULL, GL_STATIC_DRAW);
 
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, MAT4_SIZE, camera->CameraProjection);
-    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE, MAT4_SIZE, camera->TranslateMatrix);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, MAT4_SIZE, camera->projection);
+    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE, MAT4_SIZE, camera->viewSpace);
     glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 2, MAT4_SIZE, camera->RotationMatrix);
-    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 3, MAT4_SIZE, camera->CameraSpace);
-
+    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 3, MAT4_SIZE, camera->TranslateMatrix);
+    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 4, MAT4_SIZE, showMap.shadowMatrix._mat4);
+    glBufferSubData(GL_UNIFORM_BUFFER , MAT4_SIZE * 5,VEC3_SIZE , Sunlight->Direction.v3);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, OID->UBO[OID->GetCID_UBO('w')]);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);

@@ -9,43 +9,45 @@ void CameraRotate(GLFWwindow *window, Camera &camera, float speed)
 {
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        camera.SetRotationY(speed);
+        camera.SetRotationY(-speed);
+        Transform::Rotation(camera.GetRotation(),camera.RotationMatrix);
     }
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        camera.SetRotationY(-speed);
+        camera.SetRotationY(speed);
+        Transform::Rotation(camera.GetRotation(),camera.RotationMatrix);
     }
 }
 
-void CameraTranslate(GLFWwindow *window, TransformAttribute &entity, float speed, float *mat, int location)
+void CameraTranslate(GLFWwindow *window, Camera &camera, float speed)
 {
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        entity.SetPositionX(speed);
+        camera.SetPositionX(speed);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        entity.SetPositionX(-speed);
+        camera.SetPositionX(-speed);
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        entity.SetPositionY(speed);
+        camera.SetPositionY(speed);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
-        entity.SetPositionY(-speed);
+        camera.SetPositionY(-speed);
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        entity.SetPositionZ(speed);
+        camera.SetPositionZ(speed);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        entity.SetPositionZ(-speed);
+        camera.SetPositionZ(-speed);
     }
 
-    Transform::Translate(entity.GetPosition(), mat);
+    Transform::Translate(camera.GetPosition(), camera.TranslateMatrix);
 }
 
 void KeyRotate(GLFWwindow *window, TransformAttribute &entity, float speed, float *mat)

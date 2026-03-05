@@ -16,7 +16,10 @@
 #define Persp 0x907
 
 #define FLOAT_SIZE 4
+#define VEC3_SIZE 12
+#define VEC4_SIZE 16
 #define MAT4_SIZE 64
+
 
 #define FAIL 0
 #define SUCCESS 1

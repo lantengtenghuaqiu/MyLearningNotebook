@@ -14,6 +14,7 @@
 void glClearConfig();
 void ObjectIndexManger(ObjectIndex *OID);
 void BindShader(GLAD &glad, Tools::TheFile *&file, Shader &shader, const char *path_vertex, const char *path_fragment);
+void DrawCallGlobalConfigs();
 
 float speed = 0.0f;
 
@@ -28,18 +29,50 @@ int main()
         ObjectIndexManger(OID);
         Tools::ImageManager *image = Tools::ImageManager::GetInstance();
         Tools::TheFile *file = Tools::TheFile::GetInstance();
-        // Vertices vertex;
 
+        // --------------------------------------------------------------------
+        // Textures------------------------------------------------------------
+
+        ShadowMap directLightShadow;
+        directLightShadow.size = 20.0f;
+        directLightShadow.near = 0.01f;
+        directLightShadow.far = 10.0f;
+        directLightShadow.InitShadowMapMatrix(Ortho);
+
+        glGenTextures(1, &directLightShadow.textureId);
+        glBindTexture(GL_TEXTURE_2D, directLightShadow.textureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, directLightShadow.textureSize, directLightShadow.textureSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glGenFramebuffers(1, &directLightShadow.framebufferId);
+        glBindFramebuffer(GL_FRAMEBUFFER,directLightShadow.framebufferId);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,directLightShadow.textureId,0);
+        glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+        // Scene Objects-------------------------------------------------------
         Hierarchy hierarchy;
-
-        // Camera--------------------------------------------------------------
+        // Global Scene Object-----------------------------
+        // Camera------------------------------------------
         hierarchy.sceneObjects.emplace("Camera", Camera());
         Camera *HierarchyPointer_camera = &std::get<Camera>(hierarchy.sceneObjects["Camera"]);
         {
-            SetCamera(HierarchyPointer_camera, 10.0f, 10.0f,frameBufferWidth,frameBufferHeight);
+            SetCamera(HierarchyPointer_camera, 10.0f, 10.0f, frameBufferWidth, frameBufferHeight);
         }
-        BindTransformUniformBufferObject(OID, HierarchyPointer_camera);
 
+        // Sunlight-----------------------------------------
+        hierarchy.sceneObjects.emplace("Sunlight", Light());
+        Light *HierarchyPointer_sunlight = &std::get<Light>(hierarchy.sceneObjects["Sunlight"]);
+        {
+            Vec4 SunlightDir = Normalize(0.0, 1.0, -1.0, 0.0);
+            HierarchyPointer_sunlight->Direction.Set(SunlightDir);
+        }
+
+        BindTransformUniformBufferObject(OID, HierarchyPointer_camera, HierarchyPointer_sunlight, directLightShadow);
         // Cube Map Box------------------------------------
         hierarchy.sceneObjects.emplace("CubeMap", SceneObject());
         SceneObject *HierarchyPointer_cubmap = &std::get<SceneObject>(hierarchy.sceneObjects["CubeMap"]);
@@ -88,15 +121,23 @@ int main()
             speed = deltTime;
 
             glfwPollEvents();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            DrawCallGlobalConfigs();
+            // Camera
+            CameraRotate(glfw.window, *HierarchyPointer_camera, speed * 10.0f);
+            CameraTranslate(glfw.window, *HierarchyPointer_camera, speed);
+            glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 2, MAT4_SIZE, HierarchyPointer_camera->RotationMatrix);
+            glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 3, MAT4_SIZE, HierarchyPointer_camera->TranslateMatrix);
 
-            // Draw Calls
-            glEnable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST);
-            // Draw the cube map box
-            // glCullFace(GL_FRONT);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            // HierarchyPointer_camera->UpdateCameraSpaceMatrix();
+            // ----------------------------------------------------------------
+            // Draw the cube map box-------------------------------------------
+            glCullFace(GL_FRONT);
             glDepthMask(GL_FALSE);
-            // glDepthFunc(GL_LEQUAL); 
+            glDisable(GL_DEPTH_TEST);
+
             glUseProgram(Shader_cubeMap.Program);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, OID->TEX[0]);
@@ -107,19 +148,20 @@ int main()
 
                 Shader_cubeMap.init = true;
             }
-            // KeyTranslate(glfw.window, *HierarchyPointer_cubmap, speed * 10.0f, HierarchyPointer_cubmap->Translate._mat4);
+
             HierarchyPointer_cubmap->UpdataModelMatrix();
             glUniformMatrix4fv(location_cubmap._M, 1, GL_FALSE, HierarchyPointer_cubmap->Transform._mat4);
-            
+
             glBindVertexArray(OID->VAO[0]);
             glDrawArrays(GL_TRIANGLES, 0, 36);
-            
-            glBindVertexArray(0);
-            glDepthMask(GL_TRUE);
-            // glDepthFunc(GL_LESS); 
-            // glCullFace(GL_BACK);
 
+            glBindVertexArray(0);
+
+            // ----------------------------------------------------------------
             // Draw a container------------------------------------------------
+            glEnable(GL_DEPTH_TEST);
+            glCullFace(GL_BACK);
+            glDepthMask(GL_TRUE);
             glUseProgram(Shader_container.Program);
 
             // Key Board Event-----------------------------
@@ -128,7 +170,6 @@ int main()
 
             if (Shader_container.init == false)
             {
-                // Transform::TranslateZ(5.0f, HierarchyPointer_cube->Translate._mat4);
                 Shader_container.init = true;
             }
 
@@ -192,4 +233,13 @@ void BindShader(GLAD &glad, Tools::TheFile *&file, Shader &shader, const char *p
     glad.LinkShaderProgram(shader.Program);
 
     glad.DetachAndDeleteShaders(shader);
+}
+
+void DrawCallGlobalConfigs()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    // Draw Calls
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
 }
