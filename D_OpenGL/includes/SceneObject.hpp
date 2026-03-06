@@ -141,7 +141,7 @@ struct ShadowMap
     unsigned int framebufferId;
     unsigned int textureId;
     unsigned int location;
-    
+
     int textureSize = 1024;
 
     Vec4 right;
@@ -160,13 +160,13 @@ struct ShadowMap
         mat4 space;
         if (type == Ortho)
         {
-           projection._mat4[0] = 2.0f / (this->size);
+            projection._mat4[0] = 2.0f / (this->size);
 
-           projection._mat4[5] = 2.0f / (this->size);
+            projection._mat4[5] = 2.0f / (this->size);
 
-           projection._mat4[10] = -2.0f / (this->far - this->near);
+            projection._mat4[10] = -2.0f / (this->far - this->near);
 
-           projection._mat4[14] = -(this->far + this->near) / (this->far - this->near);
+            projection._mat4[14] = -(this->far + this->near) / (this->far - this->near);
         }
 
         this->right = Math::Cross(this->forward, 0.0f, 1.0f, 0.0f);
@@ -484,20 +484,28 @@ namespace Cube
 namespace Plane
 {
     float mesh[] = {
-        -1.0f, 1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
+        -1.0f, 0.0f, -1.0f,
+        -1.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 1.0f,
 
-        1.0f, -1.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f};
+        -1.0f, 0.0f, -1.0f,
+        1.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, -1.0f};
+    float normal[] = {
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f};
+
     float uv[] = {
-        0.0f, 1.0f,
-        1.0f, 0.0f,
         0.0f, 0.0f,
-        1.0f, 0.0f,
         0.0f, 1.0f,
-        1.0f, 1.0f};
+        1.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 1.0f,
+        1.0f, 0.0f};
 } // namespace Plane
 
 #endif

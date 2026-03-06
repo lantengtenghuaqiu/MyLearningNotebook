@@ -7,6 +7,9 @@
 #include "../includes/SceneObject.hpp"
 #include "./GlobalConfig.hpp"
 
+#define PrintPart(name) printf("\n**************%s**************\n", name)
+#define PrintSceneObjectName(name) printf("****SceneObject : %s****\n", name)
+
 #define ShaderChecker                               \
     printf("Wrong Compile (%d)\n", checker);        \
     char info[512];                                 \
@@ -142,10 +145,10 @@ public:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, data_size, index, ebo_draw_type);
     }
 
-    void BindVAO(unsigned int &VAO)
+    void BindVAOAndDrawArrays(unsigned int &VAO, const int &Type, const int &start, const int &end)
     {
-        printf("VAO Index : %d \n", VAO);
         glBindVertexArray(VAO);
+        glDrawArrays(Type, start, end);
     }
 
     void GetShadersData(Tools::TheFile *&file, const char *revalpath, char *&data)
@@ -247,40 +250,85 @@ public:
         return glGetUniformLocation(sahder_program, keyword);
     }
 };
-
-void BindTransformUniformBufferObject(ObjectID *OID, Camera *camera,Light *Sunlight , ShadowMap showMap)
+void BindUBOBlock(unsigned int shader_program, const char *name, int bling_id)
+{
+    unsigned int block_id = glGetUniformBlockIndex(shader_program, name);
+    glUniformBlockBinding(shader_program, block_id, bling_id);
+}
+void BindTransformUniformBufferObject(ObjectID *OID, Camera *camera)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('r')]);
-    glBufferData(GL_UNIFORM_BUFFER, MAT4_SIZE * 5 + VEC3_SIZE, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, MAT4_SIZE * 4, NULL, GL_STATIC_DRAW);
 
     glBufferSubData(GL_UNIFORM_BUFFER, 0, MAT4_SIZE, camera->projection);
     glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE, MAT4_SIZE, camera->viewSpace);
     glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 2, MAT4_SIZE, camera->RotationMatrix);
     glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 3, MAT4_SIZE, camera->TranslateMatrix);
-    glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 4, MAT4_SIZE, showMap.shadowMatrix._mat4);
-    glBufferSubData(GL_UNIFORM_BUFFER , MAT4_SIZE * 5,VEC3_SIZE , Sunlight->Direction.v3);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, OID->UBO[OID->GetCID_UBO('w')]);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
+void BindLightBufferObject(ObjectID *OID, Light *Sunlight)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('r')]);
+    glBufferData(GL_UNIFORM_BUFFER, VEC3_SIZE, NULL, GL_STATIC_DRAW);
+
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, VEC3_SIZE, Sunlight->Direction.v3);
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, OID->UBO[OID->GetCID_UBO('w')]);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void BindShadowMapUniformBufferObject(ObjectID *OID, ShadowMap showMap)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[OID->GetCID_UBO('r')]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, MAT4_SIZE, showMap.shadowMatrix._mat4);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 2, OID->UBO[OID->GetCID_UBO('w')]);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void BindShadowMap(ShadowMap shadow)
+{
+    glGenTextures(1, &shadow.textureId);
+    glBindTexture(GL_TEXTURE_2D, shadow.textureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadow.textureSize, shadow.textureSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, Color_white);
+
+    glGenFramebuffers(1, &shadow.framebufferId);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadow.framebufferId);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow.textureId, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("Shadow frame buffer not complete！\n");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 template <typename T, size_t N1, size_t N2, size_t N3>
 void BindSceneObject(ObjectID *OID, T (&mesh)[N1], T (&normal)[N2], T (&uv)[N3])
 {
-    size_t float_size = sizeof(float);
     glBindVertexArray(OID->VAO[OID->GetCID_VAO('w')]);
     glBindBuffer(GL_ARRAY_BUFFER, OID->VBO[OID->GetCID_VBO('w')]);
-    glBufferData(GL_ARRAY_BUFFER, (N1 + N2 + N3) * float_size, NULL, GL_STATIC_DRAW);
-
-    glBufferSubData(GL_ARRAY_BUFFER, 0, N1 * float_size, mesh);
-    glBufferSubData(GL_ARRAY_BUFFER, N1 * float_size, N2 * float_size, normal);
-    glBufferSubData(GL_ARRAY_BUFFER, (N1 + N2) * float_size, N3 * float_size, uv);
+    glBufferData(GL_ARRAY_BUFFER, (N1 + N2 + N3) * FLOAT_SIZE, NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, N1 * FLOAT_SIZE, mesh);
+    glBufferSubData(GL_ARRAY_BUFFER, N1 * FLOAT_SIZE, N2 * FLOAT_SIZE, normal);
+    glBufferSubData(GL_ARRAY_BUFFER, (N1 + N2) * FLOAT_SIZE, N3 * FLOAT_SIZE, uv);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)(N1 * float_size));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)(N1 * FLOAT_SIZE));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)((N1 + N2) * float_size));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)((N1 + N2) * FLOAT_SIZE));
     glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

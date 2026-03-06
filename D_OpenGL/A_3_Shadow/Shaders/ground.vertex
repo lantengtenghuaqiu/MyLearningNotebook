@@ -29,10 +29,11 @@ out vec2 _uv;
 
 void main()
 {
-    _sunlight_dir = sunlight_dir;
     mat3 TransposeInverseMatOfNormal = transpose(inverse(mat3(M)));
     _normal = normalize(TransposeInverseMatOfNormal * Normal);
     _uv = UV;
+
+    _sunlight_dir = sunlight_dir;
 
     mat4 V = r * t * c;
     mat4 MVP = P * V * M;

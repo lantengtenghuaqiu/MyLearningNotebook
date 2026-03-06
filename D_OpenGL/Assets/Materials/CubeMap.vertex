@@ -9,16 +9,12 @@ layout (std140) uniform Transform
     mat4 c;
     mat4 r;
     mat4 t;
-    mat4 d_shadow;
-    vec3 sunlight_dir;
 };
 
 out vec3 TexCoords;
-out vec3 _sunlight_dir;
 
 void main()
 {
-    _sunlight_dir = sunlight_dir;
     TexCoords = _vertex;
     mat4 V = r * c;
     vec4 vectex = P * V * vec4(_vertex, 1.0);
