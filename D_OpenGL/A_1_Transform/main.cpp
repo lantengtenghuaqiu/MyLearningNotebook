@@ -113,12 +113,12 @@ int main()
         //---------------------------------------------------------------------
         // Global Config-------------------------------------------------------
         // File Mangger--------------------------------------------------------
-        Tools::TheFile *file = Tools::TheFile::GetInstance();
+        Tools::TheFileManager *file = Tools::TheFileManager::GetInstance();
         // --------------------------------------------------------------------
 
         // Camera--------------------------------------------------------------
         Camera *camera;
-        SetCamera(camera, (float)frameBufferWidth, (float)frameBufferHeight);
+        SetMainCamera(camera, (float)frameBufferWidth, (float)frameBufferHeight);
 
         // Projection matrix:
         const float Projection[][16] = {

@@ -83,23 +83,23 @@ typedef struct BufferBinderAttributes
 
 } Binder;
 
-typedef struct ObjectIndex
+typedef struct ObjectIndexManger
 {
     unsigned int *VAO;
     unsigned int *VBO;
     unsigned int *EBO;
     unsigned int *TEX;
 
-    ObjectIndex() {}
+    ObjectIndexManger() {}
 
-    ObjectIndex(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
+    ObjectIndexManger(unsigned int sizeVAO, unsigned int sizeVBO, unsigned int sizeEBO, unsigned int sizeTEX)
     {
         this->VAO = new unsigned int[sizeVAO];
         this->VBO = new unsigned int[sizeVBO];
         this->EBO = new unsigned int[sizeEBO];
         this->TEX = new unsigned int[sizeTEX];
     }
-    ~ObjectIndex()
+    ~ObjectIndexManger()
     {
 
         delete[] (this->VBO);

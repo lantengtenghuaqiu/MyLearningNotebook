@@ -10,14 +10,14 @@
 namespace Tools
 {
 
-    class TheFile
+    class TheFileManager
     {
         FILE *_file;
 
     public:
         char* path;
 
-        TheFile() {}
+        TheFileManager() {}
 
         void GetContent( char *path,  char *mode, char *&container)
         {
@@ -42,8 +42,8 @@ namespace Tools
             fclose(this->_file);
         }
 
-        TheFile(const TheFile &) = delete;
-        TheFile operator=(TheFile &) = delete;
+        TheFileManager(const TheFileManager &) = delete;
+        TheFileManager operator=(TheFileManager &) = delete;
     };
 } // namespace ReadFile
 

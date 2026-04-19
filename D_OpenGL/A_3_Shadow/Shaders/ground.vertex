@@ -18,7 +18,7 @@ layout (std140) uniform LightMatirx
 
 layout (std140) uniform ShadowMap
 {
-    mat4 d_shadow;
+    mat4 ShadowSpaceMatrix;
 };
     
 uniform mat4 M;
@@ -26,6 +26,8 @@ uniform mat4 M;
 out vec3 _sunlight_dir;
 out vec3 _normal;
 out vec2 _uv;
+
+out vec4 _FragPosShadowSpace;
 
 void main()
 {
@@ -35,9 +37,12 @@ void main()
 
     _sunlight_dir = sunlight_dir;
 
-    mat4 V = r * t * c;
-    mat4 MVP = P * V * M;
-    vec4 vertices = vec4(Vertices,1.0);
+    vec4 WoldSpaceVertex = M * vec4(Vertices,1.0);
 
-    gl_Position = MVP * vertices;
+    _FragPosShadowSpace = ShadowSpaceMatrix * WoldSpaceVertex;
+
+    mat4 V = r * t * c;
+    mat4 VP = P * V ;
+
+    gl_Position = VP * WoldSpaceVertex;
 }

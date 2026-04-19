@@ -5,70 +5,72 @@
 #include "Transformation.hpp"
 #include "SceneObject.hpp"
 
-void CameraRotate(GLFWwindow *window, Camera &camera, float speed)
+void GlobalCameraRotate(GLFWwindow *window, Camera *camera, float speed)
 {
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        camera.SetRotationY(-speed);
-        Transform::Rotation(camera.GetRotation(), camera.RotationMatrix);
+        camera->SetRotationY(-speed);
+        Transform::Rotation(camera->GetRotation(), camera->RotationMatrix);
     }
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        camera.SetRotationY(speed);
-        Transform::Rotation(camera.GetRotation(), camera.RotationMatrix);
+        camera->SetRotationY(speed);
+        Transform::Rotation(camera->GetRotation(), camera->RotationMatrix);
     }
 
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
     {
-        camera.SetRotationX(-speed);
-        Transform::Rotation(camera.GetRotation(), camera.RotationMatrix);
+        camera->SetRotationX(-speed);
+        Transform::Rotation(camera->GetRotation(), camera->RotationMatrix);
     }
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
     {
-        camera.SetRotationX(speed);
-        Transform::Rotation(camera.GetRotation(), camera.RotationMatrix);
+        camera->SetRotationX(speed);
+        Transform::Rotation(camera->GetRotation(), camera->RotationMatrix);
     }
 }
 
-void CameraTranslate(GLFWwindow *window, Camera &camera, float speed)
+void GlobalCameraTranslate(GLFWwindow *window, Camera *camera, float speed)
 {
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camera.SetPositionX(-speed);
+        camera->SetPositionX(-speed);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        camera.SetPositionX(speed);
+        camera->SetPositionX(speed);
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        camera.SetPositionY(-speed);
+        camera->SetPositionY(-speed);
     }
 #ifdef __APPLE__
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
-        camera.SetPositionY(speed);
+        camera->SetPositionY(speed);
     }
 #else
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
-        camera.SetPositionY(-speed);
+        camera->SetPositionY(-speed);
     }
 #endif
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        camera.SetPositionZ(speed);
+        camera->SetPositionZ(speed);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        camera.SetPositionZ(-speed);
+        camera->SetPositionZ(-speed);
     }
 
-    Transform::Translate(camera.GetPosition(), camera.TranslateMatrix);
+    Transform::Translate(camera->GetPosition(), camera->TranslateMatrix);
 }
 
-void KeyRotate(GLFWwindow *window, TransformAttribute &entity, float speed, float *mat)
+
+
+void KeyRotate(GLFWwindow *window, Transform &entity, float speed, float *mat)
 {
 
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
@@ -108,7 +110,7 @@ void KeyRotate(GLFWwindow *window, TransformAttribute &entity, float speed, floa
     }
 }
 
-void KeyTranslate(GLFWwindow *window, TransformAttribute &entity, float speed, float *mat)
+void KeyTranslate(GLFWwindow *window, Transform &entity, float speed, float *mat)
 {
 
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)

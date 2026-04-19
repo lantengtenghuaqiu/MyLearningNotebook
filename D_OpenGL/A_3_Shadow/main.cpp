@@ -12,8 +12,8 @@
 #include "LocationManger.hpp"
 
 void glClearConfig();
-void ObjectIndexManger(ObjectIndex *OID);
-void BindShader(GLAD &glad, Tools::TheFile *&file, Shader &shader, const char *path_vertex, const char *path_fragment);
+void ObjectIndexInitiater(ObjectIndexManger *OID);
+void BindShader(GLAD &glad, Tools::TheFileManager *&file, Shader &shader, const char *path_vertex, const char *path_fragment);
 void DrawCallGlobalConfigs();
 
 float speed = 0.0f;
@@ -22,24 +22,20 @@ int main()
 {
     GLFW glfw;
     GLAD glad;
-    if (Init_GLFW_GLAD(glfw, glad))
+    int SRC_WIDTH = 350;
+    int SRC_HEIGHT = 200;
+    int SRC_FRAMEBUFFER_WIDTH=0;
+    int SRC_FRAMEBUFFER_HEIGHT=0;
+    if (Init_GLFW_GLAD(glfw, SRC_WIDTH, SRC_HEIGHT, glad, SRC_FRAMEBUFFER_WIDTH, SRC_FRAMEBUFFER_HEIGHT))
     {
         // Mangers
-        ObjectIndex *OID = ObjectIndex::GetIntance();
-        ObjectIndexManger(OID);
+        ObjectIndexManger *OID = ObjectIndexManger::GetIntance();
+        ObjectIndexInitiater(OID);
         Tools::ImageManager *image = Tools::ImageManager::GetInstance();
-        Tools::TheFile *file = Tools::TheFile::GetInstance();
+        Tools::TheFileManager *file = Tools::TheFileManager::GetInstance();
 
         // --------------------------------------------------------------------
         // Textures------------------------------------------------------------
-        ShadowMap directLightShadow;
-        directLightShadow.size = 20.0f;
-        directLightShadow.near = 0.01f;
-        directLightShadow.far = 10.0f;
-        directLightShadow.InitShadowMapMatrix(Ortho);
-
-        BindShadowMap(directLightShadow);
-        BindShadowMapUniformBufferObject(OID, directLightShadow);
 
         // --------------------------------------------------------------------
 
@@ -49,21 +45,37 @@ int main()
         // Global Scene Object-----------------------------
         // Camera------------------------------------------
         hierarchy.sceneObjects.emplace("Camera", Camera());
-        Camera *HierarchyPointer_camera = &std::get<Camera>(hierarchy.sceneObjects["Camera"]);
+        Camera *HierarchyPointer_MainCamera = &std::get<Camera>(hierarchy.sceneObjects["Camera"]);
         {
-            SetCamera(HierarchyPointer_camera, 10.0f, 10.0f, frameBufferWidth, frameBufferHeight);
-            BindTransformUniformBufferObject(OID, HierarchyPointer_camera);
+            SetMainCamera(HierarchyPointer_MainCamera, 10.0f, 10.0f, SRC_FRAMEBUFFER_WIDTH, SRC_FRAMEBUFFER_HEIGHT);
+            BindTransformUniformBufferObject(OID, HierarchyPointer_MainCamera);
         }
 
         // Sunlight-----------------------------------------
-        hierarchy.sceneObjects.emplace("Sunlight", Light());
-        Light *HierarchyPointer_sunlight = &std::get<Light>(hierarchy.sceneObjects["Sunlight"]);
+        hierarchy.sceneObjects.emplace("Sunlight", DirectionalLight());
+        DirectionalLight *HierarchyPointer_sunlight = &std::get<DirectionalLight>(hierarchy.sceneObjects["Sunlight"]);
         {
             Vec4 SunlightDir = Normalize(0.0, 1.0, -1.0, 0.0);
             HierarchyPointer_sunlight->Direction.Set(SunlightDir);
             BindLightBufferObject(OID, HierarchyPointer_sunlight);
+
+            // Shadow Configs
+            HierarchyPointer_sunlight->InitShadowMap(1);
+            HierarchyPointer_sunlight->GetShadowMap()->forward = SunlightDir;
+            HierarchyPointer_sunlight->GetShadowMap()[0].size = 100.0f;
+            HierarchyPointer_sunlight->GetShadowMap()[0].near = 0.01f;
+            HierarchyPointer_sunlight->GetShadowMap()[0].far = 200.0f;
+            HierarchyPointer_sunlight->GetShadowMap()[0].InitShadowMapMatrix(Ortho);
+
+            BindShadowMapTexture(HierarchyPointer_sunlight->GetShadowMap()[0]);
+            BindShadowMapUniformBufferObject(OID, HierarchyPointer_sunlight->GetShadowMap()[0]);
         }
 
+        Shader Shader_shadowMap;
+        BindShader(glad, file, Shader_shadowMap, "/D_OpenGL/Assets/Materials/Shadow.vertex", "/D_OpenGL/Assets/Materials/Shadow.fragment");
+        GlobalLocation::ShadowMap location_shadowmap;
+        location_shadowmap._M = glGetUniformLocation(Shader_shadowMap.Program, "M");
+        BindUBOBlock(Shader_shadowMap.Program, "ShadowMatrix", 2);
         // --------------------------------------------------------------------
 
         // --------------------------------------------------------------------
@@ -73,14 +85,14 @@ int main()
         {
         }
         BindSceneObject<float>(OID, Cube::mesh, Cube::normal, Cube::uv);
-        BindCubeMapTexture(OID, image);
+        BindSixCubeMapTexture(OID, image);
 
         Shader Shader_cubeMap;
         BindShader(glad, file, Shader_cubeMap, "/D_OpenGL/Assets/Materials/CubeMap.vertex", "/D_OpenGL/Assets/Materials/CubeMap.fragment");
 
-        Loaction_CubeMap location_cubmap;
+        GlobalLocation::CubeMap location_cubmap;
         location_cubmap._skybox = glGetUniformLocation(Shader_cubeMap.Program, "skybox");
-        location_cubmap._M = glGetUniformLocation(Shader_cubeMap.Program, "M");
+
         BindUBOBlock(Shader_cubeMap.Program, "Transform", 0);
 
         // --------------------------------------------------------------------
@@ -97,6 +109,8 @@ int main()
         // Loactions
         Location_Container location_container;
         location_container._M = glGetUniformLocation(Shader_container.Program, "M");
+        location_container._ShadowMapTexture = glGetUniformLocation(Shader_container.Program, "ShadowMapTexture");
+
         BindUBOBlock(Shader_container.Program, "Transform", 0);
         BindUBOBlock(Shader_container.Program, "LightMatirx", 1);
         BindUBOBlock(Shader_container.Program, "ShadowMap", 2);
@@ -116,6 +130,7 @@ int main()
         // Loactions
         Location_Ground location_ground;
         location_ground._M = glGetUniformLocation(Shader_ground.Program, "M");
+        location_ground._ShadowMapTexture = glGetUniformLocation(Shader_ground.Program, "ShadowMapTexture");
         BindUBOBlock(Shader_ground.Program, "Transform", 0);
         BindUBOBlock(Shader_ground.Program, "LightMatirx", 1);
         BindUBOBlock(Shader_ground.Program, "ShadowMap", 2);
@@ -142,16 +157,39 @@ int main()
 
             glfwPollEvents();
             DrawCallGlobalConfigs();
-            // Camera
-            CameraRotate(glfw.window, *HierarchyPointer_camera, speed * 10.0f);
-            CameraTranslate(glfw.window, *HierarchyPointer_camera, speed * 10.0f);
-            glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[0]);
-            glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 2, MAT4_SIZE, HierarchyPointer_camera->RotationMatrix);
-            glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 3, MAT4_SIZE, HierarchyPointer_camera->TranslateMatrix);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
             // ----------------------------------------------------------------
-            // Draw the cube map box-------------------------------------------
+            // Shadow Map----------------------------------
+            glViewport(0, 0, HierarchyPointer_sunlight->GetShadowMap()[0].textureSize, HierarchyPointer_sunlight->GetShadowMap()[0].textureSize);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, HierarchyPointer_sunlight->GetShadowMap()[0].framebufferId);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glUseProgram(Shader_shadowMap.Program);
+            glUniformMatrix4fv(location_shadowmap._M, 1, GL_FALSE, HierarchyPointer_cube->Transform._mat4);
+            glad.BindVAOAndDrawArrays(OID->VAO[1], GL_TRIANGLES, 0, 36);
+
+            glUniformMatrix4fv(location_shadowmap._M, 1, GL_FALSE, HierarchyPointer_ground->Transform._mat4);
+            glad.BindVAOAndDrawArrays(OID->VAO[2], GL_TRIANGLES, 0, 6);
+
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // ----------------------------------------------------------------
+
+            // ----------------------------------------------------------------
+            // Camera--------------------------------------
+            GlobalCameraRotate(glfw.window, HierarchyPointer_MainCamera, speed * 10.0f);
+            GlobalCameraTranslate(glfw.window, HierarchyPointer_MainCamera, speed * 10.0f);
+            glBindBuffer(GL_UNIFORM_BUFFER, OID->UBO[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 2, MAT4_SIZE, HierarchyPointer_MainCamera->RotationMatrix);
+            glBufferSubData(GL_UNIFORM_BUFFER, MAT4_SIZE * 3, MAT4_SIZE, HierarchyPointer_MainCamera->TranslateMatrix);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            // ----------------------------------------------------------------
+
+            // ----------------------------------------------------------------
+            // Draw the cube map box-----------------------
+            glViewport(0, 0, SRC_FRAMEBUFFER_WIDTH, SRC_FRAMEBUFFER_HEIGHT);
             glCullFace(GL_FRONT);
             glDepthMask(GL_FALSE);
             glDisable(GL_DEPTH_TEST);
@@ -168,21 +206,22 @@ int main()
             }
 
             HierarchyPointer_cubmap->UpdataModelMatrix();
-            glUniformMatrix4fv(location_cubmap._M, 1, GL_FALSE, HierarchyPointer_cubmap->Transform._mat4);
 
-            glBindVertexArray(OID->VAO[0]);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
 
-            glBindVertexArray(0);
+            glad.BindVAOAndDrawArrays(OID->VAO[0], GL_TRIANGLES, 0, 36);
+
             // ----------------------------------------------------------------
 
             // ----------------------------------------------------------------
-            // Draw a container------------------------------------------------
+            // Draw a container----------------------------
             glEnable(GL_DEPTH_TEST);
             glCullFace(GL_BACK);
             glDepthMask(GL_TRUE);
 
             glUseProgram(Shader_container.Program);
+            glBindTexture(GL_TEXTURE_2D, HierarchyPointer_sunlight->GetShadowMap()[0].textureId);
+            glActiveTexture(GL_TEXTURE0);
+            glUniform1i(location_container._ShadowMapTexture, 0);
             // Key Board Event-----------------------------
             KeyRotate(glfw.window, *HierarchyPointer_cube, speed * 35.0f, HierarchyPointer_cube->Rotation._mat4);
             KeyTranslate(glfw.window, *HierarchyPointer_cube, speed * 10.0f, HierarchyPointer_cube->Translate._mat4);
@@ -195,14 +234,17 @@ int main()
             HierarchyPointer_cube->UpdataModelMatrix();
             glUniformMatrix4fv(location_container._M, 1, GL_FALSE, HierarchyPointer_cube->Transform._mat4);
 
-            glBindVertexArray(OID->VAO[1]);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glBindVertexArray(0);
+            glad.BindVAOAndDrawArrays(OID->VAO[1], GL_TRIANGLES, 0, 36);
+
             // ----------------------------------------------------------------
 
             // ----------------------------------------------------------------
             // Ground----------------------------------------------------------
             glUseProgram(Shader_ground.Program);
+            glBindTexture(GL_TEXTURE_2D, HierarchyPointer_sunlight->GetShadowMap()[0].textureId);
+            glActiveTexture(GL_TEXTURE0);
+            glUniform1i(location_ground._ShadowMapTexture, 0);
+
             if (Shader_ground.init == false)
             {
                 Transform::Scale(15.0f, 1.0f, 15.0f, HierarchyPointer_ground->Scale._mat4);
@@ -213,9 +255,7 @@ int main()
                 glUniformMatrix4fv(location_ground._M, 1, GL_FALSE, HierarchyPointer_ground->Transform._mat4);
                 Shader_ground.init = true;
             }
-            glBindVertexArray(OID->VAO[2]);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glBindVertexArray(0);
+            glad.BindVAOAndDrawArrays(OID->VAO[2], GL_TRIANGLES, 0, 6);
 
             // ----------------------------------------------------------------
 
@@ -233,7 +273,7 @@ void glClearConfig()
     glClearDepth(1.0f);
 }
 
-void ObjectIndexManger(ObjectIndex *OID)
+void ObjectIndexInitiater(ObjectIndexManger *OID)
 {
     OID->CreateAndGenObjectIndex(OID_VAO, 3);
     glGenVertexArrays(OID->sizeVAO, OID->VAO);
@@ -253,26 +293,6 @@ void ObjectIndexManger(ObjectIndex *OID)
     OID->CreateAndGenObjectIndex(OID_FBO, 1);
 }
 
-void BindShader(GLAD &glad, Tools::TheFile *&file, Shader &shader, const char *path_vertex, const char *path_fragment)
-{
-#ifdef __APPLE__
-    glad.GetShadersData(file, path_vertex, shader.ShaderData);
-    glad.CompileAndAttachShader(shader.Program, shader.Vertex, shader.ShaderData, "Vertex");
-
-    glad.GetShadersData(file, path_fragment, shader.ShaderData);
-    glad.CompileAndAttachShader(shader.Program, shader.Fragment, shader.ShaderData, "Fragment");
-#else
-    glad.GetShadersData(file, path_vertex, shader.ShaderData);
-    glad.CompileAndAttachShader(shader.Program, shader.Vertex, shader.ShaderData, "Vertex");
-
-    glad.GetShadersData(file, path_fragment, shader.ShaderData);
-    glad.CompileAndAttachShader(shader.Program, shader.Fragment, shader.ShaderData, "Fragment");
-#endif
-
-    glad.LinkShaderProgram(shader.Program);
-
-    glad.DetachAndDeleteShaders(shader);
-}
 
 void DrawCallGlobalConfigs()
 {

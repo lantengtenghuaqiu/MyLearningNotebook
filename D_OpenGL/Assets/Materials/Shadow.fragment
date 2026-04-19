@@ -1,4 +1,3 @@
-#version core 410
-out vec4 FragmentColor;
+#version 410 core 
 
 void main(){}

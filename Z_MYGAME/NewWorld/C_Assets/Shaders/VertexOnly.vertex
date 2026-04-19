@@ -1,0 +1,22 @@
+#version 410 core
+layout (location = 0) in vec3 _vertices;
+
+layout (std140) uniform Transform
+{
+    mat4 _P;
+    mat4 _c;
+    mat4 _r;
+    mat4 _t;
+};
+    
+uniform mat4 _M;
+
+void main()
+{
+    vec4 WoldSpaceVertex = _M * vec4(_vertices,1.0);
+
+    mat4 V = _r * _t * _c;
+    mat4 VP = _P * V ;
+
+    gl_Position = VP * WoldSpaceVertex;
+}

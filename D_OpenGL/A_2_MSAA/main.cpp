@@ -44,7 +44,7 @@ void DrawCallFirst()
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
-void Container(GLAD &glad, Tools::TheFile *&file, ObjectID *&OID, Shader &containerShader)
+void Container(GLAD &glad, Tools::TheFileManager *&file, ObjectID *&OID, Shader &containerShader)
 {
     printf("VAO Index : %d , CID : %d\n", OID->VAO[OID->GetCID_VAO('r')], OID->GetCID_VAO('r'));
     glBindVertexArray(OID->VAO[OID->GetCID_VAO('w')]);
@@ -106,10 +106,10 @@ int main()
         //---------------------------------------------------------------------
         // Global Config-------------------------------------------------------
         // File Mangger--------------------------------------------------------
-        Tools::TheFile *file = Tools::TheFile::GetInstance();
+        Tools::TheFileManager *file = Tools::TheFileManager::GetInstance();
         // Camera--------------------------------------------------------------
         Camera camera;
-        SetCamera(camera, (float)frameBufferWidth, (float)frameBufferHeight);
+        SetMainCamera(camera, (float)frameBufferWidth, (float)frameBufferHeight);
 
         // Projection matrix:
         const float Projection[][16] = {
@@ -135,7 +135,7 @@ int main()
         // --------------------------------------------------------------------
         // All Buffer Object---------------------------------------------------
         // Buffer Object Mannger
-        ObjectID *OID = ObjectIndex::GetIntance();
+        ObjectID *OID = ObjectIndexManger::GetIntance();
         OID->CreateAndGenObjectIndex(OID_VAO, 2);
         glGenVertexArrays(OID->sizeVAO, OID->VAO);
 
